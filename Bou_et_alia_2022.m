@@ -1,7 +1,13 @@
 % The DAS-recorded spatio-temporal strain data supporting this analysis is available at:
 % https://doi.org/10.5281/zenodo.5823343
-% 
-% Name                               Size                     Bytes  Class     Attributes
+
+% DAS4Whale: Svalbard distributed acoustic sensing dataset for baleen whale monitoring
+% author : Léa Bouffaut and Kittinat Taweesintananon
+% year : 2022,
+% publisher : Zenodo
+
+
+%   Name                               Size                     Bytes  Class    
 % 
 %   data                            5000x103217            4128680000  double              
 %   info_DAS_meta_raw                  1x1                     258991  struct              
@@ -26,6 +32,13 @@ clear all
 close all
 
 %% load data from dataset
+dir = fullfile('Dataset');
+addpath(dir);
+dir = fullfile('filters');
+addpath(dir);
+dir = fullfile('plots');
+addpath(dir);
+
 filename = "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat";
 
 timestamp = load(filename).info_timestamp;
@@ -68,6 +81,9 @@ time_space_plot(strain_dB, time, distance_km, ...
     time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
 subtitle(timestamp, "FontSize", 12);
 
+filename_export = fullfile('Bou22_article_plots/', 'time_space_plot_bou22_article_whale.png');
+%exportgraphics(gca, filenae_export);
+
 %% strain waveform of a single channel
 channel_position_km = 44.2; % channel of interest
 
@@ -79,6 +95,9 @@ amplitude_min = min(channel_focus, [], "all"); amplitude_max = max(channel_focus
 
 strain_waveform(channel_focus, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
+
+filename_export = fullfile('Bou22_article_plots/', 'strain_waveform_bou22_article_whale.png');
+%exportgraphics(gca, filenae_export);
 
 %% spectrogram of a single channel
 channel_position_km = 44.2; % channel of interest
@@ -100,6 +119,9 @@ plot_spectrogram(channel_focus, nfft, N, han_window, overlap_pct, sampling_frequ
 
 subtitle(sprintf("Channel at km %0.1f", channel_position_km));
 
+filename_export = fullfile('Bou22_article_plots/', 'spectrogram_bou22_article_whale.png');
+%exportgraphics(gca, filenae_export);
+
 %% space-frequency plot
 nfft = 4096;
 
@@ -113,6 +135,9 @@ get_animation = true;
 
 space_frequency_plot(strain_fk_filtered, distance_km, sampling_frequency_Hz, nfft, time_window_fx, ...
     time_start_fx, time_end_fx, frequency_min, frequency_max, strain_min_dB, strain_max_dB, get_animation);
+
+filename_export = fullfile('Bou22_article_plots/', 'spatio_spectral_plot_bou22_article_whale.png');
+%exportgraphics(gca, filenae_export);
 
 %% corss correlation statistics
 channel_position_km = 44.2; % reference channel distance

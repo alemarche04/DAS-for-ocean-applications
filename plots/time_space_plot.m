@@ -11,7 +11,9 @@
 % strain_min : minimum plot strain (dB)
 % strain_max : minimum plot strain (dB)
 
-function time_space_plot(data, time, dist_km, time_start, time_end, distance_min, distance_max, strain_min, strain_max)
+function time_space_plot(data, time, dist_km, ...
+    time_start, time_end, distance_min, distance_max, strain_min, strain_max)
+
 
     figure;
     imagesc(time, dist_km, data);
