@@ -1,4 +1,5 @@
-% The DAS-recorded spatio-temporal strain data supporting this analysis is available at https://doi.org/10.5281/zenodo.5823343
+% The DAS-recorded spatio-temporal strain data supporting this analysis is available at:
+% https://doi.org/10.5281/zenodo.5823343
 % 
 % Name                               Size                     Bytes  Class     Attributes
 % 
@@ -68,9 +69,9 @@ time_space_plot(strain_dB, time, distance_km, ...
 subtitle(timestamp, "FontSize", 12);
 
 %% strain waveform of a single channel
-channel_km = 44.2; % channel of interest
+channel_position_km = 44.2; % channel of interest
 
-[~, channel_focus_idx] = min(abs(distance_km - channel_km));
+[~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :);
 
 time_start = time(1); time_end = time(end); 
@@ -80,9 +81,9 @@ strain_waveform(channel_focus, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
 
 %% spectrogram of a single channel
-channel_km = 44.2; % channel of interest
+channel_position_km = 44.2; % channel of interest
 
-[~, channel_focus_idx] = min(abs(distance_km - channel_km));
+[~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :);
 
 nfft = 4096;
@@ -97,15 +98,9 @@ strain_min_dB = -20; strain_max_dB = 0;
 plot_spectrogram(channel_focus, nfft, N, han_window, overlap_pct, sampling_frequency_Hz, ...
     time_start, time_end, frequency_min, frequency_max, strain_min_dB, strain_max_dB)
 
-subtitle(sprintf("Channel at km %0.1f", channel_km));
+subtitle(sprintf("Channel at km %0.1f", channel_position_km));
 
 %% space-frequency plot
-% lower_bp_freq_fx = 20;
-% higher_bp_freq_fx = 45;
-% filter_order_fx = 5;
-% 
-% strain_bp_filtered_fx = butterworth_bp_filter(strain, lower_bp_freq_fx, higher_bp_freq_fx, filter_order_fx, sampling_frequency_Hz);
-
 nfft = 4096;
 
 time_start_fx = 44; time_end_fx = 67; 
@@ -120,3 +115,8 @@ space_frequency_plot(strain_fk_filtered, distance_km, sampling_frequency_Hz, nff
     time_start_fx, time_end_fx, frequency_min, frequency_max, strain_min_dB, strain_max_dB, get_animation);
 
 %% corss correlation statistics
+channel_position_km = 44.2; % reference channel distance
+offset_xcorr = 300; % maximum offset (m)
+max_lag = 1;  % maximum time lag (s)
+
+correlation(strain_fk_filtered, sampling_frequency_Hz, distance_m, channel_distance, channel_position_km, offset_xcorr, max_lag)
