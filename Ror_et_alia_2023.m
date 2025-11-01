@@ -28,32 +28,35 @@ clear all
 close all
 
 %% load data from dataset
-addpath("Dataset\");
-addpath("filters\");
-addpath("plots\");
+addpath('Dataset', 'filters', 'plots');
 
 filename = "20220822_122707_to_123037_ch9803_to_ch24509_sample_Freq_78_Hz.mat";
+data_struct = load(filename);
 
-timestamp = load(filename).info_timestamp;
+%timestamp = data_struct.info_timestamp;
+filename_char = char(filename);
+datestamp = filename_char(1:4) + "-" + filename_char(5:6) + "-" + filename_char(7:8);
+timestamp = filename_char(10:11) + ":" + filename_char(12:13) + ":" + filename_char(14:15);
+time_and_date = datestamp + " " + timestamp;
 
-strain = load(filename).data;
+strain = data_struct.data;
 
-time = load(filename).x1_time;
-sampling_interval_s = load(filename).info_sapmling_interval_s;
+time = data_struct.x1_time;
+sampling_interval_s = data_struct.info_sapmling_interval_s;
 
-distance_m = load(filename).x1_absolute_channel;
+distance_m = data_struct.x1_absolute_channel;
 distance_km = distance_m .* 1e-3;
 
-nb_of_channels = load(filename).info_ntraces;
-nb_of_samples = load(filename).info_nsamples;
+nb_of_channels = data_struct.info_ntraces;
+nb_of_samples = data_struct.info_nsamples;
 
-sampling_frequency_Hz = load(filename).info_sampling_frequency_Hz;
-gauge_length = load(filename).info_gauge_length;
+sampling_frequency_Hz = data_struct.info_sampling_frequency_Hz;
+gauge_length = data_struct.info_gauge_length;
 channel_distance = distance_m(2) - distance_m(1);
 
-%% butterworth bandpass filter [20 45] Hz
-lower_bp_freq = 20;
-higher_bp_freq = 45;
+%% butterworth bandpass filter [15 30] Hz
+lower_bp_freq = 15;
+higher_bp_freq = 30;
 filter_order = 5;
 
 strain_bp_filtered = butterworth_bp_filter(strain, lower_bp_freq, higher_bp_freq, filter_order, sampling_frequency_Hz);
@@ -72,7 +75,7 @@ strain_min_dB = -50; strain_max_dB = -18;
 
 time_space_plot(strain_dB, time, distance_km, ...
     time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
-subtitle(timestamp, "FontSize", 12);
+subtitle(time_and_date, "FontSize", 12);
 
 filename_export = fullfile('Ror23_article_plots/', 'time_space_plot_ror23_article_whale.png');
 %exportgraphics(gca, filenae_export);
@@ -84,7 +87,7 @@ channel_position_km = 59.52; % channel of interest
 channel_focus = strain_fk_filtered(channel_focus_idx, :);
 
 time_start = time(1); time_end = time(end); 
-amplitude_min = min(channel_focus, [], "all"); amplitude_max = max(channel_focus, [], "all");
+amplitude_min = -1.7 * 1e-9; amplitude_max = 1.7 * 1e-9;
 
 strain_waveform(channel_focus, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
@@ -104,7 +107,7 @@ overlap_pct = 0.98;
 han_window = hann(N, 'periodic');
 
 time_start = time(1); time_end = time(end); 
-frequency_min = 0; frequency_max = 50;
+frequency_min = 10; frequency_max = 35;
 strain_min_dB = -35; strain_max_dB = -5;
 
 plot_spectrogram(channel_focus, nfft, N, han_window, overlap_pct, sampling_frequency_Hz, ...
@@ -119,12 +122,12 @@ filename_export = fullfile('Ror23_article_plots/', 'spectrogram_ror23_article_wh
 nfft = 4096;
 
 time_start_fx = 105; time_end_fx = 125; 
-frequency_min = 10; frequency_max = 50;
+frequency_min = 10; frequency_max = 35;
 strain_min_dB = -35; strain_max_dB = -5;
 
-time_window_fx = 2;
+time_window_fx = 1.8;
 
-get_animation = false;
+get_animation = true;
 
 space_frequency_plot(strain_fk_filtered, distance_km, sampling_frequency_Hz, nfft, time_window_fx, ...
     time_start_fx, time_end_fx, frequency_min, frequency_max, strain_min_dB, strain_max_dB, get_animation);

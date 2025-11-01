@@ -41,7 +41,11 @@ function space_frequency_plot(data, distance, sampling_frequency, nfft, time_win
     
     % open figure
     figure;
-    sgtitle('Spatio-Spectral Rapresentation', 'FontSize', 16, 'FontWeight', 'bold');
+    title = "Spatio-Spectral Representation";
+    time_start_str = sprintf('%.2f', time_start); time_end_str = sprintf('%.2f', time_end);
+    subtitle = "From " + time_start_str + "s to " + time_end_str + "s";
+    %sgtitle('Spatio-Spectral Representation', 'FontSize', 16, 'FontWeight', 'bold');
+    sgtitle({title, subtitle});
 
     % open file for animation
     if(get_animation)
@@ -89,6 +93,12 @@ function space_frequency_plot(data, distance, sampling_frequency, nfft, time_win
         
             clim([strain_min, strain_max]);
             xlim([frequency_min, frequency_max]);
+
+            xlabel('Frequency (Hz)');
+            ylabel('Distance (km)');
+
+            c = colorbar;
+            c.Label.String = 'Strain (dB)';
 
             frame = getframe(f);
             writeVideo(fx_animation, frame);

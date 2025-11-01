@@ -32,30 +32,30 @@ clear all
 close all
 
 %% load data from dataset
-dir = fullfile('Dataset');
-addpath(dir);
-dir = fullfile('filters');
-addpath(dir);
-dir = fullfile('plots');
-addpath(dir);
+addpath('Dataset', 'filters', 'plots');
 
 filename = "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat";
+data_struct = load(filename);
 
-timestamp = load(filename).info_timestamp;
+%timestamp = data_struct.info_timestamp;
+filename_char = char(filename);
+datestamp = filename_char(1:4) + "-" + filename_char(5:6) + "-" + filename_char(7:8);
+timestamp = filename_char(10:11) + ":" + filename_char(12:13) + ":" + filename_char(14:15);
+time_and_date = datestamp + " " + timestamp;
 
-strain = load(filename).data;
+strain = data_struct.data;
 
-time = load(filename).x2_time_s;
-sampling_interval_s = load(filename).info_sample_interval_s;
+time = data_struct.x2_time_s;
+sampling_interval_s = data_struct.info_sample_interval_s;
 
-distance_m = load(filename).x1_position_m;
+distance_m = data_struct.x1_position_m;
 distance_km = distance_m .* 1e-3;
 
-nb_of_channels = load(filename).info_ntraces;
-nb_of_samples = load(filename).info_nsamples;
+nb_of_channels = data_struct.info_ntraces;
+nb_of_samples = data_struct.info_nsamples;
 
-sampling_frequency_Hz = load(filename).info_sampling_frequency_Hz;
-gauge_length = load(filename).info_GL_m;
+sampling_frequency_Hz = data_struct.info_sampling_frequency_Hz;
+gauge_length = data_struct.info_GL_m;
 channel_distance = distance_m(2) - distance_m(1);
 
 %% butterworth bandpass filter [20 45] Hz
@@ -79,7 +79,7 @@ strain_min_dB = -30; strain_max_dB = -5;
 
 time_space_plot(strain_dB, time, distance_km, ...
     time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
-subtitle(timestamp, "FontSize", 12);
+subtitle(time_and_date, "FontSize", 12);
 
 filename_export = fullfile('Bou22_article_plots/', 'time_space_plot_bou22_article_whale.png');
 %exportgraphics(gca, filenae_export);
@@ -88,10 +88,10 @@ filename_export = fullfile('Bou22_article_plots/', 'time_space_plot_bou22_articl
 channel_position_km = 44.2; % channel of interest
 
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
-channel_focus = strain_fk_filtered(channel_focus_idx, :);
+channel_focus = strain_fk_filtered(channel_focus_idx, :) .* 1e-9;
 
 time_start = time(1); time_end = time(end); 
-amplitude_min = min(channel_focus, [], "all"); amplitude_max = max(channel_focus, [], "all");
+amplitude_min = -0.7 * 1e-9; amplitude_max = 0.7 * 1e-9;
 
 strain_waveform(channel_focus, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
@@ -129,7 +129,7 @@ time_start_fx = 44; time_end_fx = 67;
 frequency_min = 10; frequency_max = 50;
 strain_min_dB = -20; strain_max_dB = -5;
 
-time_window_fx = 2;
+time_window_fx = 1.5;
 
 get_animation = true;
 

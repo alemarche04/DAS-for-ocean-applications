@@ -28,31 +28,34 @@ clear all
 close all
 
 %% load data from dataset
-addpath("Dataset\");
-addpath("filters\");
-addpath("plots\");
+addpath('Dataset', 'filters', 'plots');
 
 filename = "20220906_175106_to_175436_ch2450_to_ch9191_sample_Freq_125_Hz_outer.mat";
+data_struct = load(filename);
 
-timestamp = load(filename).info_timestamp;
+%timestamp = data_struct.info_timestamp;
+filename_char = char(filename);
+datestamp = filename_char(1:4) + "-" + filename_char(5:6) + "-" + filename_char(7:8);
+timestamp = filename_char(10:11) + ":" + filename_char(12:13) + ":" + filename_char(14:15);
+time_and_date = datestamp + " " + timestamp;
 
-strain = load(filename).data;
+strain = data_struct.data;
 
-time = load(filename).x1_time;
-sampling_interval_s = load(filename).info_sapmling_interval_s;
+time = data_struct.x1_time;
+sampling_interval_s = data_struct.info_sapmling_interval_s;
 
-distance_m = load(filename).x1_absolute_channel;
+distance_m = data_struct.x1_absolute_channel;
 distance_km = distance_m .* 1e-3;
 
-nb_of_channels = load(filename).info_ntraces;
-nb_of_samples = load(filename).info_nsamples;
+nb_of_channels = data_struct.info_ntraces;
+nb_of_samples = data_struct.info_nsamples;
 
-sampling_frequency_Hz = load(filename).info_sampling_frequency_Hz;
-gauge_length = load(filename).info_gauge_length;
+sampling_frequency_Hz = data_struct.info_sampling_frequency_Hz;
+gauge_length = data_struct.info_gauge_length;
 channel_distance = distance_m(2) - distance_m(1);
 
-%% butterworth bandpass filter [20 45] Hz
-lower_bp_freq = 20;
+%% butterworth bandpass filter [5 45] Hz
+lower_bp_freq = 5;
 higher_bp_freq = 45;
 filter_order = 5;
 
@@ -66,8 +69,8 @@ strain_fk_filtered = fk_filter_filt(strain_bp_filtered, fk_filter);
 strain_dB = 20*log10(abs(strain_fk_filtered) ./ max(abs(strain_fk_filtered), [], "all"));
 
 %% time-space plot
-time_start = 85; time_end = 170; 
-distance_min = 50; distance_max = 100;
+time_start = time(1); time_end = time(end); 
+distance_min = distance_km(1); distance_max = distance_km(end);
 strain_min_dB = -50; strain_max_dB = -18;
 
 time_space_plot(strain_dB, time, distance_km, ...
@@ -78,7 +81,7 @@ filename_export = fullfile('Ror23_airgun/', 'time_space_plot_ror23_airgun_outer.
 %exportgraphics(gca, filenae_export);
 
 %% strain waveform of a single channel
-channel_position_km = 59.52; % channel of interest
+channel_position_km = 30; % channel of interest
 
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :);
@@ -93,7 +96,7 @@ filename_export = fullfile('Ror23_airgun/', 'strain_waveform_ror23_airgun_outer.
 %exportgraphics(gca, filenae_export);
 
 %% spectrogram of a single channel
-channel_position_km = 59.52; % channel of interest
+channel_position_km = 30; % channel of interest
 
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :);
@@ -118,7 +121,7 @@ filename_export = fullfile('Ror23_airgun/', 'spectrogram_ror23_airgun_outer.png'
 %% space-frequency plot
 nfft = 4096;
 
-time_start_fx = 105; time_end_fx = 125; 
+time_start_fx = 50; time_end_fx = 70; 
 frequency_min = 10; frequency_max = 50;
 strain_min_dB = -35; strain_max_dB = -5;
 
@@ -133,7 +136,7 @@ filename_export = fullfile('Ror23_airgun/', 'spatio_spectral_plot_ror23_airgun_o
 %exportgraphics(gca, filenae_export);
 
 %% corss correlation statistics
-channel_position_km = 59.52; % reference channel distance
+channel_position_km = 30; % reference channel distance
 offset_xcorr = 300; % maximum offset (m)
 max_lag = 1;  % maximum time lag (s)
 

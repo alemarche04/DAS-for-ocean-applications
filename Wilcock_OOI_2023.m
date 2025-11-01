@@ -143,9 +143,7 @@ clear all
 close all
 
 %% load data from dataset
-addpath("Dataset\");
-addpath("filters\");
-addpath("plots\");
+addpath('Dataset', 'filters', 'plots');
 
 filename = "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5";
 
