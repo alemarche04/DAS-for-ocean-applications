@@ -144,4 +144,8 @@ channel_position_km = 44.2; % reference channel distance
 offset_xcorr = 300; % maximum offset (m)
 max_lag = 1;  % maximum time lag (s)
 
+time_corr_start = 1; time_corr_end = 1;
+
+strain_corr = strain_fk_filtered(:, time_corr_start:time_corr_end);
+
 correlation(strain_fk_filtered, sampling_frequency_Hz, distance_m, channel_distance, channel_position_km, offset_xcorr, max_lag)
