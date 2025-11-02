@@ -41,12 +41,7 @@ function space_frequency_plot(data, distance, sampling_frequency, nfft, time_win
     
     % open figure
     figure;
-    title = "Spatio-Spectral Representation";
-    time_start_str = sprintf('%.2f', time_start); time_end_str = sprintf('%.2f', time_end);
-    subtitle = "From " + time_start_str + "s to " + time_end_str + "s";
-    %sgtitle('Spatio-Spectral Representation', 'FontSize', 16, 'FontWeight', 'bold');
-    sgtitle({title, subtitle});
-
+    
     % open file for animation
     if(get_animation)
         fx_animation = VideoWriter('space_frequency_animation.avi', 'Motion JPEG AVI');
@@ -73,6 +68,9 @@ function space_frequency_plot(data, distance, sampling_frequency, nfft, time_win
         % plot
         imagesc(frequency_axis, distance, fft_segment_dB);
         axis xy;
+        
+        title_subplot = sprintf("%0.2f s - %0.2f s", (segment_start/sampling_frequency), (segment_end/sampling_frequency));
+        title({" ", title_subplot});
 
         set(gca, 'YDir', 'normal');
         colormap(parula);
@@ -106,6 +104,12 @@ function space_frequency_plot(data, distance, sampling_frequency, nfft, time_win
         end
         
     end
+
+    title_plot = "Spatio-Spectral Representation";
+    time_start_str = sprintf('%.2f', time_start); time_end_str = sprintf('%.2f', time_end);
+    subtitle_plot = "From " + time_start_str + "s to " + time_end_str + "s";
+    %sgtitle('Spatio-Spectral Representation', 'FontSize', 16, 'FontWeight', 'bold');
+    sgtitle({title_plot, subtitle_plot});
 
     c = colorbar;
     c.Label.String = 'Strain (dB)';
