@@ -1,0 +1,109 @@
+
+_____ Cross-Correlation Statistics _____
+
+Max auto-correlation: 8.349e-21 
+
+Max correlation at offset 20.43 m: 3.471e-21 
+at time lag -0.01280 s
+{Index in position 1 is invalid. Array indices must be positive integers or logical values.
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('correlation_statistics', 'C:\Users\ale09\Documents\Unige\Tesi\DAS_Scripts_Matlab\plots\correlation_statistics.m', 69)" style="font-weight:bold">correlation_statistics</a> (<a href="matlab: opentoline('C:\Users\ale09\Documents\Unige\Tesi\DAS_Scripts_Matlab\plots\correlation_statistics.m',69,0)">line 69</a>)
+        [x_corr2, lags_xcorr_2] = xcorr(data((channel_reference_idx - i * offset_step), :), channel_reference, max_lag_samples);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('Ror23_airgun_inner_cable', 'C:\Users\ale09\Documents\Unige\Tesi\DAS_Scripts_Matlab\Ror23_airgun_inner_cable.m', 159)" style="font-weight:bold">Ror23_airgun_inner_cable</a> (<a href="matlab: opentoline('C:\Users\ale09\Documents\Unige\Tesi\DAS_Scripts_Matlab\Ror23_airgun_inner_cable.m',159,0)">line 159</a>)
+correlation_statistics(strain_corr, sampling_frequency_Hz, distance_m, ...
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+}
+Ror23_airgun_inner_cable
+
+_____ Cross-Correlation Statistics _____
+
+Max auto-correlation: 2.064e-22 
+
+Max correlation at offset 20.43 m: 9.524e-23 
+at time lag -0.01600 s
+
+Max correlation at offset -20.43 m: 1.227e-22 
+at time lag 0.00800 s
+
+Max correlation at offset 40.85 m: 1.918e-22 
+at time lag 0.02400 s
+
+Max correlation at offset -40.85 m: 7.607e-23 
+at time lag 0.02400 s
+
+Max correlation at offset 61.28 m: 1.048e-22 
+at time lag 0.09600 s
+
+Max correlation at offset -61.28 m: 1.312e-22 
+at time lag 0.03200 s
+
+Max correlation at offset 81.70 m: 1.550e-22 
+at time lag 0.00000 s
+
+Max correlation at offset -81.70 m: 8.607e-23 
+at time lag 0.04000 s
+
+Max correlation at offset 102.13 m: 6.765e-23 
+at time lag 0.06400 s
+
+Max correlation at offset -102.13 m: 1.093e-22 
+at time lag 0.00000 s
+
+Max correlation at offset 122.56 m: 8.521e-23 
+at time lag -0.08000 s
+
+Max correlation at offset -122.56 m: 1.138e-22 
+at time lag 0.00000 s
+
+Max correlation at offset 142.98 m: 1.013e-22 
+at time lag 0.04000 s
+
+Max correlation at offset -142.98 m: 7.086e-23 
+at time lag -0.03200 s
+
+_____ Cross-Correlation Statistics _____
+
+Max auto-correlation: 2.064e-22 
+
+Max correlation at offset 20.43 m: 9.524e-23 
+at time lag -0.01600 s
+
+Max correlation at offset -20.43 m: 1.227e-22 
+at time lag 0.00800 s
+
+Max correlation at offset 40.85 m: 1.918e-22 
+at time lag 0.02400 s
+
+Max correlation at offset -40.85 m: 7.607e-23 
+at time lag 0.02400 s
+
+Max correlation at offset 61.28 m: 1.048e-22 
+at time lag 0.09600 s
+
+Max correlation at offset -61.28 m: 1.312e-22 
+at time lag 0.03200 s
+
+Max correlation at offset 81.70 m: 1.550e-22 
+at time lag 0.00000 s
+
+Max correlation at offset -81.70 m: 8.607e-23 
+at time lag 0.04000 s
+
+Max correlation at offset 102.13 m: 6.765e-23 
+at time lag 0.06400 s
+
+Max correlation at offset -102.13 m: 1.093e-22 
+at time lag 0.00000 s
+
+Max correlation at offset 122.56 m: 8.521e-23 
+at time lag -0.08000 s
+
+Max correlation at offset -122.56 m: 1.138e-22 
+at time lag 0.00000 s
+
+Max correlation at offset 142.98 m: 1.013e-22 
+at time lag 0.04000 s
+
+Max correlation at offset -142.98 m: 7.086e-23 
+at time lag -0.03200 s

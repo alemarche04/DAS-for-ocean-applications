@@ -37,7 +37,7 @@ data_struct = load(filename);
 filename_char = char(filename);
 datestamp = filename_char(1:4) + "-" + filename_char(5:6) + "-" + filename_char(7:8);
 timestamp = filename_char(10:11) + ":" + filename_char(12:13) + ":" + filename_char(14:15);
-time_and_date = datestamp + " " + timestamp;
+time_and_date = datestamp + ", " + timestamp;
 
 strain = data_struct.data;
 
@@ -78,7 +78,7 @@ time_space_plot(strain_dB, time, distance_km, ...
 subtitle(time_and_date, "FontSize", 12);
 
 filename_export = fullfile('Ror23_airgun/', 'time_space_plot_ror23_airgun_inner.png');
-%exportgraphics(gca, filenae_export);
+exportgraphics(gcf, filename_export);
 
 %% strain waveform of a single channel
 channel_position_km = 32; % channel of interest
@@ -91,9 +91,10 @@ amplitude_min = -1.9 * 1e-10; amplitude_max = 1.9 * 1e-10;
 
 strain_waveform(channel_focus, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
+subtitle({time_and_date, sprintf("Channel at km %.2f", channel_position_km)}, "FontSize", 12);
 
 filename_export = fullfile('Ror23_airgun/', 'strain_waveform_ror23_airgun_inner.png');
-%exportgraphics(gca, filenae_export);
+exportgraphics(gcf, filename_export);
 
 %% spectrogram of a single channel
 channel_position_km = 32; % channel of interest
@@ -112,11 +113,10 @@ strain_min_dB = -25; strain_max_dB = -2;
 
 plot_spectrogram(channel_focus, nfft, N, han_window, overlap_pct, sampling_frequency_Hz, ...
     time_start, time_end, frequency_min, frequency_max, strain_min_dB, strain_max_dB)
-
-subtitle(sprintf("Channel at km %0.1f", channel_position_km));
+subtitle({time_and_date, sprintf("Channel at km %.2f", channel_position_km)}, "FontSize", 12);
 
 filename_export = fullfile('Ror23_airgun/', 'spectrogram_ror23_airgun_inner.png');
-%exportgraphics(gca, filenae_export);
+exportgraphics(gcf, filename_export);
 
 %% space-frequency plot
 nfft = 4096;
@@ -131,13 +131,36 @@ get_animation = false;
 
 space_frequency_plot(strain_fk_filtered, distance_km, sampling_frequency_Hz, nfft, time_window_fx, ...
     time_start_fx, time_end_fx, frequency_min, frequency_max, strain_min_dB, strain_max_dB, get_animation);
+sgtitle({"Spatio-Spectral Representation", sprintf("From %.2f s to %.2f s", time_start_fx, time_end_fx), time_and_date});
 
-filename_export = fullfile('Ror23_airgun/', 'spatio_spectral_plot_ror23_inner.png');
-%exportgraphics(gca, filenae_export);
+filename_export = fullfile('Ror23_airgun/', 'spatio_spectral_plot_ror23_airgun_inner.png');
+exportgraphics(gcf, filename_export);
 
 %% corss correlation statistics
 channel_position_km = 32; % reference channel distance
 offset_xcorr = 300; % maximum offset (m)
-max_lag = 1;  % maximum time lag (s)
+max_lag = 0.25;  % maximum time lag (s)
 
-correlation(strain_fk_filtered, sampling_frequency_Hz, distance_m, channel_distance, channel_position_km, offset_xcorr, max_lag)
+time_corr_start = 40; time_corr_end = 75;
+
+strain_corr = strain_fk_filtered(:, time_corr_start:time_corr_end);
+
+correlogram(strain_corr, sampling_frequency_Hz, distance_m, ...
+    channel_position_km, offset_xcorr, max_lag)
+subtitle({sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date}, 'FontSize', 12);
+
+filename_export = fullfile('Ror23_airgun/', 'correlogram_ror23_airgun_inner.png');
+exportgraphics(gcf, filename_export);
+
+
+filename_corr_stats = fullfile('Ror23_airgun/', 'correlation_statistics_ror23_airgun_inner.txt');
+diary(filename_corr_stats)
+
+correlation_statistics(strain_corr, sampling_frequency_Hz, distance_m, ...
+    channel_distance, channel_position_km, offset_xcorr, max_lag)
+sgtitle({'Correlation', sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
+
+diary off
+
+filename_export = fullfile('Ror23_airgun/', 'correlation_statistics_ror23_airgun_inner.png');
+exportgraphics(gcf, filename_export);
