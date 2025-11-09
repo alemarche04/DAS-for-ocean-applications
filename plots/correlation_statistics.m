@@ -8,9 +8,10 @@
 % channel_referece_distance_km : reference channel distance [km]
 % offset_xcorr : maximum offset [m]
 % max_lag : maximum time lag [s]
+% file_name : name of output file
 
 function correlation_statistics(data, sampling_frequency, distance_m, ...
-    channel_distance, channel_reference_distance_km, offset_xcorr, max_lag)
+    channel_distance, channel_reference_distance_km, offset_xcorr, max_lag, file_name)
 
     max_lag_samples = round(max_lag * sampling_frequency);
 
@@ -42,8 +43,11 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
     ylabel('Auto-correlation');
     title({'Auto-correlation', sprintf('(Channel: %.3f km)', actual_channel_distance .* 1e-3)});
 
-    fprintf("\n_____ Cross-Correlation Statistics _____\n");
-    fprintf("\nMax auto-correlation: %0.3d \n", max(auto_correlation, [], "all"));
+
+    fileID = fopen(file_name,'w');
+
+    fprintf(fileID, "\n_____ Cross-Correlation Statistics _____\n");
+    fprintf(fileID, "\nMax auto-correlation: %0.3d \n", max(auto_correlation, [], "all"));
 
 
     for i = 1:(nb_subplots/2)
@@ -61,9 +65,9 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
 
 
         [max_xcorr1, max_xcorr1_idx] = max(x_corr1, [], "all");
-        fprintf("\nMax correlation at offset %0.2f m: %0.3d \n", ...
+        fprintf(fileID, "\nMax correlation at offset %0.2f m: %0.3d \n", ...
             (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance), max_xcorr1);
-        fprintf("at time lag %0.5f s\n", time_lags_xcorr_1(max_xcorr1_idx));
+        fprintf(fileID, "at time lag %0.5f s\n", time_lags_xcorr_1(max_xcorr1_idx));
 
 
         [x_corr2, lags_xcorr_2] = xcorr(data((channel_reference_idx - i * offset_step), :), channel_reference, max_lag_samples);
@@ -78,10 +82,12 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
             sprintf('offset %0.2f m', distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance)});
 
         [max_xcorr2, max_xcorr2_idx] = max(x_corr2, [], "all");
-        fprintf("\nMax correlation at offset %0.2f m: %0.3d \n", ...
+        fprintf(fileID, "\nMax correlation at offset %0.2f m: %0.3d \n", ...
             (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance), max_xcorr2);
-        fprintf("at time lag %0.5f s\n", time_lags_xcorr_2(max_xcorr2_idx));
+        fprintf(fileID, "at time lag %0.5f s\n", time_lags_xcorr_2(max_xcorr2_idx));
 
     end
+
+    fclose(fileID);
 
 end

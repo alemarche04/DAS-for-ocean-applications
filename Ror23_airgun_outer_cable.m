@@ -154,13 +154,10 @@ exportgraphics(gcf, filename_export);
 
 
 filename_corr_stats = fullfile('Ror23_airgun/', 'correlation_statistics_ror23_airgun_outer.txt');
-diary(filename_corr_stats)
 
 correlation_statistics(strain_corr, sampling_frequency_Hz, distance_m, ...
-    channel_distance, channel_position_km, offset_xcorr, max_lag)
+    channel_distance, channel_position_km, offset_xcorr, max_lag, filename_corr_stats)
 sgtitle({'Correlation', sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
-
-diary off
 
 filename_export = fullfile('Ror23_airgun/', 'correlation_statistics_ror23_airgun_outer.png');
 exportgraphics(gcf, filename_export);
