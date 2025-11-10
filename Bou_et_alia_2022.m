@@ -48,7 +48,7 @@ strain = data_struct.data;
 time = data_struct.x2_time_s;
 sampling_interval_s = data_struct.info_sample_interval_s;
 
-distance_m = data_struct.x1_position_m;
+distance_m = data_struct.x1_distance_from_shore_m;
 distance_km = distance_m .* 1e-3;
 
 nb_of_channels = data_struct.info_ntraces;
@@ -58,9 +58,9 @@ sampling_frequency_Hz = data_struct.info_sampling_frequency_Hz;
 gauge_length = data_struct.info_GL_m;
 channel_distance = distance_m(2) - distance_m(1);
 
-%% butterworth bandpass filter [20 45] Hz
-lower_bp_freq = 20;
-higher_bp_freq = 45;
+%% butterworth bandpass filter [5 75] Hz
+lower_bp_freq = 5;
+higher_bp_freq = 75;
 filter_order = 5;
 
 strain_bp_filtered = butterworth_bp_filter(strain, lower_bp_freq, higher_bp_freq, filter_order, sampling_frequency_Hz);
@@ -77,12 +77,20 @@ time_start = time(1); time_end = time(end);
 distance_min = distance_km(1); distance_max = distance_km(end);
 strain_min_dB = -30; strain_max_dB = -5;
 
+c = 1500; % propagation speed
+
+hold on;
+y = (c .* (time-46.5));
+y = 44.2;
+plot(time, y, "LineStyle","-", "Color", "w");
+hold off;
+
 time_space_plot(strain_dB, time, distance_km, ...
     time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
 subtitle(time_and_date, "FontSize", 12);
 
 filename_export = fullfile('Bou22_article_plots/', 'time_space_plot_bou22_article_whale.png');
-exportgraphics(gcf, filename_export);
+%exportgraphics(gcf, filename_export);
 
 %% strain waveform of a single channel
 channel_position_km = 44.2; % channel of interest
@@ -142,7 +150,7 @@ exportgraphics(gcf, filename_export);
 
 %% corss correlation statistics
 channel_position_km = 44.2; % reference channel distance
-offset_xcorr = 300; % maximum offset (m)
+offset_xcorr = 35; % maximum offset (m)
 max_lag = 0.05;  % maximum time lag (s)
 
 time_corr_start = 40; time_corr_end = 75;
@@ -154,7 +162,7 @@ correlogram(strain_corr, sampling_frequency_Hz, distance_m, ...
 subtitle({sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date}, 'FontSize', 12);
 
 filename_export = fullfile('Bou22_article_plots/', 'correlogram_bou22_article_whale.png');
-exportgraphics(gcf, filename_export);
+%exportgraphics(gcf, filename_export);
 
 
 filename_corr_stats = fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.txt');
@@ -164,4 +172,4 @@ correlation_statistics(strain_corr, sampling_frequency_Hz, distance_m, ...
 sgtitle({'Correlation', sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
 
 filename_export = fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.png');
-exportgraphics(gcf, filename_export);
+%exportgraphics(gcf, filename_export);

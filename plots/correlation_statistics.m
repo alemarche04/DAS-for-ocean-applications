@@ -22,7 +22,7 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
     channel_reference = data(channel_reference_idx, :);
     
     % sets up subplots
-    offset_step = 5; % calculates cross correlation every 3 channels
+    offset_step = 2; % calculates cross correlation every 2 channels
     nb_subplots = round(offset_xcorr/(offset_step * channel_distance));
     nb_columns = floor(sqrt(nb_subplots));
     nb_rows = ceil(nb_subplots / nb_columns);
@@ -34,11 +34,19 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
     % Calculate auto-correlation for the reference channel
     [auto_correlation, lags_auto] = xcorr(channel_reference, max_lag_samples);
     auto_time_lags = lags_auto/sampling_frequency;
+
+    % parameters for plot scaling
+    min_correlation = min(auto_correlation, [], "all");
+    min_correlation = min_correlation + min_correlation/4;
+
+    max_correlation = max(auto_correlation, [], "all");
+    max_correlation = max_correlation + max_correlation/4;
     
     % Plot auto-correlation
     nexttile
 
     plot(auto_time_lags, auto_correlation);
+    ylim([min_correlation max_correlation]);
     xlabel('Time lag (s)');
     ylabel('Auto-correlation');
     title({'Auto-correlation', sprintf('(Channel: %.3f km)', actual_channel_distance .* 1e-3)});
@@ -58,6 +66,7 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
         nexttile
 
         plot(time_lags_xcorr_1, x_corr1);
+        ylim([min_correlation max_correlation]);
         ylabel('Correlation');
         xlabel('Time lag (s)');
         title({'Cross-correlation' , ...
@@ -76,6 +85,7 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
         nexttile
         
         plot(time_lags_xcorr_2, x_corr2);
+        ylim([min_correlation max_correlation]);
         ylabel('Correlation');
         xlabel('Time lag (s)');
         title({'Cross-correlation' , ...
