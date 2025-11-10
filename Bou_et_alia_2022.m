@@ -77,14 +77,14 @@ time_start = time(1); time_end = time(end);
 distance_min = distance_km(1); distance_max = distance_km(end);
 strain_min_dB = -30; strain_max_dB = -5;
 
-c = 1500; % propagation speed
+c = 1.47; % propagation speed [km/s]
 
 time_space_plot(strain_dB, time, distance_km, ...
     time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
 
 hold on;
-y = (c .* (time-46.5));
-plot(time, y, "LineStyle","-", "Color", "w");
+y = ( c .* (time - 46.2) ) + 43.2;
+plot(time, y, 'w--', 'LineWidth', 0.7);
 hold off;
 
 subtitle(time_and_date, "FontSize", 12);
@@ -93,17 +93,25 @@ filename_export = fullfile('Bou22_article_plots/', 'time_space_plot_bou22_articl
 %exportgraphics(gcf, filename_export);
 
 %% strain waveform of a single channel
-channel_position_km = 44.2; % channel of interest
+channel_position_km = 42; % channel of interest
+CPA_position_km = 42.8; % closest point of apporach
 
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :) .* 1e-9;
 
+[~, CPA_idx] = min(abs(distance_km - CPA_position_km));
+channel_CPA = strain_fk_filtered(CPA_idx, :) .* 1e-9;
+
 time_start = time(1); time_end = time(end); 
-amplitude_min = -0.7 * 1e-9; amplitude_max = 0.7 * 1e-9;
+amplitude_min = -1.3 * 1e-9; amplitude_max = 1.3 * 1e-9;
 
 strain_waveform(channel_focus, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
 subtitle({time_and_date, sprintf("Channel at km %.2f", channel_position_km)}, "FontSize", 12);
+
+strain_waveform(channel_CPA, time, ...
+    time_start, time_end, amplitude_min, amplitude_max)
+subtitle({time_and_date, sprintf("Channel at km %.2f (closest point of approach)", CPA_position_km)}, "FontSize", 12);
 
 filename_export = fullfile('Bou22_article_plots/', 'strain_waveform_bou22_article_whale.png');
 exportgraphics(gcf, filename_export);
@@ -151,9 +159,9 @@ exportgraphics(gcf, filename_export);
 %% corss correlation statistics
 channel_position_km = 44.2; % reference channel distance
 offset_xcorr = 35; % maximum offset (m)
-max_lag = 0.05;  % maximum time lag (s)
+max_lag = 0.06;  % maximum time lag (s)
 
-time_corr_start = 40; time_corr_end = 75;
+time_corr_start = 47; time_corr_end = 50;
 
 strain_corr = strain_fk_filtered(:, time_corr_start:time_corr_end);
 

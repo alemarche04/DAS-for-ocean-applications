@@ -23,7 +23,7 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
     
     % sets up subplots
     offset_step = 2; % calculates cross correlation every 2 channels
-    nb_subplots = round(offset_xcorr/(offset_step * channel_distance));
+    nb_subplots = 2 * round(offset_xcorr/(offset_step * channel_distance)) + 1;
     nb_columns = floor(sqrt(nb_subplots));
     nb_rows = ceil(nb_subplots / nb_columns);
 
