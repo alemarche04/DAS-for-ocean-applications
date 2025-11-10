@@ -79,14 +79,14 @@ strain_min_dB = -30; strain_max_dB = -5;
 
 c = 1500; % propagation speed
 
+time_space_plot(strain_dB, time, distance_km, ...
+    time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
+
 hold on;
 y = (c .* (time-46.5));
-y = 44.2;
 plot(time, y, "LineStyle","-", "Color", "w");
 hold off;
 
-time_space_plot(strain_dB, time, distance_km, ...
-    time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
 subtitle(time_and_date, "FontSize", 12);
 
 filename_export = fullfile('Bou22_article_plots/', 'time_space_plot_bou22_article_whale.png');
