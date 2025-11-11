@@ -39,7 +39,7 @@ The DAS crosses Isfjorden out to the open sea, bypassing the South of Prins Karl
 
 #### Data Processing
 
-- **Filter:** 5th order Butterworth bandpass filter [20-45] Hz
+- **Filter:** 5th order Butterworth bandpass filter [5-75] Hz
 - **f-k Filter:** Frequency-Wavenumber fan filter to keep waves with [1450-3400] m/s propagation speed
 
 #### Sample Data
