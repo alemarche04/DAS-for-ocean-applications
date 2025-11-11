@@ -73,6 +73,8 @@ strain_fk_filtered = fk_filter_filt(strain_bp_filtered, fk_filter);
 strain_dB = 20*log10(abs(strain_fk_filtered) ./ max(abs(strain_fk_filtered), [], "all"));
 
 %% time-space plot
+
+% time-space plot parameters
 time_start = time(1); time_end = time(end); 
 distance_min = distance_km(1); distance_max = distance_km(end);
 strain_min_dB = -30; strain_max_dB = -5;
@@ -82,54 +84,75 @@ c = 1.47; % propagation speed [km/s]
 time_space_plot(strain_dB, time, distance_km, ...
     time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
 
+% propagation speed line
 hold on;
-y = ( c .* (time - 46.2) ) + 43.2;
-plot(time, y, 'w--', 'LineWidth', 0.7);
+x_p = 46.2;
+y_p = 43.2;
+prop_speed = ( c .* (time - x_p) ) + y_p;
+plot(time, prop_speed, 'w--', 'LineWidth', 1);
+
+prop_speed_txt = ['c = ', num2str(c * 1e3), '[m/s]  '];
+text(46.2, 43.2, prop_speed_txt, 'Color', 'white', 'FontSize', 12, 'HorizontalAlignment','right');
 hold off;
 
 subtitle(time_and_date, "FontSize", 12);
 
 filename_export = fullfile('Bou22_article_plots/', 'time_space_plot_bou22_article_whale.png');
-%exportgraphics(gcf, filename_export);
+exportgraphics(gcf, filename_export);
 
 %% strain waveform of a single channel
 channel_position_km = 42; % channel of interest
 CPA_position_km = 42.8; % closest point of apporach
 
+% get signal of channel at km = channel_position_km
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :) .* 1e-9;
 
+% get signal of channel at km = CPA_position_km
 [~, CPA_idx] = min(abs(distance_km - CPA_position_km));
 channel_CPA = strain_fk_filtered(CPA_idx, :) .* 1e-9;
 
+% parameters of strain waveform plot
 time_start = time(1); time_end = time(end); 
 amplitude_min = -1.3 * 1e-9; amplitude_max = 1.3 * 1e-9;
 
+% strain waveform channel of interest
 strain_waveform(channel_focus, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
 subtitle({time_and_date, sprintf("Channel at km %.2f", channel_position_km)}, "FontSize", 12);
 
+filename_export = fullfile('Bou22_article_plots/', 'strain_waveform_bou22_article_whale.png');
+exportgraphics(gcf, filename_export);
+
+% export audio file
+filename_export = fullfile('Bou22_article_plots/', 'strain_audio_bou22_article_whale.wav');
+audiowrite(filename_export, (channel_focus .* 1e9), round(sampling_frequency_Hz*3));
+
+% strain waveform closest point of approach
 strain_waveform(channel_CPA, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
 subtitle({time_and_date, sprintf("Channel at km %.2f (closest point of approach)", CPA_position_km)}, "FontSize", 12);
 
-filename_export = fullfile('Bou22_article_plots/', 'strain_waveform_bou22_article_whale.png');
+filename_export = fullfile('Bou22_article_plots/', 'strain_waveform_CPA_bou22_article_whale.png');
 exportgraphics(gcf, filename_export);
 
 %% spectrogram of a single channel
 channel_position_km = 44.2; % channel of interest
 
+% get signal of channel at km = channel_position_km
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :);
 
+% STFT parameters
 nfft = 4096;
 N = 512;
 overlap_pct = 0.98;
 han_window = hann(N, 'periodic');
 
+% spectrogram parameters
 time_start = time(1); time_end = time(end); 
 frequency_min = 0; frequency_max = 100;
-strain_min_dB = -20; strain_max_dB = 0;
+strain_min_dB = -25; strain_max_dB = 0;
 
 plot_spectrogram(channel_focus, nfft, N, han_window, overlap_pct, sampling_frequency_Hz, ...
     time_start, time_end, frequency_min, frequency_max, strain_min_dB, strain_max_dB)
@@ -139,15 +162,19 @@ filename_export = fullfile('Bou22_article_plots/', 'spectrogram_bou22_article_wh
 exportgraphics(gcf, filename_export);
 
 %% space-frequency plot
+
+% FFT parameters
 nfft = 4096;
 
+% space-frequency plot parameters
 time_start_fx = 44; time_end_fx = 67; 
 frequency_min = 10; frequency_max = 50;
 strain_min_dB = -20; strain_max_dB = -5;
 
 time_window_fx = 1.5;
 
-get_animation = false;
+% if true, produces animation
+get_animation = true;
 
 space_frequency_plot(strain_fk_filtered, distance_km, sampling_frequency_Hz, nfft, time_window_fx, ...
     time_start_fx, time_end_fx, frequency_min, frequency_max, strain_min_dB, strain_max_dB, get_animation);
@@ -159,18 +186,20 @@ exportgraphics(gcf, filename_export);
 %% corss correlation statistics
 channel_position_km = 44.2; % reference channel distance
 offset_xcorr = 35; % maximum offset (m)
-max_lag = 0.06;  % maximum time lag (s)
+max_lag = 0.06; % maximum time lag (s)
 
+% select time duration of the signals
 time_corr_start = 47; time_corr_end = 50;
-
 strain_corr = strain_fk_filtered(:, time_corr_start:time_corr_end);
 
+
+% correlation of signals during whale call
 correlogram(strain_corr, sampling_frequency_Hz, distance_m, ...
     channel_position_km, offset_xcorr, max_lag)
 subtitle({sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date}, 'FontSize', 12);
 
 filename_export = fullfile('Bou22_article_plots/', 'correlogram_bou22_article_whale.png');
-%exportgraphics(gcf, filename_export);
+exportgraphics(gcf, filename_export);
 
 
 filename_corr_stats = fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.txt');
@@ -180,4 +209,26 @@ correlation_statistics(strain_corr, sampling_frequency_Hz, distance_m, ...
 sgtitle({'Correlation', sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
 
 filename_export = fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.png');
-%exportgraphics(gcf, filename_export);
+exportgraphics(gcf, filename_export);
+
+
+% correlation of noise signals
+time_corr_start = 20; time_corr_end = 23;
+strain_corr = strain_fk_filtered(:, time_corr_start:time_corr_end);
+
+correlogram(strain_corr, sampling_frequency_Hz, distance_m, ...
+    channel_position_km, offset_xcorr, max_lag)
+subtitle({sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date}, 'FontSize', 12);
+
+filename_export = fullfile('Bou22_article_plots/', 'correlogram_noise_bou22_article_whale.png');
+exportgraphics(gcf, filename_export);
+
+
+filename_corr_stats = fullfile('Bou22_article_plots/', 'correlation_statistics_noise_bou22_article_whale.txt');
+
+correlation_statistics(strain_corr, sampling_frequency_Hz, distance_m, ...
+    channel_distance, channel_position_km, offset_xcorr, max_lag, filename_corr_stats)
+sgtitle({'Correlation', sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
+
+filename_export = fullfile('Bou22_article_plots/', 'correlation_statistics_noise_bou22_article_whale.png');
+exportgraphics(gcf, filename_export);

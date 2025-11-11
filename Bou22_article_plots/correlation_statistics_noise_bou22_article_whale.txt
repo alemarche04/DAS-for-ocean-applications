@@ -1,0 +1,28 @@
+
+_____ Cross-Correlation Statistics _____
+
+Max auto-correlation: 1.404e-02 
+
+Max correlation at offset 8.17 m: 1.522e-02 
+at time lag 0.00155 s
+
+Max correlation at offset -8.17 m: 2.147e-04 
+at time lag 0.00465 s
+
+Max correlation at offset 16.34 m: 6.137e-04 
+at time lag 0.00465 s
+
+Max correlation at offset -16.34 m: 8.247e-04 
+at time lag -0.00310 s
+
+Max correlation at offset 24.52 m: 7.211e-04 
+at time lag -0.00310 s
+
+Max correlation at offset -24.51 m: 000 
+at time lag -0.06045 s
+
+Max correlation at offset 32.69 m: 2.409e-03 
+at time lag 0.00000 s
+
+Max correlation at offset -32.68 m: 1.101e-02 
+at time lag 0.00000 s
