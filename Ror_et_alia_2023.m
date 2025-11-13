@@ -55,9 +55,12 @@ gauge_length = data_struct.info_gauge_length;
 channel_distance = distance_m(2) - distance_m(1);
 
 %% butterworth bandpass filter [15 30] Hz
+
+% filter parameters
 lower_bp_freq = 15;
 higher_bp_freq = 30;
 filter_order = 5;
+%
 
 strain_bp_filtered = butterworth_bp_filter(strain, lower_bp_freq, higher_bp_freq, filter_order, sampling_frequency_Hz);
 
@@ -69,95 +72,147 @@ strain_fk_filtered = fk_filter_filt(strain_bp_filtered, fk_filter);
 strain_dB = 20*log10(abs(strain_fk_filtered) ./ max(abs(strain_fk_filtered), [], "all"));
 
 %% time-space plot
+
+% time-space plot parameters
 time_start = 85; time_end = 170; 
 distance_min = 50; distance_max = 100;
 strain_min_dB = -50; strain_max_dB = -18;
+%
 
+% time-space plot
 time_space_plot(strain_dB, time, distance_km, ...
     time_start, time_end, distance_min, distance_max, strain_min_dB, strain_max_dB)
 subtitle(time_and_date, "FontSize", 12);
+%
 
+% export plot as png
 filename_export = fullfile('Ror23_article_plots/', 'time_space_plot_ror23_article_whale.png');
 exportgraphics(gcf, filename_export);
+%
 
 %% strain waveform of a single channel
 channel_position_km = 59.52; % channel of interest
 
+% get signal of channel at km = channel_position_km
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :);
+%
 
+% parameters of strain waveform plot
 time_start = time(1); time_end = time(end); 
 amplitude_min = -1.7 * 1e-9; amplitude_max = 1.7 * 1e-9;
+%
 
+% plot strain waveform channel of interest
 strain_waveform(channel_focus, time, ...
     time_start, time_end, amplitude_min, amplitude_max)
 subtitle({time_and_date, sprintf("Channel at km %.2f", channel_position_km)}, "FontSize", 12);
+%
 
+% export plot as png
 filename_export = fullfile('Ror23_article_plots/', 'strain_waveform_ror23_article_whale.png');
 exportgraphics(gcf, filename_export);
+%
 
 %% spectrogram of a single channel
 channel_position_km = 59.52; % channel of interest
 
+% get signal of channel at km = channel_position_km
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
 channel_focus = strain_fk_filtered(channel_focus_idx, :);
+%
 
+% STFT parameters
 nfft = 4096;
 N = 512;
 overlap_pct = 0.98;
 han_window = hann(N, 'periodic');
+%
 
+% spectrogram parameters
 time_start = time(1); time_end = time(end); 
 frequency_min = 10; frequency_max = 35;
 strain_min_dB = -35; strain_max_dB = -5;
+%
 
+% plot spectrogram
 plot_spectrogram(channel_focus, nfft, N, han_window, overlap_pct, sampling_frequency_Hz, ...
     time_start, time_end, frequency_min, frequency_max, strain_min_dB, strain_max_dB)
 subtitle({time_and_date, sprintf("Channel at km %.2f", channel_position_km)}, "FontSize", 12);
+%
 
+% export plot as png
 filename_export = fullfile('Ror23_article_plots/', 'spectrogram_ror23_article_whale.png');
 exportgraphics(gcf, filename_export);
+%
 
 %% space-frequency plot
+
+% FFT parameters
 nfft = 4096;
+%
 
+% space-frequency plot parameters
 time_start_fx = 105; time_end_fx = 125; 
-frequency_min = 10; frequency_max = 35;
-strain_min_dB = -35; strain_max_dB = -5;
-
 time_window_fx = 1.8;
 
-get_animation = false;
+frequency_min = 10; frequency_max = 35;
+strain_min_dB = -35; strain_max_dB = -5;
+%
 
+% if true, produces animation
+get_animation = false;
+%
+
+% plot spatio-spectral representation
 space_frequency_plot(strain_fk_filtered, distance_km, sampling_frequency_Hz, nfft, time_window_fx, ...
     time_start_fx, time_end_fx, frequency_min, frequency_max, strain_min_dB, strain_max_dB, get_animation);
 sgtitle({"Spatio-Spectral Representation", sprintf("From %.2f s to %.2f s", time_start_fx, time_end_fx), time_and_date});
+%
 
+% export plot as png
 filename_export = fullfile('Ror23_article_plots/', 'spatio_spectral_plot_ror23_article_whale.png');
 exportgraphics(gcf, filename_export);
+%
 
 %% corss correlation statistics
+
+% correlation parameters
 channel_position_km = 59.52; % reference channel distance
 offset_xcorr = 300; % maximum offset (m)
-max_lag = 0.25;  % maximum time lag (s)
+max_lag = 0.2;  % maximum time lag (s)
+%
 
-time_corr_start = 95; time_corr_end = 130;
+% strain signal in selected time interval
+time_corr_start = 100; time_corr_end = 103;
+t_start_idx = round(time_corr_start / sampling_interval_s);
+t_end_idx = round(time_corr_end / sampling_interval_s);
+strain_corr = strain_fk_filtered(:, t_start_idx:t_end_idx);
+%
 
-strain_corr = strain_fk_filtered(:, time_corr_start:time_corr_end);
-
+% plot correlogram
 correlogram(strain_corr, sampling_frequency_Hz, distance_m, ...
     channel_position_km, offset_xcorr, max_lag)
 subtitle({sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date}, 'FontSize', 12);
+%
 
+% export plot as png
 filename_export = fullfile('Ror23_article_plots/', 'correlogram_ror23_article_whale.png');
 exportgraphics(gcf, filename_export);
+%
 
-
+% txt file name (for correlation statistics)
 filename_corr_stats = fullfile('Ror23_article_plots/', 'correlation_statistics_ror23_article_whale.txt');
+%
 
+% plot correlation statistics and export data to txt file
 correlation_statistics(strain_corr, sampling_frequency_Hz, distance_m, ...
     channel_distance, channel_position_km, offset_xcorr, max_lag, filename_corr_stats)
-sgtitle({'Correlation', sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
+sgtitle({sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', channel_position_km, offset_xcorr), ...
+        sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
+%
 
+% export plot as png
 filename_export = fullfile('Ror23_article_plots/', 'correlation_statistics_ror23_article_whale.png');
 exportgraphics(gcf, filename_export);
+%
