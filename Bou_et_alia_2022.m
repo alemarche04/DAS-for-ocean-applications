@@ -137,7 +137,7 @@ filename_export = fullfile('Bou22_article_plots/', 'strain_waveform_CPA_bou22_ar
 exportgraphics(gcf, filename_export);
 
 %% spectrogram of a single channel
-channel_position_km = 44.2; % channel of interest
+channel_position_km = 42; % channel of interest
 
 % get signal of channel at km = channel_position_km
 [~, channel_focus_idx] = min(abs(distance_km - channel_position_km));
@@ -174,7 +174,7 @@ strain_min_dB = -20; strain_max_dB = -5;
 time_window_fx = 1.5;
 
 % if true, produces animation
-get_animation = true;
+get_animation = false;
 
 space_frequency_plot(strain_fk_filtered, distance_km, sampling_frequency_Hz, nfft, time_window_fx, ...
     time_start_fx, time_end_fx, frequency_min, frequency_max, strain_min_dB, strain_max_dB, get_animation);
@@ -184,16 +184,16 @@ filename_export = fullfile('Bou22_article_plots/', 'spatio_spectral_plot_bou22_a
 exportgraphics(gcf, filename_export);
 
 %% corss correlation statistics
-channel_position_km = 44.2; % reference channel distance
-offset_xcorr = 35; % maximum offset (m)
-max_lag = 0.06; % maximum time lag (s)
+channel_position_km = 42; % reference channel distance
+offset_xcorr = 300; % maximum offset (m)
+max_lag = 0.2; % maximum time lag (s)
 
-% select time duration of the signals
+%% correlation of signals during whale call
 time_corr_start = 47; time_corr_end = 50;
-strain_corr = strain_fk_filtered(:, time_corr_start:time_corr_end);
+t_start_idx = round(time_corr_start / sampling_interval_s);
+t_end_idx = round(time_corr_end / sampling_interval_s);
+strain_corr = strain_fk_filtered(:, t_start_idx:t_end_idx);
 
-
-% correlation of signals during whale call
 correlogram(strain_corr, sampling_frequency_Hz, distance_m, ...
     channel_position_km, offset_xcorr, max_lag)
 subtitle({sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date}, 'FontSize', 12);
@@ -212,9 +212,11 @@ filename_export = fullfile('Bou22_article_plots/', 'correlation_statistics_bou22
 exportgraphics(gcf, filename_export);
 
 
-% correlation of noise signals
+%% correlation of noise signals
 time_corr_start = 20; time_corr_end = 23;
-strain_corr = strain_fk_filtered(:, time_corr_start:time_corr_end);
+t_start_idx = round(time_corr_start / sampling_interval_s);
+t_end_idx = round(time_corr_end / sampling_interval_s);
+strain_corr = strain_fk_filtered(:, t_start_idx:t_end_idx);
 
 correlogram(strain_corr, sampling_frequency_Hz, distance_m, ...
     channel_position_km, offset_xcorr, max_lag)
