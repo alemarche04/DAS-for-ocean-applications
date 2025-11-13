@@ -1,7 +1,7 @@
 
 _____ Cross-Correlation Statistics _____
 
-Max auto-correlation: 2.535e+02 
+Max auto-correlation: 253.482 
 
 Max correlation at offset 8.17 m: 2.283e+02 
 at time lag 0.00465 s

@@ -206,7 +206,8 @@ filename_corr_stats = fullfile('Bou22_article_plots/', 'correlation_statistics_b
 
 correlation_statistics(strain_corr, sampling_frequency_Hz, distance_m, ...
     channel_distance, channel_position_km, offset_xcorr, max_lag, filename_corr_stats)
-sgtitle({'Correlation', sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
+sgtitle({sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', channel_position_km, offset_xcorr), ...
+        sprintf('Signals duration: from %.2f s to %.2f s', time_corr_start, time_corr_end), time_and_date});
 
 filename_export = fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.png');
 exportgraphics(gcf, filename_export);
