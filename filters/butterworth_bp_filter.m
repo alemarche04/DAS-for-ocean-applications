@@ -1,4 +1,4 @@
-% Buttworth bandpass filter
+% Butterworth bandpass filter
 
 % --- INPUT ---
 % data : [channels x time] data matrix
@@ -14,6 +14,8 @@ function filtered_data = butterworth_bp_filter(data, lower_freq, higher_freq, or
 
     cutoff_freq = [lower_freq higher_freq]/(sampling_freq/2);
     [B, A] = butter(order, cutoff_freq, 'bandpass');
+
+    fprintf('Applying Butterworth bandpass filter\n');
     filtered_data = filtfilt(B, A, data')';
 
 end

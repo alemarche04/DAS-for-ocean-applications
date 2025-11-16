@@ -14,11 +14,14 @@ function trace_out = fk_filter_filt(trace_in, fk_filter_matrix)
     trace = trace_in;
 
     % fk spectrum (2D fft)
+    fprintf('Calculating fk spectrum (2D FFT)\n');
     fk_trace = fftshift(fft2(trace));
 
     % applies filter
+    fprintf('Applying fk filter\n');
     fk_filtered_trace = fk_trace .* fk_filter_matrix;
 
     % back to tx domain
+    fprintf('Inverse FFT after fk filtering\n');
     trace_out = real(ifft2(ifftshift(fk_filtered_trace)));
 end

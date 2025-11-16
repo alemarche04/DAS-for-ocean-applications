@@ -8,10 +8,17 @@
 % channel_referece_distance_km : reference channel distance [km]
 % offset_xcorr : maximum offset [m]
 % max_lag : maximum time lag [s]
+% time_start : start time of plot time interval [s]
+% time_end : end time of plot time interval[s]
 % file_name : name of output file
 
-function correlation_statistics(data, sampling_frequency, distance_m, ...
-    channel_distance, channel_reference_distance_km, offset_xcorr, max_lag, file_name)
+function fig = correlation_statistics(data, sampling_frequency, distance_m, channel_distance, ...
+    channel_reference_distance_km, offset_xcorr, max_lag, time_start, time_end, file_name)
+
+    % validate input
+    parse_inputs(data, sampling_frequency, distance_m, channel_distance, ...
+        channel_reference_distance_km, offset_xcorr, max_lag, time_start, time_end, file_name);
+    %
 
     % number of samples
     max_lag_samples = round(max_lag * sampling_frequency);
@@ -32,7 +39,7 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
     %
 
     % open figure
-    figure('units','normalized','outerposition',[0 0 1 1]);
+    fig = figure('units','normalized','outerposition',[0 0 1 1]);
     t = tiledlayout(nb_rows,nb_columns,'TileSpacing','Compact', 'Padding', 'compact');
     %
 
@@ -97,6 +104,7 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
         fprintf(fileID, "\nMax correlation at offset %0.2f m: %0.3d \n", ...
             (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance), max_xcorr1);
         fprintf(fileID, "at time lag %0.5f s\n", time_lags_xcorr_1(max_xcorr1_idx));
+        %
         
 
         % (cross)correlation with positive offset
@@ -123,5 +131,39 @@ function correlation_statistics(data, sampling_frequency, distance_m, ...
     end
 
     fclose(fileID);
+
+    % function for input validation
+    function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance, ...
+    channel_reference_distance_km, offset_xcorr, max_lag, time_start, time_end, file_name)
+    p = inputParser;
+
+    valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
+    addRequired(p, 'data', valid);
+
+    valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
+    addRequired(p, 'sampling_frequency', valid);
+
+    valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'vector'});
+    addRequired(p, 'distance_m', valid);
+
+    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'scalar'});
+    addRequired(p, 'channel_distance', valid);
+    addRequired(p, 'channel_reference_position_km', valid);
+    addRequired(p, 'offset_xcorr', valid);
+    addRequired(p, 'max_lag', valid);
+
+    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'scalar'});
+    addRequired(p, 'time_start', valid);
+    addRequired(p, 'time_end', valid);
+
+    valid = @(x) ~isempty(x) & isstring(x) || ischar(x) || iscell(c);
+    addRequired(p, 'file_name', valid);    
+
+    parse(p, data, sampling_frequency, distance_m, channel_distance, ...
+    channel_reference_distance_km, offset_xcorr, max_lag, time_start, time_end, file_name);
+
+    results = p.Results;
+    end
+    %
 
 end
