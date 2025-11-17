@@ -1,0 +1,64 @@
+
+_____ Cross-Correlation Statistics _____
+
+Max auto-correlation: 0.000 
+
+Max correlation at offset 8.17 m: 1.300e-17 
+at time lag 0.00000 s
+
+Max correlation at offset -8.17 m: 1.741e-17 
+at time lag 0.00000 s
+
+Max correlation at offset 16.34 m: 8.784e-18 
+at time lag -0.00800 s
+
+Max correlation at offset -16.34 m: 7.871e-18 
+at time lag 0.00800 s
+
+Max correlation at offset 24.51 m: 1.661e-17 
+at time lag -0.01600 s
+
+Max correlation at offset -24.51 m: 1.395e-17 
+at time lag 0.01600 s
+
+Max correlation at offset 32.68 m: 1.392e-17 
+at time lag -0.01600 s
+
+Max correlation at offset -32.68 m: 1.434e-17 
+at time lag 0.01600 s
+
+Max correlation at offset 40.85 m: 8.915e-18 
+at time lag -0.02400 s
+
+Max correlation at offset -40.85 m: 6.970e-18 
+at time lag 0.02400 s
+
+Max correlation at offset 49.02 m: 1.135e-17 
+at time lag -0.02400 s
+
+Max correlation at offset -49.02 m: 8.957e-18 
+at time lag 0.02400 s
+
+Max correlation at offset 57.19 m: 8.672e-18 
+at time lag -0.02400 s
+
+Max correlation at offset -57.19 m: 6.218e-18 
+at time lag 0.02400 s
+
+Max correlation at offset 65.36 m: 6.406e-18 
+at time lag 0.04000 s
+
+Max correlation at offset -65.36 m: 7.986e-18 
+at time lag -0.04000 s
+
+Max correlation at offset 73.53 m: 6.392e-18 
+at time lag 0.04000 s
+
+Max correlation at offset -73.53 m: 5.892e-18 
+at time lag -0.04000 s
+
+Max correlation at offset 81.70 m: 7.120e-18 
+at time lag -0.04000 s
+
+Max correlation at offset -81.70 m: 4.335e-18 
+at time lag 0.03200 s

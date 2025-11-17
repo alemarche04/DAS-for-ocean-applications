@@ -1,4 +1,4 @@
-% Correlation statistics
+%% Correlation statistics
 
 % --- INPUT ---
 % data : data matrix [channel x time sample]
@@ -15,7 +15,7 @@
 function fig = correlation_statistics(data, sampling_frequency, distance_m, channel_distance, ...
     channel_reference_distance_km, offset_xcorr, max_lag, time_start, time_end, file_name)
 
-    % validate input
+    % parse input parameters
     parse_inputs(data, sampling_frequency, distance_m, channel_distance, ...
         channel_reference_distance_km, offset_xcorr, max_lag, time_start, time_end, file_name);
     %
@@ -132,7 +132,7 @@ function fig = correlation_statistics(data, sampling_frequency, distance_m, chan
 
     fclose(fileID);
 
-    % function for input validation
+    % validates and parses input arguments
     function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance, ...
     channel_reference_distance_km, offset_xcorr, max_lag, time_start, time_end, file_name)
     p = inputParser;

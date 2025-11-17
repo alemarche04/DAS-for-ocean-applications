@@ -32,6 +32,8 @@ function fig = strain_waveform(data, time, varargin)
     % plot limits configuration
     if ~isempty(time_start) & ~isempty(time_end)
         xlim([time_start time_end]);
+    else
+        xlim([time(1) time(end)]);
     end
 
     if ~isempty(amplitude_min) & ~isempty(amplitude_max)

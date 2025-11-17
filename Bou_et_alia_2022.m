@@ -77,7 +77,7 @@ strain_dB = 20*log10(abs(strain_fk_filtered) ./ max(abs(strain_fk_filtered), [],
 %% time-space plot
 
 % time-space plot
-time_space_plot = time_space_plot(strain_dB, time, distance_km, 'strain_min', -30, 'strain_max', -5);
+tx_plot = time_space_plot(strain_dB, time, distance_km, 'strain_min', -30, 'strain_max', -5);
 subtitle(time_and_date, "FontSize", 12);
 %
 
@@ -95,7 +95,7 @@ hold off;
 
 % export plot as png
 filename_export = fullfile('Bou22_article_plots/', 'time_space_plot_bou22_article_whale.png');
-exportgraphics(time_space_plot, filename_export);
+exportgraphics(tx_plot, filename_export);
 %
 
 %% strain waveform of a single channel
@@ -190,13 +190,13 @@ time_window_fx = 1.5;
 
 % plot spatio-spectral representation
 spatio_spectral_plot = space_frequency_plot(strain_fk_filtered, distance_km, sampling_frequency_Hz, nfft, time_window_fx, ...
-    time_start_fx, time_end_fx, 'frequency_min', 10, 'frequency_max', 50, 'strain_min', -20, 'strain_max', -5);
+    time_start_fx, time_end_fx, 'frequency_min', 5, 'frequency_max', 75, 'strain_min', -20, 'strain_max', -5);
 sgtitle({"Spatio-Spectral Representation", sprintf("From %.2f s to %.2f s", time_start_fx, time_end_fx), time_and_date});
 %
 
 % export plot as png
 filename_export = fullfile('Bou22_article_plots/', 'spatio_spectral_plot_bou22_article_whale.png');
-exportgraphics(gcf, filename_export);
+exportgraphics(spatio_spectral_plot, filename_export);
 %
 
 %% corss correlation statistics
