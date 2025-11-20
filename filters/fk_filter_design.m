@@ -102,8 +102,10 @@ function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
         title('f-k filter');
     end
 
+end
 
-    % function for input validation
+
+% function for input validation
     function results = parse_inputs(trace_shape, dx, dt, varargin)
     p = inputParser;
 
@@ -128,4 +130,3 @@ function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
     results = p.Results;
     end
     %
-end

@@ -141,8 +141,11 @@ function fig = space_frequency_plot(data, distance, sampling_frequency, nfft, ..
         close(fx_animation);
     end
     %
+    
+end
 
-    % function for input validation
+
+% function for input validation
     function results = parse_inputs(data, distance, sampling_frequency, nfft, ...
     time_window, time_start, time_end, varargin)
 
@@ -185,5 +188,3 @@ function fig = space_frequency_plot(data, distance, sampling_frequency, nfft, ..
     results = p.Results;
     end
     %
-
-end

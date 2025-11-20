@@ -57,7 +57,7 @@ channel_distance = distance_m(2) - distance_m(1);
 
 %filter parameters
 lower_bp_freq = 5;
-higher_bp_freq = 38;
+higher_bp_freq = 45;
 filter_order = 5;
 %
 

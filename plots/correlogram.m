@@ -74,35 +74,10 @@ function fig = correlogram(data, sampling_frequency, distance_m, channel_referen
         actual_channel_distance .* 1e-3, offset_xcorr), 'FontSize', 14, 'FontWeight', 'bold');
     %
 
-    % colormap function
-    function cmap = redblue(m)
-    % Red Blue Colormap
-        if nargin < 1
-            m = size(get(gcf,'colormap'), 1);
-        end
-        
-        if m == 1
-            cmap = [1 1 1];
-            return;
-        end
-        
-        n_half = ceil(m/2);
-        r_lower = linspace(0, 1, n_half)';
-        g_lower = linspace(0, 1, n_half)';
-        b_lower = ones(n_half, 1);
-        
-        n_upper = m - n_half;
-        r_upper = ones(n_upper, 1);
-        g_upper = linspace(1, 0, n_upper)';
-        b_upper = linspace(1, 0, n_upper)';
-        
-        cmap = [r_lower, g_lower, b_lower; r_upper, g_upper, b_upper];
-        
-        cmap = cmap(1:m, :);
-    end
-    %
+end
 
-    % function for input validation
+
+% function for input validation
     function results = parse_inputs(data, sampling_frequency, distance_m, channel_reference_position_km, ...
             offset_xcorr, max_lag, time_start, time_end)
     p = inputParser;
@@ -132,4 +107,31 @@ function fig = correlogram(data, sampling_frequency, distance_m, channel_referen
     end
     %
 
-end
+
+% colormap function
+    function cmap = redblue(m)
+    % Red Blue Colormap
+        if nargin < 1
+            m = size(get(gcf,'colormap'), 1);
+        end
+        
+        if m == 1
+            cmap = [1 1 1];
+            return;
+        end
+        
+        n_half = ceil(m/2);
+        r_lower = linspace(0, 1, n_half)';
+        g_lower = linspace(0, 1, n_half)';
+        b_lower = ones(n_half, 1);
+        
+        n_upper = m - n_half;
+        r_upper = ones(n_upper, 1);
+        g_upper = linspace(1, 0, n_upper)';
+        b_upper = linspace(1, 0, n_upper)';
+        
+        cmap = [r_lower, g_lower, b_lower; r_upper, g_upper, b_upper];
+        
+        cmap = cmap(1:m, :);
+    end
+    %

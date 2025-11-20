@@ -4,7 +4,7 @@
 % channel_target : signal of a single channel
 % nnft : number of FFT samples
 % N : window length
-% window : window funciton
+% window : spectral window
 % overlap_pct : overlap pencentage
 % sampling_frequency : sampling frequency [Hz]
 
@@ -65,7 +65,10 @@ function fig = plot_spectrogram(data, nfft, N, window, overlap_pct, sampling_fre
     end
     %
 
-    % function for input validation
+end
+
+
+% function for input validation
     function results = parse_inputs(data, nfft, N, window, overlap_pct, sampling_frequency, varargin)
     p = inputParser;
 
@@ -102,5 +105,3 @@ function fig = plot_spectrogram(data, nfft, N, window, overlap_pct, sampling_fre
     results = p.Results;
     end
     %
-
-end

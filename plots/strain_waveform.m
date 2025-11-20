@@ -41,7 +41,10 @@ function fig = strain_waveform(data, time, varargin)
     end
     %
 
-    % function for input validation
+end
+
+
+% function for input validation
     function results = parse_inputs(data, time, varargin)
     p = inputParser;
 
@@ -65,5 +68,3 @@ function fig = strain_waveform(data, time, varargin)
     results = p.Results;
     end
     %
-
-end

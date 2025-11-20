@@ -52,8 +52,10 @@ function fig = time_space_plot(data, time, distance, varargin)
     end
     %
 
-    
-    % function for input validation
+end
+
+
+% function for input validation
     function results = parse_inputs(data, time, distance, varargin)
     p = inputParser;
 
@@ -82,6 +84,3 @@ function fig = time_space_plot(data, time, distance, varargin)
     results = p.Results;
     end
     %
-end
-
-

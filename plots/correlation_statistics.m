@@ -132,7 +132,10 @@ function fig = correlation_statistics(data, sampling_frequency, distance_m, chan
 
     fclose(fileID);
 
-    % validates and parses input arguments
+end
+
+
+% validates and parses input arguments
     function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance, ...
     channel_reference_distance_km, offset_xcorr, max_lag, time_start, time_end, file_name)
     p = inputParser;
@@ -165,5 +168,3 @@ function fig = correlation_statistics(data, sampling_frequency, distance_m, chan
     results = p.Results;
     end
     %
-
-end
