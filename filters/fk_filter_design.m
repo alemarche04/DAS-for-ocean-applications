@@ -1,40 +1,62 @@
-% adapted from: https://github.com/DAS4Whales/DAS4Whales/blob/main/src/das4whales/dsp.py#L290
-
-% design of fk filter
-% (default propagation speed: [1450-3400] m/s)
-
-% --- INPUT ---
-% trace_shape : [n_channels, n_samples] matrix dimensions
-% selected_channels : [start, end, step] list of selected channels
-% dx : channel distance [m]
-% dt : sampling interval [s]
-
-% --- OPTIONAL PARAMETERS ---
-% cs_min : minimum speed for fk bandpass filtering
-% cp_min : minimum speed for fk stopband filtering
-% cp_max : maximum speed for fk bandpass filtering
-% cs_max : maximum speed for fk stopband filtering
-% display_filter: if true, plots the filter
-
-% --- OUTPUT ---
-% fk_filter_matrix : [space x time] matrix containing the fk filter
-
 function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
+% FK_FILTER_DESIGN Design frequency-wavenumber (f-k) filter for DAS data
+%
+%   fk_filter_out = FK_FILTER_DESIGN(trace_shape, dx, dt) designs an f-k
+%   filter with default propagation speed range [1450-3400] m/s.
+%
+%   fk_filter_out = FK_FILTER_DESIGN(..., 'Name', Value) specifies optional
+%   parameters using name-value pairs.
+%
+%   Inputs:
+%       trace_shape - [1x2] vector [n_channels, n_samples] specifying matrix dimensions
+%       dx          - Channel spacing (m)
+%       dt          - Sampling interval (s)
+%
+%   Optional Parameters:
+%       'c_range'         - [1x4] vector specifying filter speed range (m/s):
+%                           [cs_min, cp_min, cp_max, cs_max] where:
+%                           cs_min: minimum speed for stopband filtering
+%                           cp_min: minimum speed for bandpass filtering
+%                           cp_max: maximum speed for bandpass filtering
+%                           cs_max: maximum speed for stopband filtering
+%                           Default: [1450, 1450, 3400, 3400]
+%       'display_filter'  - Logical flag to plot the filter. Default: false
+%
+%   Output:
+%       fk_filter_out - [space x time] matrix containing the f-k filter
+%
+%   Example:
+%       % Design f-k filter with custom speed range
+%       filter = fk_filter_design([1000, 5000], 10, 0.001, ...
+%                                 'c_range', [1500, 2000, 3000, 3500], ...
+%                                 'display_filter', true);
+%
+%   Reference:
+%       Adapted from: https://github.com/DAS4Whales/DAS4Whales
+%
+%   See also FFT2, IFFT2
 
     % validate input and set up optional parameters
     params = parse_inputs(trace_shape, dx, dt, varargin{:});
 
-    cs_min = params.cs_min;
-    cp_min = params.cp_min;
-    cp_max = params.cp_max;
-    cs_max = params.cs_max;
+    c_range = params.c_range;
     display_filter = params.display_filter;
     %
+
+    if isempty(c_range)
+        c_range = [1400 1450 3400 3500];
+    end
     
+    cs_min = c_range(1);
+    cp_min = c_range(2);
+    cp_max = c_range(3);
+    cs_max = c_range(4);
+
     nnx = trace_shape(1);
     nns = trace_shape(2);
 
     % Frequency axis
+    fprintf('\nCalculating frequency axis\n');
     if mod(nns, 2) == 0
         freq = double([0:nns/2-1 -nns/2:-1]) / double(nns*dt); % n even
     else
@@ -43,6 +65,7 @@ function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
     freq = fftshift(freq);
 
     % Wavenumber axis
+    fprintf('\nCalculating wavenumber axis\n');
     if mod(nnx, 2) == 0
         knum = double([0:nnx/2-1 -nnx/2:-1]) / double(nnx*dx);   % n even
     else
@@ -51,7 +74,8 @@ function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
     knum = fftshift(knum);
 
     % creates matrix filter
-    fprintf('Creating fk filter matrix\n');
+    fprintf('\nCreating fk filter matrix\n');
+    tic
     fk_filter_matrix = zeros(length(knum), length(freq));
 
     % iteration on wavenumbers
@@ -91,7 +115,7 @@ function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
 
     fk_filter_trim = fk_filter_matrix(1:nnx, 1:nns);
     fk_filter_out = fk_filter_trim;
-    fprintf('Created fk filter matrix\n');
+    toc
 
     % optional plot
     if display_filter
@@ -116,11 +140,8 @@ end
     addRequired(p, 'dx', valid);
     addRequired(p, 'dy', valid);
 
-    valid = @(x) isempty(x) || (isnumeric(x) && isscalar(x) && x >= 0);
-    addParameter(p, 'cs_min', 1400, valid);
-    addParameter(p, 'cp_min', 1450, valid);
-    addParameter(p, 'cp_max', 3400, valid);
-    addParameter(p, 'cs_max', 3500, valid);
+    valid = @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x >= 0));
+    addParameter(p, 'c_range', [1400 1450 3400 3500], valid)
 
     valid = @(x) isempty(x) || (islogical(x));
     addParameter(p, 'display_filter', false, valid);

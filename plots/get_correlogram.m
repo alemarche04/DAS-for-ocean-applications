@@ -1,26 +1,39 @@
-% Correlogram
-
-% --- INPUT ---
-% data : data matrix [channel x time sample]
-% sampling_frequency : sampling frequency
-% distance_m : : distance axis [m]
-% channel_reference_position_km : reference channel distance [km]
-% offset_xcorr : maximum offset [m]
-% max_lag : maximum time lag [s]
-% time_start : start time of plot time interval [s]
-% time_end : end time of plot time interval[s]
-
-function fig = correlogram(data, sampling_frequency, distance_m, channel_reference_position_km, ...
-    offset_xcorr, max_lag, time_start, time_end)
+function fig = get_correlogram(data, sampling_frequency, distance_m, ...
+	channel_reference_position_km, offset_m, max_lag, time_interval)
+% GET_CORRELOGRAM Generate correlogram visualization of strain data
+%
+%   fig = GET_CORRELOGRAM(data, sampling_frequency, distance_m, 
+%   channel_reference_position_km, offset_m, max_lag, time_interval) 
+%   computes and visualizes the correlogram (cross-correlation as a function 
+%   of spatial offset and time lag) for DAS strain data.
+%
+%   Inputs:
+%       data                         - [channels x time] data matrix
+%       sampling_frequency           - Sampling frequency (Hz)
+%       distance_m                   - Distance axis vector (m)
+%       channel_reference_position_km - Reference channel position (km)
+%       offset_m                     - Maximum spatial offset for correlation (m)
+%       max_lag                      - Maximum time lag for correlation (s)
+%       time_interval                - [1x2] vector [start, end] time interval (s)
+%
+%   Output:
+%       fig - Figure handle containing correlogram plot
+%
+%   Example:
+%       % Generate correlogram for ±500m offset and ±0.2s lag
+%       fig = get_correlogram(strain_data, 1000, distance, 5.0, ...
+%                            500, 0.2, [10 20]);
+%
+%   See also GET_CORRELATION_STATISTICS, XCORR
 
     % validate input
     parse_inputs(data, sampling_frequency, distance_m, channel_reference_position_km, ...
-        offset_xcorr, max_lag, time_start, time_end);
+        offset_m, max_lag, time_interval);
     %
 
     % signal in time interval
-    t_start_idx = round(time_start * sampling_frequency);
-    t_end_idx = round(time_end * sampling_frequency);
+    t_start_idx = round(time_interval(1) * sampling_frequency);
+    t_end_idx = round(time_interval(2) * sampling_frequency);
     data_corr = data(:, t_start_idx:t_end_idx);
     %
 
@@ -37,7 +50,7 @@ function fig = correlogram(data, sampling_frequency, distance_m, channel_referen
     
     % get indexes of channels in maximum offset range
     distance_from_reference_channel = abs(distance_m - actual_channel_distance);
-    nearby_idx = find(distance_from_reference_channel <= offset_xcorr); % indexes of channels within max offset
+    nearby_idx = find(distance_from_reference_channel <= offset_m); % indexes of channels within max offset
     %
 
     % create cross-correlation matrix
@@ -65,13 +78,20 @@ function fig = correlogram(data, sampling_frequency, distance_m, channel_referen
     axis xy;
     colormap(redblue);
     xlim([-max_lag, max_lag]);
-    ylim([-offset_xcorr offset_xcorr]);
+    ylim([-offset_m offset_m]);
     c = colorbar;
     ylabel(c, 'Correlation'); 
     ylabel('Distance from reference (m)');
     xlabel('Time lag (s)');
     title(sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', ...
-        actual_channel_distance .* 1e-3, offset_xcorr), 'FontSize', 14, 'FontWeight', 'bold');
+        actual_channel_distance .* 1e-3, offset_m), 'FontSize', 14, 'FontWeight', 'bold');
+
+    try
+        time_and_date = evalin('caller', 'data.time_and_date');
+        subtitle({sprintf('Signals duration: from %.2f s to %.2f s', time_interval), time_and_date}, 'FontSize', 12);
+    catch
+        warning('Unable to create subtitle: time and date not found');
+    end
     %
 
 end
@@ -79,7 +99,7 @@ end
 
 % function for input validation
     function results = parse_inputs(data, sampling_frequency, distance_m, channel_reference_position_km, ...
-            offset_xcorr, max_lag, time_start, time_end)
+            offset_m, max_lag, time_interval)
     p = inputParser;
 
     valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
@@ -93,15 +113,14 @@ end
 
     valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'scalar'});
     addRequired(p, 'channel_reference_position_km', valid);
-    addRequired(p, 'offset_xcorr', valid);
+    addRequired(p, 'offset_m', valid);
     addRequired(p, 'max_lag', valid);
 
-    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'scalar'});
-    addRequired(p, 'time_start', valid);
-    addRequired(p, 'time_end', valid);
+    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
+    addRequired(p, 'time_interval', valid);
 
     parse(p, data, sampling_frequency, distance_m, channel_reference_position_km, ...
-        offset_xcorr, max_lag, time_start, time_end);
+        offset_m, max_lag, time_interval);
 
     results = p.Results;
     end

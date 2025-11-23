@@ -1,32 +1,45 @@
-% Spatio-Spectral (fx) plot of a time window
-
-% --- INPUT ---
-% data : data matrix [channel x time sample]
-% distance : distance axis [km]
-% sampling_frequency : sampling frequency [Hz]
-% time_window : duration of each fx plot [s]
-% nfft : number of FFT samples
-% time_start : start time of plot time interval [s]
-% time_end : end time of plot time interval[s]
-
-% --- OPTIONAL PARAMETERS ---
-% frequency_min : minimum plot frequency [Hz]
-% frequency_max : maximum plot frequency [Hz]
-% strain_min : minimum plot strain (dB)
-% strain_max : minimum plot strain (dB)
-% get_animation : if true, produces an animation of the fx plot (default: false)
-
-function fig = space_frequency_plot(data, distance, sampling_frequency, nfft, ...
-    time_window, time_start, time_end, varargin)
+function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
+	nfft, time_window, time_interval, varargin)
+% GET_SPACE_FREQUENCY_PLOT Generate spatio-spectral (f-x) visualization
+%
+%   fig = GET_SPACE_FREQUENCY_PLOT(data, distance, sampling_frequency, nfft, 
+%   time_window, time_interval) creates a space-frequency domain plot showing 
+%   spectral content across spatial channels for a specified time window.
+%
+%   fig = GET_SPACE_FREQUENCY_PLOT(..., 'Name', Value) specifies optional
+%   parameters using name-value pairs.
+%
+%   Inputs:
+%       data               - [channels x time] data matrix
+%       distance           - Distance axis vector (km)
+%       sampling_frequency - Sampling frequency (Hz)
+%       nfft               - Number of FFT samples for spectral estimation
+%       time_window        - Duration of each f-x plot window (s)
+%       time_interval      - [1x2] vector [start, end] time interval (s)
+%
+%   Optional Parameters:
+%       'frequency_lim'  - [1x2] vector [fmin, fmax] frequency axis limits (Hz)
+%       'strain_lim'     - [1x2] vector [min, max] strain amplitude limits (dB)
+%       'get_animation'  - Logical flag to produce animation of f-x plot. 
+%                          Default: false
+%
+%   Output:
+%       fig - Figure handle containing space-frequency plot
+%
+%   Example:
+%       % Create f-x plot with custom frequency range
+%       fig = get_space_frequency_plot(strain_data, distance, 1000, 2048, ...
+%                                      1.0, [0 30], 'frequency_lim', [0 100], ...
+%                                      'get_animation', true);
+%
+%   See also GET_SPECTROGRAM, PWELCH, FFT
 
     % validate input and set up optional parameters
     params = parse_inputs(data, distance, sampling_frequency, nfft, ...
-    time_window, time_start, time_end, varargin{:});
+    time_window, time_interval, varargin{:});
   
-    frequency_min = params.frequency_min;
-    frequency_max = params.frequency_max;
-    strain_min = params.strain_min;
-    strain_max = params.strain_max;
+    frequency_lim = params.frequency_lim;
+    strain_lim = params.strain_lim;
     get_animation = params.get_animation;
     %
 
@@ -41,8 +54,8 @@ function fig = space_frequency_plot(data, distance, sampling_frequency, nfft, ..
     %
 
     % selects data in the time window
-    time_start_idx = round(time_start * sampling_frequency);
-    time_end_idx = min(size(data, 2), round(time_end * sampling_frequency));
+    time_start_idx = round(time_interval(1) * sampling_frequency);
+    time_end_idx = min(size(data, 2), round(time_interval(2) * sampling_frequency));
     data_window = data(:, time_start_idx:time_end_idx);
     %
 
@@ -86,7 +99,7 @@ function fig = space_frequency_plot(data, distance, sampling_frequency, nfft, ..
         % plot
         imagesc(frequency_axis, distance, fft_segment_dB);
         axis xy;
-        title_subplot = sprintf("%0.2f s - %0.2f s", (time_start + segment_start/sampling_frequency), (time_start + segment_end/sampling_frequency));
+        title_subplot = sprintf("%0.2f s - %0.2f s", (time_interval(1) + segment_start/sampling_frequency), (time_interval(1) + segment_end/sampling_frequency));
         title(title_subplot);
         set(gca, 'YDir', 'normal');
         colormap(parula);
@@ -95,14 +108,21 @@ function fig = space_frequency_plot(data, distance, sampling_frequency, nfft, ..
         %
 
         % plot limits configuration
-        if ~isempty(frequency_min) & ~isempty(frequency_max)
-            xlim([frequency_min frequency_max]);
+        if ~isempty(frequency_lim)
+            xlim(frequency_lim);
         end
     
-        if ~isempty(strain_min) & ~isempty(strain_max)
-            clim([strain_min strain_max]);
+        if ~isempty(strain_lim)
+            clim(strain_lim);
         end
         %
+
+        try
+            time_and_date = evalin('caller', 'data.time_and_date');
+            sgtitle({"Spatio-Spectral Representation", sprintf("From %.2f s to %.2f s", time_interval), time_and_date});
+        catch
+            warning('Unable to create subtitle: time and date not found');
+        end
 
         % generates animation frame
         if(get_animation)
@@ -114,8 +134,8 @@ function fig = space_frequency_plot(data, distance, sampling_frequency, nfft, ..
             set(gca, 'YDir', 'normal');
             colormap(parula);
         
-            clim([strain_min, strain_max]);
-            xlim([frequency_min, frequency_max]);
+            clim(strain_lim);
+            xlim(frequency_lim);
 
             xlabel('Frequency (Hz)');
             ylabel('Distance (km)');
@@ -147,7 +167,7 @@ end
 
 % function for input validation
     function results = parse_inputs(data, distance, sampling_frequency, nfft, ...
-    time_window, time_start, time_end, varargin)
+    time_window, time_interval, varargin)
 
     p = inputParser;
 
@@ -166,24 +186,21 @@ end
     valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
     addRequired(p, 'time_window', valid);
 
-    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'scalar'});
-    addRequired(p, 'time_start', valid);
-    addRequired(p, 'time_end', valid);
+    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
+    addRequired(p, 'time_interval', valid);
     
     
-    valid = @(x) isempty(x) || (isnumeric(x) && isscalar(x) && x >= 0);
-    addParameter(p, 'frequency_min', [], valid);
-    addParameter(p, 'frequency_max', [], valid);
+    valid = @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x >= 0));
+    addParameter(p, 'frequency_lim', [], valid);
 
-    valid = @(x) isempty(x) || (isnumeric(x) && isscalar(x));
-    addParameter(p, 'strain_min', [], valid);
-    addParameter(p, 'strain_max', [], valid);
+    valid = @(x) isempty(x) || (isnumeric(x) && isvector(x));
+    addParameter(p, 'strain_lim', [], valid);
 
     valid = @(x) isempty(x) || (islogical(x));
     addParameter(p, 'get_animation', false, valid);
 
     parse(p, data, distance, sampling_frequency, nfft, ...
-        time_window, time_start, time_end, varargin{:});
+        time_window, time_interval, varargin{:});
 
     results = p.Results;
     end
