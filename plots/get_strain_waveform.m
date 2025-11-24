@@ -28,14 +28,15 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
 %   See also GET_WATERFALL_PLOT, PLOT
 
     % validate input and set up optional parameters
-    params = parse_inputs(data, distance_km, channel_position_km, time, varargin{:});
+    params = parse_inputs(data, distance_km, time, channel_position_km, varargin{:});
 
     time_lim = params.time_lim;
     strain_lim = params.strain_lim;
     %
 
 	% extract the channel data for the specified position
-    channelData = get_channel(data, distance_km, channel_position_km);
+    [~, channel_position_idx] = min(abs(distance_km - channel_position_km));
+	channelData = data(channel_position_idx, :);
     
     % plot figure
     fig = figure;
@@ -65,11 +66,16 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
     end
     %
 
-end
+	% export audio file
+	try
+        filename_audio = evalin('caller', 'waveform.filename_audio');
+		sampling_frequency_Hz = evalin('caller', 'data.sampling_frequency_Hz');
+        audiowrite(filename_audio, (channelData .* 1e9), round(sampling_frequency_Hz*3));
+    catch
+        warning('Unable to generate audio from waveform: filename not found');
+	end
+	
 
-function channel = get_channel(data, distance_km, channel_position_km)
-	[~, channel_position_idx] = min(abs(distance_km - channel_position_km));
-	channel = data(channel_position_idx, :);
 end
 
 
