@@ -24,19 +24,19 @@ function trace_out = fk_filter_filt(trace_in, fk_filter_matrix)
     trace = trace_in;
 
     % fk spectrum (2D fft)
-    fprintf('\nCalculating fk spectrum (2D FFT)\n');
+    fprintf('\nCalculating fk spectrum (2D FFT)...\n');
     tic
     fk_trace = fftshift(fft2(trace));
     toc
 
     % applies filter
-    fprintf('\nApplying fk filter\n');
+    fprintf('\nApplying fk filter...\n');
     tic
     fk_filtered_trace = fk_trace .* fk_filter_matrix;
     toc
 
     % back to tx domain
-    fprintf('\nInverse FFT after fk filtering\n');
+    fprintf('\nInverse FFT after fk filtering...\n');
     tic
     trace_out = real(ifft2(ifftshift(fk_filtered_trace)));
     toc

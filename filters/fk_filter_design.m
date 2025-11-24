@@ -56,25 +56,29 @@ function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
     nns = trace_shape(2);
 
     % Frequency axis
-    fprintf('\nCalculating frequency axis\n');
+    fprintf('\nCalculating frequency axis...\n');
+	tic
     if mod(nns, 2) == 0
         freq = double([0:nns/2-1 -nns/2:-1]) / double(nns*dt); % n even
     else
         freq = double([0:(nns-1)/2 -(nns-1)/2:-1]) / double(nns*dt); % n odd
     end
     freq = fftshift(freq);
+	toc
 
     % Wavenumber axis
-    fprintf('\nCalculating wavenumber axis\n');
+    fprintf('\nCalculating wavenumber axis...\n');
+	tic
     if mod(nnx, 2) == 0
         knum = double([0:nnx/2-1 -nnx/2:-1]) / double(nnx*dx);   % n even
     else
         knum = double([0:(nnx-1)/2 -(nnx-1)/2:-1]) / double(nnx*dx); % n odd
     end
     knum = fftshift(knum);
+	toc
 
     % creates matrix filter
-    fprintf('\nCreating fk filter matrix\n');
+    fprintf('\nCreating fk filter matrix...n');
     tic
     fk_filter_matrix = zeros(length(knum), length(freq));
 

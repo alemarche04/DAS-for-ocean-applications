@@ -24,7 +24,7 @@ function filtered_data = butterworth_bp_filter(data, cutoff_freq, order, samplin
     [B, A] = butter(order, cutoff_bp, 'bandpass');
 
     tic
-    fprintf('\nApplying Butterworth bandpass filter\n');
+    fprintf('\nApplying Butterworth bandpass filter...\n');
     filtered_data = filtfilt(B, A, data')';
     toc
 
