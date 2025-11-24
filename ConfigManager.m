@@ -96,7 +96,7 @@ classdef ConfigManager
             
             % Extract data
             data.time_and_date =			"2020-06-27, 05:24:41";
-            data.strain =					dataset.data;
+            data.strain =					dataset.data .* 1e-9;
             data.time =						dataset.x2_time_s; % s
             data.sampling_interval_s =		dataset.info_sample_interval_s; % s
             data.distance_m =				dataset.x1_distance_from_shore_m; % m
@@ -116,6 +116,9 @@ classdef ConfigManager
             % Bandpass filter parameters
             params.bpFilter.cutoff_freq =				[5 75]; % Hz
             params.bpFilter.order =						5;
+
+			% 2D median filter filter parameters
+            params.medianFilter2D.dimensions =			[3 3];
             
             % FK filter parameters
             params.fkFilter.c_range =					[];
@@ -169,6 +172,7 @@ classdef ConfigManager
 
 			% Event detection parameters
 			params.eventDetection.filename_csv =		fullfile('Bou22_article_plots/', 'events_bou22_article_whale.csv');
+			params.eventDetection.filename_plot =		fullfile('Bou22_article_plots/', 'events_detected_bou22_article_whale.png');
         end
         
         %% DAS4Tracking_ror23
@@ -179,7 +183,7 @@ classdef ConfigManager
             
             % Extract data (similar structure)
             data.time_and_date =			"2022-08-22, 12:27:07";
-            data.strain =					dataset.data .* 1e-9;
+            data.strain =					dataset.data;
             data.time =						dataset.x1_time;
             data.sampling_interval_s =		dataset.info_sapmling_interval_s;            
             data.distance_m =				dataset.x1_absolute_channel;
