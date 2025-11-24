@@ -5,11 +5,11 @@ function trace_out = fk_filter_filt(trace_in, fk_filter_matrix)
 %   filter to the input data in the time-space domain.
 %
 %   Inputs:
-%       trace_in         - [channels x time] data matrix in t-x domain
-%       fk_filter_matrix - [space x time] filter matrix (from FK_FILTER_DESIGN)
+%       trace_in			- [channels x time] data matrix in t-x domain
+%       fk_filter_matrix	- [space x time] filter matrix (from FK_FILTER_DESIGN)
 %
 %   Output:
-%       trace_out - [channels x time] filtered data matrix in f-x domain
+%       trace_out	- [channels x time] filtered data matrix in f-x domain
 %
 %   Example:
 %       % Design and apply f-k filter
@@ -24,20 +24,27 @@ function trace_out = fk_filter_filt(trace_in, fk_filter_matrix)
     trace = trace_in;
 
     % fk spectrum (2D fft)
-    fprintf('\nCalculating fk spectrum (2D FFT)...\n');
-    tic
+    printStep('Calculating fk spectrum (2D FFT)');
     fk_trace = fftshift(fft2(trace));
-    toc
+    printTime()
 
     % applies filter
-    fprintf('\nApplying fk filter...\n');
-    tic
+    printStep('Applying fk filter');
     fk_filtered_trace = fk_trace .* fk_filter_matrix;
-    toc
+    printTime()
 
     % back to tx domain
-    fprintf('\nInverse FFT after fk filtering...\n');
-    tic
+    printStep('Inverse FFT after fk filtering');
     trace_out = real(ifft2(ifftshift(fk_filtered_trace)));
-    toc
+    printTime()
+end
+
+function printStep(msg)
+    numDots = 60 - length(msg);
+    fprintf('%s%s', msg, repmat('.', 1, max(numDots, 3)));
+    tic;
+end
+
+function printTime()
+    fprintf(' Time elapsed: %.3f s\n', toc);
 end

@@ -50,28 +50,25 @@ function [events, fig] = event_detection(data, time, distance, varargin)
     
     % apply 2D median filter to remove outliers and spikes
     % each pixel is replaced by the median of its neighbors
-    fprintf("\nComputing 2D median filter...\n");
-	tic
+    printStep("Computing 2D median filter");
     data_filt = medfilt2(data, filter_size);
-    toc
+    printTime();
     
     % compute local energy by averaging squared values in a moving window
     % this highlights regions with high signal amplitude
-    fprintf("\nComputing local energy...\n");
-	tic
+    printStep("Computing local energy");
     data_single = single(data_filt.^2);
     energy_kernel = ones(energy_window) / prod(energy_window);
     energy = imfilter(data_single, energy_kernel, 'replicate');
-    toc
+    printTime();
     
     % convert energy to z-scores (number of standard deviations from mean)
     % this allows using a universal threshold regardless of data scale
-    fprintf("\nConverting energy to z-scores...\n");
-	tic
+    printStep("\nConverting energy to z-scores...\n");
     energy_mean = mean(energy(:));
     energy_std = std(energy(:));
     energy_norm = (energy - energy_mean) / energy_std;
-    toc
+    printTime();
     
     % create binary mask: 1 where energy exceeds threshold, 0 elsewhere
     % pixels above threshold are potential event locations
@@ -183,4 +180,14 @@ function results = parse_inputs(data, time, distance, varargin)
     % Parse inputs
     parse(p, data, time, distance, varargin{:});
     results = p.Results;
+end
+
+function printStep(msg)
+    numDots = 60 - length(msg);
+    fprintf('%s%s', msg, repmat('.', 1, max(numDots, 3)));
+    tic;
+end
+
+function printTime()
+    fprintf(' Time elapsed: %.3f s\n', toc);
 end

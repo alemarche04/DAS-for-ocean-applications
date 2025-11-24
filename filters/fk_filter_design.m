@@ -56,30 +56,27 @@ function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
     nns = trace_shape(2);
 
     % Frequency axis
-    fprintf('\nCalculating frequency axis...\n');
-	tic
+    printStep('Calculating frequency axis');
     if mod(nns, 2) == 0
         freq = double([0:nns/2-1 -nns/2:-1]) / double(nns*dt); % n even
     else
         freq = double([0:(nns-1)/2 -(nns-1)/2:-1]) / double(nns*dt); % n odd
     end
     freq = fftshift(freq);
-	toc
+	printTime();
 
     % Wavenumber axis
-    fprintf('\nCalculating wavenumber axis...\n');
-	tic
+    printStep('Calculating wavenumber axis');
     if mod(nnx, 2) == 0
         knum = double([0:nnx/2-1 -nnx/2:-1]) / double(nnx*dx);   % n even
     else
         knum = double([0:(nnx-1)/2 -(nnx-1)/2:-1]) / double(nnx*dx); % n odd
     end
     knum = fftshift(knum);
-	toc
+	printTime();
 
     % creates matrix filter
-    fprintf('\nCreating fk filter matrix...n');
-    tic
+    printStep('Creating fk filter matrix');
     fk_filter_matrix = zeros(length(knum), length(freq));
 
     % iteration on wavenumbers
@@ -119,7 +116,7 @@ function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
 
     fk_filter_trim = fk_filter_matrix(1:nnx, 1:nns);
     fk_filter_out = fk_filter_trim;
-    toc
+    printTime();
 
     % optional plot
     if display_filter
@@ -134,7 +131,7 @@ end
 
 
 % function for input validation
-    function results = parse_inputs(trace_shape, dx, dt, varargin)
+function results = parse_inputs(trace_shape, dx, dt, varargin)
     p = inputParser;
 
     valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
@@ -153,5 +150,15 @@ end
     parse(p, trace_shape, dx, dt, varargin{:});
 
     results = p.Results;
-    end
-    %
+
+end
+
+function printStep(msg)
+    numDots = 60 - length(msg);
+    fprintf('%s%s', msg, repmat('.', 1, max(numDots, 3)));
+    tic;
+end
+
+function printTime()
+    fprintf(' Time elapsed: %.3f s\n', toc);
+end
