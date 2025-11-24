@@ -175,7 +175,7 @@ classdef ConfigManager
             
             % Extract data (similar structure)
             data.time_and_date =			"2022-08-22, 12:27:07";
-            data.strain =					dataset.data;
+            data.strain =					dataset.data .* 1e-9;
             data.time =						dataset.x1_time;
             data.sampling_interval_s =		dataset.info_sapmling_interval_s;            
             data.distance_m =				dataset.x1_absolute_channel;
@@ -332,6 +332,7 @@ classdef ConfigManager
             % Reload only parameters (keeps existing data in memory)
             % Usage: cfg = cfg.reload_params()
             
+			clc;
             fprintf('Reloading parameters for dataset: %s\n', obj.dataset_name);
             
             % Re-initialize only parameters based on dataset
