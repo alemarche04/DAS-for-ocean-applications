@@ -121,7 +121,8 @@ function [events, fig] = event_detection(data, time, distance, varargin)
         	writetable(events_table, csv_filename);
     	catch
         	warning('Unable to find name for event detection file: used default file name events.csv');
-			writetable(events_table, 'events.csv');
+			csv_filename = 'events.csv';
+			writetable(correlation_table, csv_filename);
 		end
         fprintf('Events saved to: %s\n', csv_filename);
     end
