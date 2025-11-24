@@ -156,13 +156,13 @@ exportgraphics(space_frequency_plot, fxPlot.filename);
 
 %% corss correlation statistics
 cfg =			cfg.reload_params();	% loads any changes in the configuration file
-crossCorr =		cfg.params.correlation;	% corss-correlation analysis parameters
+correlation =	cfg.params.correlation;	% corss-correlation analysis parameters
 
 % function parameters
-channel_position_km =	crossCorr.channel_position_km;	% position of target channel [km]
-offset_m =				crossCorr.offset_m;				% offset for correlation analysis
-time_lag =				crossCorr.time_lag;				% time lag for correlation analysis
-time_interval =			crossCorr.time_interval;		% time interval for correlation analysis
+channel_position_km =	correlation.channel_position_km;	% position of target channel [km]
+offset_m =				correlation.offset_m;				% offset for correlation analysis
+time_lag =				correlation.time_lag;				% time lag for correlation analysis
+time_interval =			correlation.time_interval;		% time interval for correlation analysis
 
 % plot correlogram
 correlogram = get_correlogram(strain_filtered, ...
@@ -174,7 +174,7 @@ correlogram = get_correlogram(strain_filtered, ...
 	time_interval);
 
 % export plot as png
-exportgraphics(correlogram, crossCorr.filename_corrlogram);
+exportgraphics(correlogram, correlation.filename_corrlogram);
 
 % plot correlation statistics and export data to txt file
 correlation_statistics = get_correlation_statistics(strain_filtered, ...
@@ -187,7 +187,7 @@ correlation_statistics = get_correlation_statistics(strain_filtered, ...
 	time_interval);
 
 % export plot as png
-exportgraphics(correlation_statistics, crossCorr.filename_xcorr);
+exportgraphics(correlation_statistics, correlation.filename_xcorr);
 
 %% event detection
 cfg =				cfg.reload_params();		% loads any changes in the configuration file

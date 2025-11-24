@@ -168,7 +168,7 @@ classdef ConfigManager
             params.correlation.time_interval =			[47 50]; % s
             params.correlation.filename_corrlogram =	fullfile('Bou22_article_plots/', 'correlogram_bou22_article_whale.png');
             params.correlation.filename_xcorr =			fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.png');
-            params.correlation.filename =				fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.txt');
+            params.correlation.filename_table =			fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.csv');
 
 			% Event detection parameters
 			params.eventDetection.filename_csv =		fullfile('Bou22_article_plots/', 'events_bou22_article_whale.csv');
