@@ -8,14 +8,14 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
 %   statistics for DAS strain data and generates visualization plots.
 %
 %   Inputs:
-%       data                         - [channels x time] data matrix
-%       sampling_frequency           - Sampling frequency (Hz)
-%       distance_m                   - Distance axis vector (m)
-%       channel_distance_m           - Spacing between adjacent channels (m)
-%       channel_reference_position_km - Reference channel position (km)
-%       offset_m                     - Maximum spatial offset for correlation (m)
-%       max_lag                      - Maximum time lag for correlation (s)
-%       time_interval                - [1x2] vector [start, end] time interval (s)
+%       data							- [channels x time] data matrix
+%       sampling_frequency				- Sampling frequency (Hz)
+%       distance_m						- Distance axis vector (m)
+%       channel_distance_m				- Spacing between adjacent channels (m)
+%       channel_reference_position_km	- Reference channel position (km)
+%       offset_m						- Maximum spatial offset for correlation (m)
+%       max_lag							- Maximum time lag for correlation (s)
+%       time_interval					- [1x2] vector [start, end] time interval (s)
 %
 %   Output:
 %       fig - Figure handle containing correlation statistics plots
@@ -29,7 +29,7 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
 
     % parse input parameters
     parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-        channel_reference_position_km, offset_m, max_lag, time_interval, file_name);
+        channel_reference_position_km, offset_m, max_lag, time_interval);
     %
 
     % signal in time interval
@@ -120,7 +120,7 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
         ylim([min_correlation max_correlation]);
         %ylabel('Correlation');
         xlabel('Time lag (s)');
-        title(sprintf('Δx= %0.2f m', distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance));
+        title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance));
         %
 
         % writes (cross)correlation result on txt file
@@ -142,7 +142,7 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
         ylim([min_correlation max_correlation]);
         %ylabel('Correlation');
         xlabel('Time lag (s)');
-        title(sprintf('Δx= %0.2f m', distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance));
+        title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance));
         %
 
         % writes (cross)correlation result on txt file
@@ -168,31 +168,30 @@ end
 
 
 % validates and parses input arguments
-    function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval)
-    p = inputParser;
-
-    valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
-    addRequired(p, 'data', valid);
-
-    valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
-    addRequired(p, 'sampling_frequency', valid);
-
-    valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'vector'});
-    addRequired(p, 'distance_m', valid);
-
-    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'scalar'});
-    addRequired(p, 'channel_distance_m', valid);
-    addRequired(p, 'channel_reference_position_km', valid);
-    addRequired(p, 'offset_m', valid);
-    addRequired(p, 'max_lag', valid);
-
-    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
-    addRequired(p, 'time_interval', valid); 
-
-    parse(p, data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval);
-
-    results = p.Results;
-    end
-    %
+function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
+	channel_reference_position_km, offset_m, max_lag, time_interval)
+	p = inputParser;
+	
+	valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
+	addRequired(p, 'data', valid);
+	
+	valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
+	addRequired(p, 'sampling_frequency', valid);
+	
+	valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'vector'});
+	addRequired(p, 'distance_m', valid);
+	
+	valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'scalar'});
+	addRequired(p, 'channel_distance_m', valid);
+	addRequired(p, 'channel_reference_position_km', valid);
+	addRequired(p, 'offset_m', valid);
+	addRequired(p, 'max_lag', valid);
+	
+	valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
+	addRequired(p, 'time_interval', valid); 
+	
+	parse(p, data, sampling_frequency, distance_m, channel_distance_m, ...
+	channel_reference_position_km, offset_m, max_lag, time_interval);
+	
+	results = p.Results;
+end
