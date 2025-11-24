@@ -91,9 +91,6 @@ strain_waveform = get_strain_waveform(strain_fk_filtered, ...
 % export plot as png
 exportgraphics(strain_waveform, waveform.filename_plot);
 
-% export audio file
-audiowrite(waveform.filename_audio, strain_fk_filtered(channel_position_idx, :), round(data.sampling_frequency_Hz*3));
-
 %% spectrogram of a single channel
 cfg =			cfg.reload_params();		% loads any changes in the configuration file
 spectrogram =	cfg.params.spectrogram;		% spectrogram parameters
@@ -145,7 +142,7 @@ exportgraphics(space_frequency_plot, fxPlot.filename);
 
 %% corss correlation statistics
 cfg =			cfg.reload_params();	% loads any changes in the configuration file
-crossCorr =		cfg.params.crossCorr;	% corss-correlation analysis parameters
+crossCorr =		cfg.params.correlation;	% corss-correlation analysis parameters
 
 % function parameters
 channel_position_km =	crossCorr.channel_position_km;	% position of target channel [km]
@@ -177,4 +174,10 @@ correlation_statistics = get_correlation_statistics(strain_fk_filtered, ...
 	crossCorr.filename);
 
 % export plot as png
-exportgraphics(correlation_statistics, filename_export);
+exportgraphics(correlation_statistics, crossCorr.filename_xcorr);
+
+%% event detection
+
+[events_detected, events_plot] = event_detection(strain_fk_filtered, ...
+	data.time, ...
+	data.distance_km);
