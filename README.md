@@ -100,6 +100,8 @@ The DAS crosses Isfjorden out to the open sea, bypassing the South of Prins Karl
 
 For questions about the datasets, please contact the authors through the respective data repositories.
 
+
+
 # DAS Analysis Toolbox
 
 MATLAB toolbox for analyzing DAS (Distributed Acoustic Sensing) data, with functions for filtering, visualization, and event detection.
@@ -168,6 +170,32 @@ filtered_data = butterworth_bp_filter(data, cutoff_freq, order, sampling_freq)
 ```matlab
 fs = 250;
 filtered = butterworth_bp_filter(eeg_data, [8 12], 4, fs);
+```
+
+---
+
+#### `median_filter_2D`
+Applies a 2D median filter to reduce noise in multi-channel data.
+
+**Syntax:**
+```matlab
+trace_out = median_filter_2D(data, filter_dimensions)
+```
+
+**Parameters:**
+- `data` - Data matrix [channels × time]
+- `filter_dimensions` - [1×2] vector [channel_size, time_size] specifying the median filter kernel dimensions
+
+**Output:**
+- `trace_out` - Filtered data matrix [channels × time]
+
+**Example:**
+```matlab
+% Apply 3x3 median filter to reduce spike noise
+filtered = median_filter_2D(strain_data, [3 3]);
+
+% Apply asymmetric filter (5 channels, 3 time samples)
+filtered = median_filter_2D(strain_data, [5 3]);
 ```
 
 ---
@@ -578,3 +606,9 @@ fig = get_space_frequency_plot(cfg.data.strain, cfg.data.distance, ...
 - MATLAB R2019b or later
 - Signal Processing Toolbox
 - Image Processing Toolbox (for `event_detection`)
+
+---
+
+## Authors and License
+
+ELEDIA Research Center - All Rights Reserved
