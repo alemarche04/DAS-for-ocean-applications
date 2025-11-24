@@ -23,7 +23,6 @@ function [events, fig] = event_detection(data, time, distance, varargin)
 %                          Default: [7 7]
 %       'save_csv'       - Logical flag to save events to CSV file. 
 %                          Default: false
-%       'csv_filename'   - CSV output filename. Default: 'events.csv'
 %
 %   Outputs:
 %       events - [N x 3] matrix where each row contains:
@@ -48,19 +47,18 @@ function [events, fig] = event_detection(data, time, distance, varargin)
     filter_size = params.filter_size;
     energy_window = params.energy_window;
     save_csv = params.save_csv;
-    csv_filename = params.csv_filename;
     
     % apply 2D median filter to remove outliers and spikes
     % each pixel is replaced by the median of its neighbors
-    tic
-    fprintf("Computing 2D median filter\n");
+    fprintf("\nComputing 2D median filter...\n");
+	tic
     data_filt = medfilt2(data, filter_size);
     toc
     
     % compute local energy by averaging squared values in a moving window
     % this highlights regions with high signal amplitude
-    tic
-    fprintf("Computing local energy\n");
+    fprintf("\nComputing local energy...\n");
+	tic
     data_single = single(data_filt.^2);
     energy_kernel = ones(energy_window) / prod(energy_window);
     energy = imfilter(data_single, energy_kernel, 'replicate');
@@ -68,8 +66,8 @@ function [events, fig] = event_detection(data, time, distance, varargin)
     
     % convert energy to z-scores (number of standard deviations from mean)
     % this allows using a universal threshold regardless of data scale
-    tic
-    fprintf("Converting energy to z-scores\n");
+    fprintf("\nConverting energy to z-scores...\n");
+	tic
     energy_mean = mean(energy(:));
     energy_std = std(energy(:));
     energy_norm = (energy - energy_mean) / energy_std;
@@ -120,7 +118,14 @@ function [events, fig] = event_detection(data, time, distance, varargin)
     if save_csv
         events_table = array2table(events, ...
             'VariableNames', {'Time_s', 'Distance_km', 'Area_pixels'});
-        writetable(events_table, csv_filename);
+
+		try
+        	csv_filename = evalin('caller', 'eventDetection.filename_csv');
+        	writetable(events_table, csv_filename);
+    	catch
+        	warning('Unable to find name for event detection file: used default file name events.csv');
+			writetable(events_table, 'events.csv');
+		end
         fprintf('Events saved to: %s\n', csv_filename);
     end
     
@@ -174,9 +179,6 @@ function results = parse_inputs(data, time, distance, varargin)
     
     valid = @(x) islogical(x) || (isnumeric(x) && (x == 0 || x == 1));
     addParameter(p, 'save_csv', false, valid);
-    
-    valid = @(x) ischar(x) || isstring(x);
-    addParameter(p, 'csv_filename', 'events.csv', valid);
     
     % Parse inputs
     parse(p, data, time, distance, varargin{:});

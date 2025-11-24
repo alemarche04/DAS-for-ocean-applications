@@ -72,7 +72,13 @@ function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
     
     % open file for animation
     if ~isempty(get_animation) & get_animation
-        fx_animation = VideoWriter('space_frequency_animation.avi', 'Motion JPEG AVI');
+		try
+            filename_animation = evalin('caller', 'fxPlot.filename_animation');
+            fx_animation = VideoWriter(filename_animation, 'Motion JPEG AVI');
+        catch
+            warning('Unable to find name animation: used default file name space_frequency_animation.avi');
+			fx_animation = VideoWriter('space_frequency_animation.avi', 'Motion JPEG AVI');
+		end
         fx_animation.Quality = 95;
         fx_animation.FrameRate = 3;
         open(fx_animation);

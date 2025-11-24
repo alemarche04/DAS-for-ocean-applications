@@ -155,6 +155,7 @@ classdef ConfigManager
             params.fxPlot.time_window =					1.5;
             params.fxPlot.frequency_lim =				[5 75]; % Hz
             params.fxPlot.strain_lim =					[-20 -5];
+			params.fxPlot.filename_animation =			fullfile('Bou22_article_plots/', 'spatio_spectral_animation_plot_bou22_article_whale.avi');
             params.fxPlot.filename =					fullfile('Bou22_article_plots/', 'spatio_spectral_plot_bou22_article_whale.png');
             
             % Correlation parameters
@@ -165,6 +166,9 @@ classdef ConfigManager
             params.correlation.filename_corrlogram =	fullfile('Bou22_article_plots/', 'correlogram_bou22_article_whale.png');
             params.correlation.filename_xcorr =			fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.png');
             params.correlation.filename =				fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.txt');
+
+			% Event detection parameters
+			params.eventDetection.filename_csv =		fullfile('Bou22_article_plots/', 'events_bou22_article_whale.csv');
         end
         
         %% DAS4Tracking_ror23
@@ -235,6 +239,7 @@ classdef ConfigManager
             params.fxPlot.time_window =					1.5;
             params.fxPlot.frequency_lim =				[5 35]; % Hz
             params.fxPlot.strain_lim =					[-35 -5];
+			params.fxPlot.filename_animation =			fullfile('Ror23_article_plots/', 'spatio_spectral_animation_plot_ror23_article_whale.avi');
             params.fxPlot.filename =					fullfile('Ror23_article_plots/', 'spatio_spectral_plot_ror23_article_whale.png');
             
             % Correlation parameters
@@ -245,6 +250,9 @@ classdef ConfigManager
             params.correlation.filename_corrlogram =	fullfile('Ror23_article_plots/', 'correlogram_ror23_article_whale.png');
             params.correlation.filename_xcorr =			fullfile('Ror23_article_plots/', 'correlation_statistics_ror23_article_whale.png');
             params.correlation.filename =				fullfile('Ror23_article_plots/', 'correlation_statistics_ror23_article_whale.txt');
+
+			% Event detection parameters
+			params.eventDetection.filename_csv =		fullfile('Ror23_article_plots/', 'events_ror23_article_whale.csv');
         end
         
         %% initialization

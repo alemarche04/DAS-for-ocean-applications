@@ -368,7 +368,7 @@ Computes and visualizes correlation statistics of strain data.
 **Syntax:**
 ```matlab
 fig = get_correlation_statistics(data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval, file_name)
+    channel_reference_position_km, offset_m, max_lag, time_interval)
 ```
 
 **Parameters:**
@@ -380,7 +380,6 @@ fig = get_correlation_statistics(data, sampling_frequency, distance_m, channel_d
 - `offset_m` - Maximum spatial offset (m)
 - `max_lag` - Maximum time lag (s)
 - `time_interval` - Time interval [start, end] (s)
-- `file_name` - Output filename
 
 **Output:**
 - `fig` - Figure handle with correlation statistics
@@ -388,7 +387,7 @@ fig = get_correlation_statistics(data, sampling_frequency, distance_m, channel_d
 **Example:**
 ```matlab
 fig = get_correlation_statistics(strain_data, 1000, distance, 10, ...
-                                5.0, 1000, 0.5, [0 10], 'corr_stats');
+                                5.0, 1000, 0.5, [0 10]);
 ```
 
 ---
@@ -444,7 +443,6 @@ Detects events in DAS data using normalized energy analysis.
 - `'filter_size'` - Median filter size [time, space] (default: [5 5])
 - `'energy_window'` - Energy computation window [time, space] (default: [7 7])
 - `'save_csv'` - Flag to save events to CSV (default: false)
-- `'csv_filename'` - CSV output filename (default: 'events.csv')
 
 **Outputs:**
 - `events` - [N × 3] matrix where each row contains:
@@ -457,7 +455,7 @@ Detects events in DAS data using normalized energy analysis.
 ```matlab
 [events, fig] = event_detection(strain_data, time, distance, ...
                                'threshold', 7, 'min_area', 100, ...
-                               'save_csv', true, 'csv_filename', 'my_events.csv');
+                               'save_csv', true);
 ```
 
 ---

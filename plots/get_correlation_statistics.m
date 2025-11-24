@@ -1,5 +1,5 @@
 function fig = get_correlation_statistics(data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval, file_name)
+    channel_reference_position_km, offset_m, max_lag, time_interval)
 % GET_CORRELATION_STATISTICS Compute and visualize correlation statistics of strain data
 %
 %   fig = GET_CORRELATION_STATISTICS(data, sampling_frequency, distance_m, 
@@ -16,7 +16,6 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
 %       offset_m                     - Maximum spatial offset for correlation (m)
 %       max_lag                      - Maximum time lag for correlation (s)
 %       time_interval                - [1x2] vector [start, end] time interval (s)
-%       file_name                    - Output filename for saving figure
 %
 %   Output:
 %       fig - Figure handle containing correlation statistics plots
@@ -85,7 +84,13 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
     %
 
     % opens text file with correlation results
-    fileID = fopen(file_name,'w');
+	try
+        filename_statistics = evalin('caller', 'crossCorr.filename');
+        fileID = fopen(filename_statistics,'w');
+    catch
+        warning('Unable to find name for correlation statistics file: used default file name correlation_statistics.txt');
+		fileID = fopen('correlation_statistics.txt','w');
+	end
     %
     
     % writes (auto)correlation result on txt file
@@ -164,7 +169,7 @@ end
 
 % validates and parses input arguments
     function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval, file_name)
+    channel_reference_position_km, offset_m, max_lag, time_interval)
     p = inputParser;
 
     valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
@@ -183,13 +188,10 @@ end
     addRequired(p, 'max_lag', valid);
 
     valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
-    addRequired(p, 'time_interval', valid);
-
-    valid = @(x) ~isempty(x) & isstring(x) || ischar(x) || iscell(c);
-    addRequired(p, 'file_name', valid);    
+    addRequired(p, 'time_interval', valid); 
 
     parse(p, data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval, file_name);
+    channel_reference_position_km, offset_m, max_lag, time_interval);
 
     results = p.Results;
     end
