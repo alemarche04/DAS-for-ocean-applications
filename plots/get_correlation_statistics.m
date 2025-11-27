@@ -1,4 +1,4 @@
-function fig = get_correlation_statistics(data, sampling_frequency, distance_m, channel_distance_m, ...
+function [correlation_statistics, fig] = get_correlation_statistics(data, sampling_frequency, distance_m, channel_distance_m, ...
     channel_reference_position_km, offset_m, max_lag, time_interval)
 % GET_CORRELATION_STATISTICS Compute and visualize correlation statistics of strain data
 %
@@ -18,7 +18,8 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
 %       time_interval					- [1x2] vector [start, end] time interval (s)
 %
 %   Output:
-%       fig - Figure handle containing correlation statistics plots
+%       fig								- Figure handle containing correlation statistics plots
+%		correlation_statistics			- Matrix containing results of cross correlation
 %
 %   Example:
 %       % Compute correlation statistics for 1 km offset and 0.5s lag
@@ -65,22 +66,55 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
     max_correlation = max(auto_correlation);
     max_correlation = max_correlation + max_correlation/2;
     
-    % plot auto-correlation
+	% correlation statistics matrix
+    correlation_statistics = zeros(nb_subplots, 3); % [offset, max_value, time]
+	csv_position = 1;
+
+	for i = (ceil(nb_subplots/2) -1):-1:1
+    
+        % check on array limits
+        idx_plus = channel_reference_idx + i * offset_step;
+        idx_minus = channel_reference_idx - i * offset_step;
+        
+        if idx_plus > size(data_corr, 1) || idx_minus < 1
+            break;
+        end
+        
+        % (cross)correlation with negative offset
+        [x_corr2, lags_xcorr_2] = xcorr(channel_reference, data_corr((channel_reference_idx - i * offset_step), :), max_lag_samples);
+        time_lags_xcorr_2 = lags_xcorr_2 / sampling_frequency;
+        
+        % plot result 
+        nexttile
+        plot(time_lags_xcorr_2, x_corr2);
+        ylim([min_correlation max_correlation]);
+        xlabel('Time lag (s)');
+        title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance));
+        
+        % writes (cross)correlation result on txt file
+        [~, max_xcorr2_idx] = max(x_corr2);
+		correlation_statistics(csv_position, 1) = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance);
+		correlation_statistics(csv_position, 2) = x_corr2(max_xcorr2_idx);
+		correlation_statistics(csv_position, 3) = time_lags_xcorr_2(max_xcorr2_idx);
+		csv_position = csv_position + 1;
+        
+	end
+
+	% plot auto-correlation
     nexttile
     plot(auto_time_lags, auto_correlation);
     ylim([min_correlation max_correlation]);
     xlabel('Time lag (s)');
     title('Auto-correlation');
     
-        
     % writes (auto)correlation result on csv file
-	correlation_stat = zeros(nb_subplots, 3); % [offset, max_value, time]
-	[max_auto_correlation, max_auto_correlation_idx] = max(auto_correlation);	
-	correlation_stat(1, 1) = 0; % offset
-	correlation_stat(1, 2) = max_auto_correlation;
-	correlation_stat(1, 3) = auto_time_lags(max_auto_correlation_idx);
-    
-	for i = 1:(nb_subplots/2)
+	[~, max_auto_correlation_idx] = max(auto_correlation);	
+	correlation_statistics(csv_position, 1) = 0; % offset
+	correlation_statistics(csv_position, 2) = auto_correlation(max_auto_correlation_idx);
+	correlation_statistics(csv_position, 3) = auto_time_lags(max_auto_correlation_idx);
+	csv_position = csv_position + 1;
+
+	for i = 1:(ceil(nb_subplots/2) -1)
     
         % check on array limits
         idx_plus = channel_reference_idx + i * offset_step;
@@ -102,52 +136,34 @@ function fig = get_correlation_statistics(data, sampling_frequency, distance_m, 
         title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance));
         
         % writes (cross)correlation result on csv file
-        [max_xcorr1, max_xcorr1_idx] = max(x_corr1);
-		correlation_stat(2*i, 1) = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance);
-		correlation_stat(2*i, 2) = max_xcorr1;
-		correlation_stat(2*i, 3) = time_lags_xcorr_1(max_xcorr1_idx);
-        
-
-        % (cross)correlation with positive offset
-        [x_corr2, lags_xcorr_2] = xcorr(channel_reference, data_corr((channel_reference_idx - i * offset_step), :), max_lag_samples);
-        time_lags_xcorr_2 = lags_xcorr_2 / sampling_frequency;
-        
-        % plot result 
-        nexttile
-        plot(time_lags_xcorr_2, x_corr2);
-        ylim([min_correlation max_correlation]);
-        xlabel('Time lag (s)');
-        title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance));
-        
-
-        % writes (cross)correlation result on txt file
-        [max_xcorr2, max_xcorr2_idx] = max(x_corr2);
-		correlation_stat(2*i+1, 1) = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance);
-		correlation_stat(2*i+1, 2) = max_xcorr2;
-		correlation_stat(2*i+1, 3) = time_lags_xcorr_2(max_xcorr2_idx);
+        [~, max_xcorr1_idx] = max(x_corr1);
+		correlation_statistics(csv_position, 1) = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance);
+		correlation_statistics(csv_position, 2) = x_corr1(max_xcorr1_idx);
+		correlation_statistics(csv_position, 3) = time_lags_xcorr_1(max_xcorr1_idx);
+		csv_position = csv_position + 1;
         
 	end
 
-	correlation_table = array2table(correlation_stat, ...
-    	'VariableNames', {'Offet', 'Max_Value', 'Time'});
-
+	correlation_table = array2table(correlation_statistics, ...
+    	'VariableNames', {'Offset', 'Max_Value', 'Time'});
+	
 	try
 		csv_filename = evalin('caller', 'correlation.filename_table');
 		writetable(correlation_table, csv_filename);
 	catch
-		warning('Unable to find name for event detection file: used default file name events.csv');
-		csv_filename = 'events.csv';
+		warning('Unable to find name for correlation statistics file: used default file name corr_stats.csv');
+		csv_filename = 'corr_stats.csv';
 		writetable(correlation_table, csv_filename);
 	end
 	fprintf('Events saved to: %s\n', csv_filename);
 
-    try
+	try
         time_and_date = evalin('caller', 'data.time_and_date');
         sgtitle({sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', channel_reference_position_km, offset_m), ...
         sprintf('Signals duration: from %.2f s to %.2f s', time_interval), time_and_date});
     catch
         warning('Unable to create subtitle: time and date not found');
-    end
+	end
 
 end
 
