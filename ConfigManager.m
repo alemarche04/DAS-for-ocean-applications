@@ -13,22 +13,25 @@ classdef ConfigManager
     %   Methods:
     %       ConfigManager(dataset_name) - Constructor
     %           Inputs:
-    %               dataset_name - 'DAS4Whale_bou22' or 'DAS4Tracking_ror23'
-    %
-    %       load_data_bou22() - Load BOU22 whale dataset
-    %           Output: data structure with DAS measurements
-    %
-    %       init_params_bou22() - Initialize BOU22 parameter groups
+    %               dataset_name -	one of the following: 
+	%								'DAS4Whale_Bou22'
+	%								'DAS4Tracking_Ror23'
+	%								'DAS4Tracking_airgun_inner'
+	%								'DAS4Tracking_airgun_outer'
+	%								'OOI_Wilcock_2023'
+	%
+	%       initialize_parameters() - Initialize parameters for 
+	%												data processing
     %           Output: params structure with all analysis parameters
     %
-    %       load_data_ror23() - Load ROR23 tracking dataset (template)
+    %       load_data_DAS4Whale() - Load DAS4Whale dataset
     %           Output: data structure with DAS measurements
     %
-    %       init_params_ror23() - Initialize ROR23 parameters (template)
-    %           Output: params structure with all analysis parameters
-    %
-    %       init_default_params() - Initialize default parameter structures
-    %           Output: params with default values for all groups
+    %       load_data_DAS4Tracking() - Load DAS4Tracking dataset
+    %           Output: data structure with DAS measurements
+	%
+	%		load_data_OOI() - Load OOI dataset
+    %           Output: data structure with DAS measurements
     %
     %       reload() - Reload both data and configuration from source
     %           Usage: cfg = cfg.reload()
@@ -38,28 +41,11 @@ classdef ConfigManager
     %           Usage: cfg = cfg.reload_params()
     %           Output: Updated ConfigManager object
     %
-    %       save_config(filename) - Save current configuration to MAT file
-    %           Input: filename - Path to output MAT file
-    %           Usage: cfg.save_config('my_config.mat')
-    %
-    %       load_config(filename) - Load configuration from MAT file
-    %           Input: filename - Path to input MAT file
-    %           Usage: cfg = cfg.load_config('my_config.mat')
-    %           Output: Updated ConfigManager object
-    %
     %   Example:
-    %       % Load BOU22 dataset and access parameters
-    %       cfg = ConfigManager('DAS4Whale_bou22');
-    %       filtered_data = butterworth_bp_filter(cfg.data.strain, ...
-    %                                             cfg.params.bpFilter.cutoff_freq, ...
-    %                                             cfg.params.bpFilter.order, ...
-    %                                             cfg.data.sampling_frequency);
+    %       % Load BOU22 dataset
+    %       cfg = ConfigManager('DAS4Whale_Bou22');
     %
-    %       % Save and reload configuration
-    %       cfg.save_config('analysis_config.mat');
-    %       cfg = cfg.reload_params();
-    %
-    %   See also STRUCT, SAVE, LOAD
+    %   See also STRUCT, CLASSDEF
     
     properties
         dataset_name  % Dataset identifier string
@@ -70,32 +56,340 @@ classdef ConfigManager
     methods
         function obj = ConfigManager(dataset_name)
             % Initialize configuration for specified dataset
-            % dataset_name: 'DAS4Whale_bou22', 'DAS4Tracking_ror23'
-            
+            % dataset_name: one of the following
+			%				'DAS4Whale_Bou22'
+			%				'DAS4Tracking_Ror23'
+			%				'DAS4Tracking_airgun_inner'
+			%				'DAS4Tracking_airgun_outer'
+            %				'OOI_Wilcock_2023'
+
             obj.dataset_name = dataset_name;
             
             % Load data and parameters based on dataset
-            switch dataset_name
-                case 'DAS4Whale_bou22'
-                    obj.data = obj.load_data_bou22();
-                    obj.params = obj.init_params_bou22();
-                case 'DAS4Tracking_ror23'
-                    obj.data = obj.load_data_ror23();
-                    obj.params = obj.init_params_ror23();
-                % Add more datasets here
+			switch dataset_name
+                case 'DAS4Whale_Bou22'
+					filename = "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat";
+                    obj.data = obj.load_data_DAS4Whale(filename);
+					obj.data.time_and_date = "2020-06-27, 05:24:41";
+                case 'DAS4Tracking_Ror23'
+					filename = "20220822_122707_to_123037_ch9803_to_ch24509_sample_Freq_78_Hz.mat";
+                    obj.data = obj.load_data_DAS4Tracking(filename);
+					obj.data.time_and_date = "2022-08-22, 12:27:07";
+				case 'DAS4Tracking_airgun_inner'
+					filename = "20220906_175107_to_175437_ch2450_to_ch9191_sample_Freq_125_Hz_inner.mat";
+					obj.data = obj.load_data_DAS4Tracking(filename);
+					obj.data.time_and_date = "2022-09-06, 17:51:07";
+				case 'DAS4Tracking_airgun_outer'
+					filename = "20220906_175106_to_175436_ch2450_to_ch9191_sample_Freq_125_Hz_outer.mat";
+					obj.data = obj.load_data_DAS4Tracking(filename);
+					obj.data.time_and_date = "2022-09-06, 17:51:06";
+				case 'OOI_Wilcock_2023'
+					dataset = "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5";
+					obj.data = load_data_OOI(dataset);
+					obj.data.time_and_date = "2021-11-03, 01:57:31";
                 otherwise
                     error('Unknown dataset: %s', dataset_name);
-            end
+			end
+
+			obj.params = obj.initialize_parameters(dataset_name);
+		end
+
+		%% Parameters initialization
+		function params = initialize_parameters(~, dataset_name)
+
+% ──────────────────────────────────────────────────────────────────────
+%					Bandpass filter parameters
+% ──────────────────────────────────────────────────────────────────────
+			% cutoff frequency
+			bp_cutoff_freq.DAS4Whale_Bou22					= [5 75];
+			bp_cutoff_freq.DAS4Tracking_Ror23				= [5 30];
+			bp_cutoff_freq.DAS4Tracking_airgun_inner		= [5 45];
+			bp_cutoff_freq.DAS4Tracking_airgun_outer		= [5 45];
+			params.bpFilter.cutoff_freq = bp_cutoff_freq.(dataset_name);
+			
+			% filter order
+			bp_order.DAS4Whale_Bou22						= 5;
+			bp_order.DAS4Tracking_Ror23						= 5;
+			bp_order.DAS4Tracking_airgun_inner				= 5;
+			bp_order.DAS4Tracking_airgun_outer				= 5;
+			params.bpFilter.order = bp_order.(dataset_name);
+
+% ──────────────────────────────────────────────────────────────────────
+%					2D median filter filter parameters
+% ──────────────────────────────────────────────────────────────────────
+			% dimensions
+			med_filt2D_dim.DAS4Whale_Bou22					= [3 3];
+			med_filt2D_dim.DAS4Tracking_Ror23				= [3 3];
+			med_filt2D_dim.DAS4Tracking_airgun_inner		= [3 3];
+			med_filt2D_dim.DAS4Tracking_airgun_outer		= [3 3];
+			params.medianFilter2D.dimensions = med_filt2D_dim.(dataset_name);
+            
+% ──────────────────────────────────────────────────────────────────────
+%					FK filter parameters
+% ──────────────────────────────────────────────────────────────────────	
+			% velocity range
+			fk_c_range.DAS4Whale_Bou22						= [];
+			fk_c_range.DAS4Tracking_Ror23					= [];
+			fk_c_range.DAS4Tracking_airgun_inner			= [];
+			fk_c_range.DAS4Tracking_airgun_outer			= [];
+			params.fkFilter.c_range = fk_c_range.(dataset_name);
+            
+% ──────────────────────────────────────────────────────────────────────
+%					Time-space plot parameters
+% ──────────────────────────────────────────────────────────────────────
+			% time limits
+			time_lim.DAS4Whale_Bou22						= [];
+			time_lim.DAS4Tracking_Ror23						= [];
+			time_lim.DAS4Tracking_airgun_inner				= [];
+			time_lim.DAS4Tracking_airgun_outer				= [];
+			params.txPlot.time_lim = time_lim.(dataset_name);
+
+			% distance limits
+			distance_lim.DAS4Whale_Bou22					= [];
+			distance_lim.DAS4Tracking_Ror23					= [];
+			distance_lim.DAS4Tracking_airgun_inner			= [];
+			distance_lim.DAS4Tracking_airgun_outer			= [];
+			params.txPlot.distance_lim = distance_lim.(dataset_name);
+
+			% strain limits
+			strain_lim.DAS4Whale_Bou22						= [-30 -5];
+			strain_lim.DAS4Tracking_Ror23					= [];
+			strain_lim.DAS4Tracking_airgun_inner			= [];
+			strain_lim.DAS4Tracking_airgun_outer			= [];
+			params.txPlot.strain_lim = strain_lim.(dataset_name);
+
+			% propagation speed
+			prop_speed_km_s.DAS4Whale_Bou22					= 1.47;
+			prop_speed_km_s.DAS4Tracking_Ror23				= [];
+			prop_speed_km_s.DAS4Tracking_airgun_inner		= [];
+			prop_speed_km_s.DAS4Tracking_airgun_outer		= [];
+			params.txPlot.prop_speed_km_s = prop_speed_km_s.(dataset_name);
+
+			% point touched by speed line
+			speed_line_points.DAS4Whale_Bou22				= [47.75 45.48];
+			speed_line_points.DAS4Tracking_Ror23			= [];
+			speed_line_points.DAS4Tracking_airgun_inner		= [];
+			speed_line_points.DAS4Tracking_airgun_outer		= [];
+			params.txPlot.speed_line_points = speed_line_points.(dataset_name);
+
+			% channel position
+			channel_position_km.DAS4Whale_Bou22				= 42;
+			channel_position_km.DAS4Tracking_Ror23			= [];
+			channel_position_km.DAS4Tracking_airgun_inner	= [];
+			channel_position_km.DAS4Tracking_airgun_outer	= [];
+			params.txPlot.channel_position_km = channel_position_km.(dataset_name);
+
+			% CPA position
+			cpa_km.DAS4Whale_Bou22							= 42.8;
+			cpa_km.DAS4Tracking_Ror23						= [];
+			cpa_km.DAS4Tracking_airgun_inner				= [];
+			cpa_km.DAS4Tracking_airgun_outer				= [];
+			params.txPlot.cpa_km = cpa_km.(dataset_name);
+
+			% name of time-space plot png file
+			params.txPlot.filename = fullfile(dataset_name, ['time_space_plot_' dataset_name  '.png']);
+            
+% ──────────────────────────────────────────────────────────────────────
+%					Waveform parameters
+% ──────────────────────────────────────────────────────────────────────
+			% channel position
+			channel_position_km.DAS4Whale_Bou22				= 42;
+			channel_position_km.DAS4Tracking_Ror23			= [];
+			channel_position_km.DAS4Tracking_airgun_inner	= [];
+			channel_position_km.DAS4Tracking_airgun_outer	= [];
+			params.waveform.channel_position_km = channel_position_km.(dataset_name);
+
+			% CPA position
+			cpa_km.DAS4Whale_Bou22							= 42.8;
+			cpa_km.DAS4Tracking_Ror23						= [];
+			cpa_km.DAS4Tracking_airgun_inner				= [];
+			cpa_km.DAS4Tracking_airgun_outer				= [];
+			params.waveform.cpa_km = cpa_km.(dataset_name);
+
+			% time limits
+			time_lim.DAS4Whale_Bou22						= [];
+			time_lim.DAS4Tracking_Ror23						= [];
+			time_lim.DAS4Tracking_airgun_inner				= [];
+			time_lim.DAS4Tracking_airgun_outer				= [];
+			params.waveform.time_lim = time_lim.(dataset_name);
+
+			% strain limits
+			strain_lim.DAS4Whale_Bou22						= [-1.3e-9 1.3e-9];
+			strain_lim.DAS4Tracking_Ror23					= [];
+			strain_lim.DAS4Tracking_airgun_inner			= [];
+			strain_lim.DAS4Tracking_airgun_outer			= [];
+			params.waveform.strain_lim = strain_lim.(dataset_name);
+
+			% name of waveform plot png file
+			params.waveform.filename_plot =	fullfile(dataset_name, ['strain_waveform_' dataset_name  '.png']);
+
+			% name of waveform audio file
+            params.waveform.filename_audio = fullfile(dataset_name, ['strain_waveform_' dataset_name  '.wav']);
+            
+% ──────────────────────────────────────────────────────────────────────
+%					Spectrogram parameters
+% ──────────────────────────────────────────────────────────────────────
+			% channel position
+			channel_position_km.DAS4Whale_Bou22				= 42;
+			channel_position_km.DAS4Tracking_Ror23			= [];
+			channel_position_km.DAS4Tracking_airgun_inner	= [];
+			channel_position_km.DAS4Tracking_airgun_outer	= [];
+			params.spectrogram.channel_position_km = channel_position_km.(dataset_name);
+
+			% number of fft samples
+			nfft.DAS4Whale_Bou22							= 4096;
+			nfft.DAS4Tracking_Ror23							= 4096;
+			nfft.DAS4Tracking_airgun_inner					= 4096;
+			nfft.DAS4Tracking_airgun_outer					= 4096;
+			params.spectrogram.nfft = nfft.(dataset_name);
+
+			% window length
+			window_len.DAS4Whale_Bou22						= 512;
+			window_len.DAS4Tracking_Ror23					= 512;
+			window_len.DAS4Tracking_airgun_inner			= 512;
+			window_len.DAS4Tracking_airgun_outer			= 512;
+			params.spectrogram.window_len = window_len.(dataset_name);
+
+			% window overlap percentage
+			overlap_pct.DAS4Whale_Bou22						= 0.89;
+			overlap_pct.DAS4Tracking_Ror23					= 0.89;
+			overlap_pct.DAS4Tracking_airgun_inner			= 0.89;
+			overlap_pct.DAS4Tracking_airgun_outer			= 0.89;
+			params.spectrogram.overlap_pct = overlap_pct.(dataset_name);
+
+			% window function
+			window.DAS4Whale_Bou22							= hann(params.spectrogram.window_len, 'periodic');
+			window.DAS4Tracking_Ror23						= hann(params.spectrogram.window_len, 'periodic');
+			window.DAS4Tracking_airgun_inner				= hann(params.spectrogram.window_len, 'periodic');
+			window.DAS4Tracking_airgun_outer				= hann(params.spectrogram.window_len, 'periodic');
+			params.spectrogram.window = window.(dataset_name);
+
+			% time limits
+			time_lim.DAS4Whale_Bou22						= [];
+			time_lim.DAS4Tracking_Ror23						= [];
+			time_lim.DAS4Tracking_airgun_inner				= [];
+			time_lim.DAS4Tracking_airgun_outer				= [];
+			params.spectrogram.time_lim = time_lim.(dataset_name);
+
+			% frequency limits
+			frequency_lim.DAS4Whale_Bou22					= [10 80];
+			frequency_lim.DAS4Tracking_Ror23				= [];
+			frequency_lim.DAS4Tracking_airgun_inner			= [];
+			frequency_lim.DAS4Tracking_airgun_outer			= [];
+			params.spectrogram.frequency_lim = frequency_lim.(dataset_name);
+
+			% strain limits
+			strain_lim.DAS4Whale_Bou22						= [-25 0];
+			strain_lim.DAS4Tracking_Ror23					= [];
+			strain_lim.DAS4Tracking_airgun_inner			= [];
+			strain_lim.DAS4Tracking_airgun_outer			= [];
+			params.spectrogram.strain_lim = strain_lim.(dataset_name);
+
+			% name of spectrognam png file
+            params.spectrogram.filename = fullfile(dataset_name, ['spectrogram_' dataset_name  '.png']);
+            
+
+% ──────────────────────────────────────────────────────────────────────
+%					Space-frequency plot parameters
+% ──────────────────────────────────────────────────────────────────────
+            % number of fft samples
+			nfft.DAS4Whale_Bou22							= 4096;
+			nfft.DAS4Tracking_Ror23							= 4096;
+			nfft.DAS4Tracking_airgun_inner					= 4096;
+			nfft.DAS4Tracking_airgun_outer					= 4096;
+			params.fxPlot.nfft = nfft.(dataset_name);
+
+			% time interval
+			time_interval.DAS4Whale_Bou22					= [44 67];
+			time_interval.DAS4Tracking_Ror23				= [];
+			time_interval.DAS4Tracking_airgun_inner			= [];
+			time_interval.DAS4Tracking_airgun_outer			= [];
+			params.fxPlot.time_interval = time_interval.(dataset_name);
+
+			% time window
+			time_window.DAS4Whale_Bou22						= 1.5;
+			time_window.DAS4Tracking_Ror23					= NaN;
+			time_window.DAS4Tracking_airgun_inner			= NaN;
+			time_window.DAS4Tracking_airgun_outer			= NaN;
+			params.fxPlot.time_window = time_window.(dataset_name);
+
+			% frequency limits
+			frequency_lim.DAS4Whale_Bou22					= [5 75];
+			frequency_lim.DAS4Tracking_Ror23				= [];
+			frequency_lim.DAS4Tracking_airgun_inner			= [];
+			frequency_lim.DAS4Tracking_airgun_outer			= [];
+			params.fxPlot.frequency_lim = frequency_lim.(dataset_name);
+
+			% strain limits
+			strain_lim.DAS4Whale_Bou22						= [-25 -5];
+			strain_lim.DAS4Tracking_Ror23					= [];
+			strain_lim.DAS4Tracking_airgun_inner			= [];
+			strain_lim.DAS4Tracking_airgun_outer			= [];
+			params.fxPlot.strain_lim = strain_lim.(dataset_name);
+
+			% name of space-frequency plot png file
+			params.fxPlot.filename = fullfile(dataset_name, ['fx_plot_' dataset_name  '.png']);
+
+			% name of space-frequency animation file
+			params.fxPlot.filename_animation = fullfile(dataset_name, ['fx_animation_' dataset_name  '.avi']);
+            
+
+% ──────────────────────────────────────────────────────────────────────
+%					Correlation parameters
+% ──────────────────────────────────────────────────────────────────────
+			% channel position
+			channel_position_km.DAS4Whale_Bou22				= 42;
+			channel_position_km.DAS4Tracking_Ror23			= [];
+			channel_position_km.DAS4Tracking_airgun_inner	= [];
+			channel_position_km.DAS4Tracking_airgun_outer	= [];
+			params.correlation.channel_position_km = channel_position_km.(dataset_name);
+
+			% cross correlation spatial offset
+			offset_m.DAS4Whale_Bou22						= 300;
+			offset_m.DAS4Tracking_Ror23						= 300;
+			offset_m.DAS4Tracking_airgun_inner				= 300;
+			offset_m.DAS4Tracking_airgun_outer				= 300;
+			params.correlation.offset_m = offset_m.(dataset_name);
+
+			% cross correlation maximum time lag
+			time_lag.DAS4Whale_Bou22						= 0.2;
+			time_lag.DAS4Tracking_Ror23						= 0.2;
+			time_lag.DAS4Tracking_airgun_inner				= 0.2;
+			time_lag.DAS4Tracking_airgun_outer				= 0.2;
+			params.correlation.time_lag = time_lag.(dataset_name);
+
+			% time interval of cross correlated signals
+			time_interval.DAS4Whale_Bou22					= [47 50];
+			time_interval.DAS4Tracking_Ror23				= [];
+			time_interval.DAS4Tracking_airgun_inner			= [];
+			time_interval.DAS4Tracking_airgun_outer			= [];
+			params.correlation.time_interval = time_interval.(dataset_name);
+
+			% name of correlogram png file
+            params.correlation.filename_correlogram = fullfile(dataset_name, ['correlogram_' dataset_name  '.png']);
+
+			% name of cross-correlation plots png file
+            params.correlation.filename_xcorr = fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.png']);
+
+			% name of cross-correlation statistics csv file
+            params.correlation.filename_table =	fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.csv']);
+
+% ──────────────────────────────────────────────────────────────────────
+%					Event detection parameters
+% ──────────────────────────────────────────────────────────────────────
+			% name of time-space plot of events detected png file
+			params.eventDetection.filename_plot = fullfile(dataset_name, ['events_tx_plot_' dataset_name  '.png']);
+
+			% name of events detected csv file
+			params.eventDetection.filename_csv = fullfile(dataset_name, ['events_' dataset_name  '.csv']);
+			
         end
 
-        %% DAS4Whale_bou22
-        function data = load_data_bou22(~)
-            % Load BOU22 whale dataset
-            filename = "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat";
+        %% load data from DAS4Whale dataset
+		function data = load_data_DAS4Whale(~, filename)
             dataset = load(filename);
             
             % Extract data
-            data.time_and_date =			"2020-06-27, 05:24:41";
             data.strain =					dataset.data .* 1e-9;
             data.time =						dataset.x2_time_s; % s
             data.sampling_interval_s =		dataset.info_sample_interval_s; % s
@@ -107,82 +401,13 @@ classdef ConfigManager
             data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz; % Hz
             data.gauge_length_m =			dataset.info_GL_m; % m
             data.channel_distance_m =		data.distance_m(2) - data.distance_m(1); % m
-        end
+		end
 
-        function params = init_params_bou22(obj)
-            % Initialize all parameter groups
-            params = obj.init_default_params();
-            
-            % Bandpass filter parameters
-            params.bpFilter.cutoff_freq =				[5 75]; % Hz
-            params.bpFilter.order =						5;
-
-			% 2D median filter filter parameters
-            params.medianFilter2D.dimensions =			[3 3];
-            
-            % FK filter parameters
-            params.fkFilter.c_range =					[];
-            
-            % Time-space plot parameters
-            params.txPlot.time_lim =					[];
-            params.txPlot.distance_lim =				[];
-            params.txPlot.strain_lim =					[-30 -5];
-            params.txPlot.prop_speed_km_s =				1.47; % km/s
-            params.txPlot.speed_line_points =			[47.75 45.48];
-            params.txPlot.channel_position_km =			42; % km
-            params.txPlot.cpa_km =						42.8; % km
-            params.txPlot.filename =					fullfile('Bou22_article_plots/', 'time_space_plot_bou22_article_whale.png');
-            
-            % Waveform parameters
-            params.waveform.channel_position_km =		42; % km
-            params.waveform.cpa_km =					42.8; % km
-            params.waveform.time_lim =					[]; % s
-            params.waveform.strain_lim =				[-1.3e-9 1.3e-9];
-            params.waveform.filename_plot =				fullfile('Bou22_article_plots/', 'strain_waveform_bou22_article_whale.png');
-            params.waveform.filename_audio =			fullfile('Bou22_article_plots/', 'strain_audio_bou22_article_whale.wav');
-            
-            % Spectrogram parameters
-            params.spectrogram.channel_position_km =	42; % km
-            params.spectrogram.nfft =					4096;
-            params.spectrogram.window_len =				512;
-            params.spectrogram.overlap_pct =			0.89;
-            params.spectrogram.window =					hann(params.spectrogram.window_len, 'periodic');
-            params.spectrogram.time_lim =				[]; % s
-            params.spectrogram.frequency_lim =			[10 80]; % Hz
-            params.spectrogram.strain_lim =				[-25 0];
-            params.spectrogram.filename =				fullfile('Bou22_article_plots/', 'spectrogram_bou22_article_whale.png');
-            
-            % Space-frequency plot parameters
-            params.fxPlot.nfft =						4096;
-            params.fxPlot.time_interval =				[44 67]; % s
-            params.fxPlot.time_window =					1.5;
-            params.fxPlot.frequency_lim =				[5 75]; % Hz
-            params.fxPlot.strain_lim =					[-20 -5];
-			params.fxPlot.filename_animation =			fullfile('Bou22_article_plots/', 'spatio_spectral_animation_plot_bou22_article_whale.avi');
-            params.fxPlot.filename =					fullfile('Bou22_article_plots/', 'spatio_spectral_plot_bou22_article_whale.png');
-            
-            % Correlation parameters
-            params.correlation.channel_position_km =	42; % km
-            params.correlation.offset_m =				300; % m
-            params.correlation.time_lag =				0.2; % s
-            params.correlation.time_interval =			[47 50]; % s
-            params.correlation.filename_corrlogram =	fullfile('Bou22_article_plots/', 'correlogram_bou22_article_whale.png');
-            params.correlation.filename_xcorr =			fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.png');
-            params.correlation.filename_table =			fullfile('Bou22_article_plots/', 'correlation_statistics_bou22_article_whale.csv');
-
-			% Event detection parameters
-			params.eventDetection.filename_csv =		fullfile('Bou22_article_plots/', 'events_bou22_article_whale.csv');
-			params.eventDetection.filename_plot =		fullfile('Bou22_article_plots/', 'events_detected_bou22_article_whale.png');
-        end
-        
-        %% DAS4Tracking_ror23
-        function data = load_data_ror23(~)
-            % Template for another dataset
-            filename = "20220822_122707_to_123037_ch9803_to_ch24509_sample_Freq_78_Hz.mat";
+        %% load data from DAS4Tracking dataset
+		function data = load_data_DAS4Tracking(filename)
             dataset = load(filename);
             
-            % Extract data (similar structure)
-            data.time_and_date =			"2022-08-22, 12:27:07";
+            % Extract data
             data.strain =					dataset.data;
             data.time =						dataset.x1_time;
             data.sampling_interval_s =		dataset.info_sapmling_interval_s;            
@@ -193,129 +418,23 @@ classdef ConfigManager
             data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz;
             data.gauge_length =				dataset.info_gauge_length;
             data.channel_distance_m =		data.distance_m(2) - data.distance_m(1);
-        end
-
-        function params = init_params_ror23(obj)
-            % Initialize parameters
-            params = obj.init_default_params();
-            
-            % Override with dataset-specific values
-            % Bandpass filter parameters
-            params.bpFilter.cutoff_freq =				[5 30]; % Hz
-            params.bpFilter.order =						5;
-            
-            % FK filter parameters
-            params.fkFilter.speed =						[];
-            
-            % Time-space plot parameters
-            params.txPlot.time_lim =					[85 170];
-            params.txPlot.distance_lim =				[50 100];
-            params.txPlot.strain_lim =					[-50 -18];
-            params.txPlot.prop_speed_km_s =				1.47; % km/s
-            params.txPlot.speed_line_point =			[118.9 65.5];
-            params.txPlot.channel_position_km =			60; % km
-            params.txPlot.cpa_km =						58.9; % km
-            params.txPlot.filename =					fullfile('Ror23_article_plots/', 'time_space_plot_ror23_article_whale.png');
-            
-            % Waveform parameters
-            params.waveform.channel_position_km =		60; % km
-            params.waveform.cpa_km =					58.9; % km
-            params.waveform.time_lim =					[]; % s
-            params.waveform.strain_lim =				[-1.7e-9 1.7e-9];
-            params.waveform.filename_plot =				fullfile('Ror23_article_plots/', 'strain_waveform_ror23_article_whale.png');
-            params.waveform.filename_plot_cpa =			fullfile('Ror23_article_plots/', 'strain_waveform_CPA_ror23_article_whale.png');
-            params.waveform.filename_audio =			fullfile('Ror23_article_plots/', 'strain_audio_ror23_article_whale.wav');
-            
-            % Spectrogram parameters
-            params.spectrogram.channel_position_km =	60; % km
-            params.spectrogram.nfft =					4096;
-            params.spectrogram.window_len =				512;
-            params.spectrogram.overlap_pct =			0.89;
-            params.spectrogram.window =					hann(params.spectrogram.window_len, 'periodic');
-            params.spectrogram.time_lim =				[]; % s
-            params.spectrogram.frequency_lim =			[5 35]; % Hz
-            params.spectrogram.strain_lim =				[-35 -5];
-            params.spectrogram.filename =				fullfile('Ror23_article_plots/', 'spectrogram_ror23_article_whale.png');
-            
-            % Space-frequency plot parameters
-            params.fxPlot.nfft =						4096;
-            params.fxPlot.time_interval =				[100 123]; % s
-            params.fxPlot.time_window =					1.5;
-            params.fxPlot.frequency_lim =				[5 35]; % Hz
-            params.fxPlot.strain_lim =					[-35 -5];
-			params.fxPlot.filename_animation =			fullfile('Ror23_article_plots/', 'spatio_spectral_animation_plot_ror23_article_whale.avi');
-            params.fxPlot.filename =					fullfile('Ror23_article_plots/', 'spatio_spectral_plot_ror23_article_whale.png');
-            
-            % Correlation parameters
-            params.correlation.channel_position_km =	60; % km
-            params.correlation.offset_m =				300; % m
-            params.correlation.time_lag =				0.2; % s
-            params.correlation.time_interval =			[103 106]; % s
-            params.correlation.filename_corrlogram =	fullfile('Ror23_article_plots/', 'correlogram_ror23_article_whale.png');
-            params.correlation.filename_xcorr =			fullfile('Ror23_article_plots/', 'correlation_statistics_ror23_article_whale.png');
-            params.correlation.filename =				fullfile('Ror23_article_plots/', 'correlation_statistics_ror23_article_whale.txt');
-
-			% Event detection parameters
-			params.eventDetection.filename_csv =		fullfile('Ror23_article_plots/', 'events_ror23_article_whale.csv');
-        end
-        
-        %% initialization
-        function params = init_default_params(~)
-            % Initialize all parameter structures with defaults
-            
-            % Bandpass filter
-            params.bpFilter.cutoff_freq = [1 100];
-            params.bpFilter.order = 4;
-            
-            % FK filter
-            params.fkFilter.speed = [];
-            
-            % TX plot
-            params.txPlot.time_lim = [];
-            params.txPlot.distance_lim = [];
-            params.txPlot.strain_lim = [];
-            params.txPlot.prop_speed_km_s = 1.5;
-            params.txPlot.speed_line_point = [];
-            params.txPlot.channel_position_km = [];
-            params.txPlot.cpa_km = [];
-            params.txPlot.filename = '';
-            
-            % Waveform
-            params.waveform.channel_position_km = [];
-            params.waveform.cpa_km = [];
-            params.waveform.time_lim = [];
-            params.waveform.strain_lim = [];
-            params.waveform.filename_plot = '';
-            params.waveform.filename_plot_cpa = '';
-            params.waveform.filename_audio = '';
-            
-            % Spectrogram
-            params.spectrogram.channel_position_km = [];
-            params.spectrogram.nfft = 2048;
-            params.spectrogram.window_len = 256;
-            params.spectrogram.overlap_pct = 0.75;
-            params.spectrogram.window = [];
-            params.spectrogram.time_lim = [];
-            params.spectrogram.frequency_lim = [];
-            params.spectrogram.strain_lim = [];
-            params.spectrogram.filename = '';
-            
-            % FX plot
-            params.fxPlot.nfft = 2048;
-            params.fxPlot.time_interval = [];
-            params.fxPlot.time_window = [];
-            params.fxPlot.frequency_lim = [];
-            params.fxPlot.strain_lim = [];
-            params.fxPlot.filename = '';
-            
-            % Correlation
-            params.correlation.channel_position_km = [];
-            params.correlation.offset_m = [];
-            params.correlation.time_lag = [];
-            params.correlation.time_interval = [];
-            params.correlation.filename_corrlogram = '';
-            params.correlation.filename_xcorr = '';
-            params.correlation.filename = '';
+		end
+		
+		%% load data from OOI dataset
+		function data = load_data_OOI(dataset)
+                        
+            % Extract data
+            data.strain =					double(h5read(dataset,"/Acquisition/Raw[0]/RawData"))';
+            data.time =						double(h5read(dataset,"/Acquisition/Raw[0]/RawDataTime"))';
+			data.time =						(data.time - data.time(1)) .* 1e-6;
+            data.sampling_interval_s =		data.time(2) - data.time(1);            
+            data.channel_distance_m =		double(h5readatt(dataset,'/Acquisition','SpatialSamplingInterval'));
+			data.distance_m =				double(0:1:(nb_of_channels - 1)) .* channel_distance;
+            data.distance_km =				data.distance_m .* 1e-3;            
+            data.nb_of_channels =			h5readatt(dataset,'/Acquisition','NumberOfLoci');
+            data.nb_of_samples =			length(data.time);            
+            data.sampling_frequency_Hz =	h5readatt(dataset,'/Acquisition/Raw[0]','OutputDataRate');
+            data.gauge_length =				h5readatt(dataset,'/Acquisition','GaugeLength');
 		end
 
 		%% utilities
@@ -326,17 +445,32 @@ classdef ConfigManager
             fprintf('Reloading data and configuration for dataset: %s\n', obj.dataset_name);
             
             % Re-initialize based on dataset
-            switch obj.dataset_name
-                case 'DAS4Whale_bou22'
-                    obj.data = obj.load_data_bou22();
-                    obj.params = obj.init_params_bou22();
-                case 'DAS4Tracking_ror23'
-                    obj.data = obj.load_data_ror23();
-                    obj.params = obj.init_params_ror23();
+
+			switch obj.dataset_name
+                case 'DAS4Whale_Bou22'
+					filename = "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat";
+                    obj.data = obj.load_data_DAS4Whale(filename);
+					obj.data.time_and_date = "2020-06-27, 05:24:41";
+                case 'DAS4Tracking_Ror23'
+					filename = "20220822_122707_to_123037_ch9803_to_ch24509_sample_Freq_78_Hz.mat";
+                    obj.data = obj.load_data_DAS4Tracking(filename);
+					obj.data.time_and_date = "2022-08-22, 12:27:07";
+				case 'DAS4Tracking_airgun_inner'
+					filename = "20220906_175107_to_175437_ch2450_to_ch9191_sample_Freq_125_Hz_inner.mat";
+					obj.data = obj.load_data_DAS4Tracking(filename);
+					obj.data.time_and_date = "2022-09-06, 17:51:07";
+				case 'DAS4Tracking_airgun_outer'
+					filename = "20220906_175106_to_175436_ch2450_to_ch9191_sample_Freq_125_Hz_outer.mat";
+					obj.data = obj.load_data_DAS4Tracking(filename);
+					obj.data.time_and_date = "2022-09-06, 17:51:06";
+				case 'OOI_Wilcock_2023'
+					dataset = "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5";
+					obj.data = load_data_OOI(dataset);
+					obj.data.time_and_date = "2021-11-03, 01:57:31";
                 otherwise
                     error('Unknown dataset: %s', obj.dataset_name);
-            end
-            
+			end
+            obj.params = obj.initialize_parameters(obj.dataset_name);
             fprintf('Data and configuration reloaded successfully.\n');
         end
 
@@ -348,45 +482,15 @@ classdef ConfigManager
             fprintf('Reloading parameters for dataset: %s\n', obj.dataset_name);
             
             % Re-initialize only parameters based on dataset
-            switch obj.dataset_name
-                case 'DAS4Whale_bou22'
-                    obj.params = obj.init_params_bou22();
-                case 'DAS4Tracking_ror23'
-                    obj.params = obj.init_params_ror23();
-                otherwise
-                    error('Unknown dataset: %s', obj.dataset_name);
-            end
-            
+			if ~ismember(obj.dataset_name, {'DAS4Whale_Bou22', ...
+											'DAS4Tracking_Ror23', ...
+											'DAS4Tracking_airgun_inner', ...
+											'DAS4Tracking_airgun_outer', ...
+											'OOI_Wilcock_2023'})
+				error('Unknown dataset: %s', obj.dataset_name);
+			end
+            obj.params = obj.initialize_parameters(obj.dataset_name);
             fprintf('Parameters reloaded successfully.\n');
-        end
-
-        function save_config(obj, filename)
-            % Save current configuration to MAT file
-            % Usage: cfg.save_config('my_config.mat')
-            
-            config.dataset_name = obj.dataset_name;
-            config.params = obj.params;
-            config.timestamp = datetime('now');
-            
-            save(filename, 'config');
-            fprintf('Configuration saved to: %s\n', filename);
-        end
-        
-        function obj = load_config(obj, filename)
-            % Load configuration from MAT file
-            % Usage: cfg.load_config('my_config.mat')
-            
-            if ~isfile(filename)
-                error('Configuration file not found: %s', filename);
-            end
-            
-            config = load(filename);
-            obj.params = config.config.params;
-            
-            fprintf('Configuration loaded from: %s\n', filename);
-            if isfield(config.config, 'timestamp')
-                fprintf('Saved on: %s\n', config.config.timestamp);
-            end
-        end
+		end
     end
 end
