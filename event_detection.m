@@ -117,12 +117,13 @@ function [events, fig] = event_detection(data, time, distance, varargin)
             'VariableNames', {'Time_s', 'Distance_km', 'Area_pixels'});
 
 		try
-        	csv_filename = evalin('caller', 'eventDetection.filename_csv');
-        	writetable(events_table, csv_filename);
+        	eventDetection = evalin('caller', 'eventDetection');
+    		csv_filename = eventDetection.filename_csv;
+    		writetable(events_table, csv_filename);
     	catch
         	warning('Unable to find name for event detection file: used default file name events.csv');
 			csv_filename = 'events.csv';
-			writetable(correlation_table, csv_filename);
+			writetable(events_table, csv_filename);
 		end
         fprintf('Events saved to: %s\n', csv_filename);
     end

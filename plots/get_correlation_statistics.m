@@ -148,12 +148,13 @@ function [correlation_statistics, fig] = get_correlation_statistics(data, sampli
     	'VariableNames', {'Offset', 'Max_Value', 'Time'});
 	
 	try
-		csv_filename = evalin('caller', 'correlation.filename_table');
-		writetable(correlation_table, csv_filename);
+    	correlation = evalin('caller', 'correlation');
+    	csv_filename = correlation.filename_table;
+    	writetable(correlation_table, csv_filename);
 	catch
-		warning('Unable to find name for correlation statistics file: used default file name corr_stats.csv');
-		csv_filename = 'corr_stats.csv';
-		writetable(correlation_table, csv_filename);
+    	warning('Unable to find name for correlation statistics file: used default file name corr_stats.csv');
+    	csv_filename = 'corr_stats.csv';
+    	writetable(correlation_table, csv_filename);
 	end
 	fprintf('Events saved to: %s\n', csv_filename);
 
