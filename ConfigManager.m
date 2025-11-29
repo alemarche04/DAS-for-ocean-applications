@@ -153,37 +153,37 @@ classdef ConfigManager
 
 			% strain limits
 			strain_lim.DAS4Whale_Bou22						= [-30 -5];
-			strain_lim.DAS4Tracking_Ror23					= [];
-			strain_lim.DAS4Tracking_airgun_inner			= [];
-			strain_lim.DAS4Tracking_airgun_outer			= [];
+			strain_lim.DAS4Tracking_Ror23					= [-50 -18];
+			strain_lim.DAS4Tracking_airgun_inner			= [-25 -10];
+			strain_lim.DAS4Tracking_airgun_outer			= [-25 -10];
 			params.txPlot.strain_lim = strain_lim.(dataset_name);
 
 			% propagation speed
 			prop_speed_km_s.DAS4Whale_Bou22					= 1.47;
-			prop_speed_km_s.DAS4Tracking_Ror23				= [];
-			prop_speed_km_s.DAS4Tracking_airgun_inner		= [];
-			prop_speed_km_s.DAS4Tracking_airgun_outer		= [];
+			prop_speed_km_s.DAS4Tracking_Ror23				= 1.47;
+			prop_speed_km_s.DAS4Tracking_airgun_inner		= 1.47;
+			prop_speed_km_s.DAS4Tracking_airgun_outer		= 1.47;
 			params.txPlot.prop_speed_km_s = prop_speed_km_s.(dataset_name);
 
 			% point touched by speed line
 			speed_line_points.DAS4Whale_Bou22				= [47.75 45.48];
-			speed_line_points.DAS4Tracking_Ror23			= [];
-			speed_line_points.DAS4Tracking_airgun_inner		= [];
-			speed_line_points.DAS4Tracking_airgun_outer		= [];
+			speed_line_points.DAS4Tracking_Ror23			= [118.9 65.5];
+			speed_line_points.DAS4Tracking_airgun_inner		= [54.4 33];
+			speed_line_points.DAS4Tracking_airgun_outer		= [55.4 33];
 			params.txPlot.speed_line_points = speed_line_points.(dataset_name);
 
 			% channel position
 			channel_position_km.DAS4Whale_Bou22				= 42;
-			channel_position_km.DAS4Tracking_Ror23			= [];
-			channel_position_km.DAS4Tracking_airgun_inner	= [];
-			channel_position_km.DAS4Tracking_airgun_outer	= [];
+			channel_position_km.DAS4Tracking_Ror23			= 60;
+			channel_position_km.DAS4Tracking_airgun_inner	= 32.5;
+			channel_position_km.DAS4Tracking_airgun_outer	= 33;
 			params.txPlot.channel_position_km = channel_position_km.(dataset_name);
 
 			% CPA position
 			cpa_km.DAS4Whale_Bou22							= 42.8;
-			cpa_km.DAS4Tracking_Ror23						= [];
-			cpa_km.DAS4Tracking_airgun_inner				= [];
-			cpa_km.DAS4Tracking_airgun_outer				= [];
+			cpa_km.DAS4Tracking_Ror23						= 58.9;
+			cpa_km.DAS4Tracking_airgun_inner				= 31;
+			cpa_km.DAS4Tracking_airgun_outer				= 30.8;
 			params.txPlot.cpa_km = cpa_km.(dataset_name);
 
 			% name of time-space plot png file
@@ -194,16 +194,16 @@ classdef ConfigManager
 % ──────────────────────────────────────────────────────────────────────
 			% channel position
 			channel_position_km.DAS4Whale_Bou22				= 42;
-			channel_position_km.DAS4Tracking_Ror23			= [];
-			channel_position_km.DAS4Tracking_airgun_inner	= [];
-			channel_position_km.DAS4Tracking_airgun_outer	= [];
+			channel_position_km.DAS4Tracking_Ror23			= 60;
+			channel_position_km.DAS4Tracking_airgun_inner	= 32.5;
+			channel_position_km.DAS4Tracking_airgun_outer	= 33;
 			params.waveform.channel_position_km = channel_position_km.(dataset_name);
 
 			% CPA position
 			cpa_km.DAS4Whale_Bou22							= 42.8;
-			cpa_km.DAS4Tracking_Ror23						= [];
-			cpa_km.DAS4Tracking_airgun_inner				= [];
-			cpa_km.DAS4Tracking_airgun_outer				= [];
+			cpa_km.DAS4Tracking_Ror23						= 58.9;
+			cpa_km.DAS4Tracking_airgun_inner				= 31;
+			cpa_km.DAS4Tracking_airgun_outer				= 30.8;
 			params.waveform.cpa_km = cpa_km.(dataset_name);
 
 			% time limits
@@ -215,9 +215,9 @@ classdef ConfigManager
 
 			% strain limits
 			strain_lim.DAS4Whale_Bou22						= [-1.3e-9 1.3e-9];
-			strain_lim.DAS4Tracking_Ror23					= [];
-			strain_lim.DAS4Tracking_airgun_inner			= [];
-			strain_lim.DAS4Tracking_airgun_outer			= [];
+			strain_lim.DAS4Tracking_Ror23					= [-1.7*1e-9 1.7*1e-9];
+			strain_lim.DAS4Tracking_airgun_inner			= [-1*1e-9 1*1e-9];
+			strain_lim.DAS4Tracking_airgun_outer			= [-0.6*1e-9 1*0.6e-9];
 			params.waveform.strain_lim = strain_lim.(dataset_name);
 
 			% name of waveform plot png file
@@ -231,9 +231,9 @@ classdef ConfigManager
 % ──────────────────────────────────────────────────────────────────────
 			% channel position
 			channel_position_km.DAS4Whale_Bou22				= 42;
-			channel_position_km.DAS4Tracking_Ror23			= [];
-			channel_position_km.DAS4Tracking_airgun_inner	= [];
-			channel_position_km.DAS4Tracking_airgun_outer	= [];
+			channel_position_km.DAS4Tracking_Ror23			= 60;
+			channel_position_km.DAS4Tracking_airgun_inner	= 32.5;
+			channel_position_km.DAS4Tracking_airgun_outer	= 33;
 			params.spectrogram.channel_position_km = channel_position_km.(dataset_name);
 
 			% number of fft samples
@@ -273,16 +273,16 @@ classdef ConfigManager
 
 			% frequency limits
 			frequency_lim.DAS4Whale_Bou22					= [10 80];
-			frequency_lim.DAS4Tracking_Ror23				= [];
-			frequency_lim.DAS4Tracking_airgun_inner			= [];
-			frequency_lim.DAS4Tracking_airgun_outer			= [];
+			frequency_lim.DAS4Tracking_Ror23				= [5 35];
+			frequency_lim.DAS4Tracking_airgun_inner			= [5 45];
+			frequency_lim.DAS4Tracking_airgun_outer			= [5 45];
 			params.spectrogram.frequency_lim = frequency_lim.(dataset_name);
 
 			% strain limits
 			strain_lim.DAS4Whale_Bou22						= [-25 0];
-			strain_lim.DAS4Tracking_Ror23					= [];
-			strain_lim.DAS4Tracking_airgun_inner			= [];
-			strain_lim.DAS4Tracking_airgun_outer			= [];
+			strain_lim.DAS4Tracking_Ror23					= [-35 -5];
+			strain_lim.DAS4Tracking_airgun_inner			= [-25 -2];
+			strain_lim.DAS4Tracking_airgun_outer			= [-25 -2];
 			params.spectrogram.strain_lim = strain_lim.(dataset_name);
 
 			% name of spectrognam png file
@@ -301,30 +301,30 @@ classdef ConfigManager
 
 			% time interval
 			time_interval.DAS4Whale_Bou22					= [44 67];
-			time_interval.DAS4Tracking_Ror23				= [];
-			time_interval.DAS4Tracking_airgun_inner			= [];
-			time_interval.DAS4Tracking_airgun_outer			= [];
+			time_interval.DAS4Tracking_Ror23				= [100 123];
+			time_interval.DAS4Tracking_airgun_inner			= [52.5 62.9];
+			time_interval.DAS4Tracking_airgun_outer			= [53.5 63.9];
 			params.fxPlot.time_interval = time_interval.(dataset_name);
 
 			% time window
 			time_window.DAS4Whale_Bou22						= 1.5;
-			time_window.DAS4Tracking_Ror23					= NaN;
-			time_window.DAS4Tracking_airgun_inner			= NaN;
-			time_window.DAS4Tracking_airgun_outer			= NaN;
+			time_window.DAS4Tracking_Ror23					= 1.5;
+			time_window.DAS4Tracking_airgun_inner			= 1.5;
+			time_window.DAS4Tracking_airgun_outer			= 1.5;
 			params.fxPlot.time_window = time_window.(dataset_name);
 
 			% frequency limits
 			frequency_lim.DAS4Whale_Bou22					= [5 75];
-			frequency_lim.DAS4Tracking_Ror23				= [];
-			frequency_lim.DAS4Tracking_airgun_inner			= [];
-			frequency_lim.DAS4Tracking_airgun_outer			= [];
+			frequency_lim.DAS4Tracking_Ror23				= [5 35];
+			frequency_lim.DAS4Tracking_airgun_inner			= [5 45];
+			frequency_lim.DAS4Tracking_airgun_outer			= [5 45];
 			params.fxPlot.frequency_lim = frequency_lim.(dataset_name);
 
 			% strain limits
 			strain_lim.DAS4Whale_Bou22						= [-25 -5];
-			strain_lim.DAS4Tracking_Ror23					= [];
-			strain_lim.DAS4Tracking_airgun_inner			= [];
-			strain_lim.DAS4Tracking_airgun_outer			= [];
+			strain_lim.DAS4Tracking_Ror23					= [-35 -5];
+			strain_lim.DAS4Tracking_airgun_inner			= [-25 -2];
+			strain_lim.DAS4Tracking_airgun_outer			= [-25 -2];
 			params.fxPlot.strain_lim = strain_lim.(dataset_name);
 
 			% name of space-frequency plot png file
@@ -339,30 +339,30 @@ classdef ConfigManager
 % ──────────────────────────────────────────────────────────────────────
 			% channel position
 			channel_position_km.DAS4Whale_Bou22				= 42;
-			channel_position_km.DAS4Tracking_Ror23			= [];
-			channel_position_km.DAS4Tracking_airgun_inner	= [];
-			channel_position_km.DAS4Tracking_airgun_outer	= [];
+			channel_position_km.DAS4Tracking_Ror23			= 60;
+			channel_position_km.DAS4Tracking_airgun_inner	= 32.5;
+			channel_position_km.DAS4Tracking_airgun_outer	= 33;
 			params.correlation.channel_position_km = channel_position_km.(dataset_name);
 
 			% cross correlation spatial offset
 			offset_m.DAS4Whale_Bou22						= 300;
 			offset_m.DAS4Tracking_Ror23						= 300;
-			offset_m.DAS4Tracking_airgun_inner				= 300;
-			offset_m.DAS4Tracking_airgun_outer				= 300;
+			offset_m.DAS4Tracking_airgun_inner				= 35;
+			offset_m.DAS4Tracking_airgun_outer				= 35;
 			params.correlation.offset_m = offset_m.(dataset_name);
 
 			% cross correlation maximum time lag
 			time_lag.DAS4Whale_Bou22						= 0.2;
 			time_lag.DAS4Tracking_Ror23						= 0.2;
-			time_lag.DAS4Tracking_airgun_inner				= 0.2;
-			time_lag.DAS4Tracking_airgun_outer				= 0.2;
+			time_lag.DAS4Tracking_airgun_inner				= 0.02;
+			time_lag.DAS4Tracking_airgun_outer				= 0.02;
 			params.correlation.time_lag = time_lag.(dataset_name);
 
 			% time interval of cross correlated signals
 			time_interval.DAS4Whale_Bou22					= [47 50];
-			time_interval.DAS4Tracking_Ror23				= [];
-			time_interval.DAS4Tracking_airgun_inner			= [];
-			time_interval.DAS4Tracking_airgun_outer			= [];
+			time_interval.DAS4Tracking_Ror23				= [102 105];
+			time_interval.DAS4Tracking_airgun_inner			= [55 58];
+			time_interval.DAS4Tracking_airgun_outer			= [56 59];
 			params.correlation.time_interval = time_interval.(dataset_name);
 
 			% name of correlogram png file
@@ -404,7 +404,7 @@ classdef ConfigManager
 		end
 
         %% load data from DAS4Tracking dataset
-		function data = load_data_DAS4Tracking(filename)
+		function data = load_data_DAS4Tracking(~, filename)
             dataset = load(filename);
             
             % Extract data
@@ -414,14 +414,15 @@ classdef ConfigManager
             data.distance_m =				dataset.x1_absolute_channel;
             data.distance_km =				data.distance_m .* 1e-3;            
             data.nb_of_channels =			dataset.info_ntraces;
-            data.nb_of_samples =			dataset.info_nsamples;            
+            data.nb_of_samples =			dataset.info_nsamples; 
+			data.dimensions =				[data.nb_of_channels data.nb_of_samples];
             data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz;
             data.gauge_length =				dataset.info_gauge_length;
             data.channel_distance_m =		data.distance_m(2) - data.distance_m(1);
 		end
 		
-		%% load data from OOI dataset
-		function data = load_data_OOI(dataset)
+		%% load data from OOI dataset 
+		function data = load_data_OOI(~, dataset)
                         
             % Extract data
             data.strain =					double(h5read(dataset,"/Acquisition/Raw[0]/RawData"))';
@@ -432,7 +433,8 @@ classdef ConfigManager
 			data.distance_m =				double(0:1:(nb_of_channels - 1)) .* channel_distance;
             data.distance_km =				data.distance_m .* 1e-3;            
             data.nb_of_channels =			h5readatt(dataset,'/Acquisition','NumberOfLoci');
-            data.nb_of_samples =			length(data.time);            
+            data.nb_of_samples =			length(data.time);
+			data.dimensions =				[data.nb_of_channels data.nb_of_samples];
             data.sampling_frequency_Hz =	h5readatt(dataset,'/Acquisition/Raw[0]','OutputDataRate');
             data.gauge_length =				h5readatt(dataset,'/Acquisition','GaugeLength');
 		end
