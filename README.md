@@ -499,11 +499,16 @@ cfg = ConfigManager(dataset_name)
 ```
 
 **Parameters:**
-- `dataset_name` - Dataset identifier: `'DAS4Whale_bou22'` or `'DAS4Tracking_ror23'`
+- `dataset_name` - Dataset identifier, one of the following:
+  - `'DAS4Whale_Bou22'`
+  - `'DAS4Tracking_Ror23'`
+  - `'DAS4Tracking_airgun_inner'`
+  - `'DAS4Tracking_airgun_outer'`
+  - `'OOI_Wilcock_2023'`
 
 **Properties:**
-- `dataset_name` - Dataset name
-- `data` - Structure containing DAS data
+- `dataset_name` - String identifier for the dataset
+- `data` - Structure containing loaded DAS data
 - `params` - Structure containing all analysis parameters
 
 **Main Methods:**
@@ -511,27 +516,25 @@ cfg = ConfigManager(dataset_name)
 | Method | Description |
 |--------|-------------|
 | `ConfigManager(dataset_name)` | Constructor - loads data and initializes parameters |
-| `load_data_bou22()` | Load BOU22 whale dataset |
-| `init_params_bou22()` | Initialize parameters for BOU22 |
-| `load_data_ror23()` | Load ROR23 tracking dataset (template) |
-| `init_params_ror23()` | Initialize parameters for ROR23 (template) |
-| `init_default_params()` | Initialize default parameters |
-| `reload()` | Reload data and configuration |
+| `initialize_parameters()` | Initialize parameters for data processing |
+| `load_data_DAS4Whale()` | Load DAS4Whale dataset |
+| `load_data_DAS4Tracking()` | Load DAS4Tracking dataset |
+| `load_data_OOI()` | Load OOI dataset |
+| `reload()` | Reload both data and configuration from source |
 | `reload_params()` | Reload only parameters (keeps data in memory) |
-| `save_config(filename)` | Save configuration to MAT file |
-| `load_config(filename)` | Load configuration from MAT file |
 
 **Example:**
 ```matlab
-% Load BOU22 dataset and access parameters
-cfg = ConfigManager('DAS4Whale_bou22');
+% Load BOU22 whale dataset
+cfg = ConfigManager('DAS4Whale_Bou22');
+
+% Access data and parameters
 filtered_data = butterworth_bp_filter(cfg.data.strain, ...
                                       cfg.params.bpFilter.cutoff_freq, ...
                                       cfg.params.bpFilter.order, ...
                                       cfg.data.sampling_frequency);
 
-% Save and reload configuration
-cfg.save_config('analysis_config.mat');
+% Reload parameters if needed
 cfg = cfg.reload_params();
 ```
 
