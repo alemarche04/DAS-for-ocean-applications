@@ -19,6 +19,7 @@ classdef ConfigManager
 	%								'DAS4Tracking_airgun_inner'
 	%								'DAS4Tracking_airgun_outer'
 	%								'OOI_Wilcock_2023'
+	%								'Norway'
 	%
 	%       initialize_parameters() - Initialize parameters for 
 	%												data processing
@@ -31,6 +32,9 @@ classdef ConfigManager
     %           Output: data structure with DAS measurements
 	%
 	%		load_data_OOI() - Load OOI dataset
+    %           Output: data structure with DAS measurements
+	%
+	%		load_data_Norway() - Load Norway dataset
     %           Output: data structure with DAS measurements
     %
     %       reload() - Reload both data and configuration from source
@@ -62,6 +66,7 @@ classdef ConfigManager
 			%				'DAS4Tracking_airgun_inner'
 			%				'DAS4Tracking_airgun_outer'
             %				'OOI_Wilcock_2023'
+			%				'Norway'
 
             obj.dataset_name = dataset_name;
             
@@ -84,9 +89,13 @@ classdef ConfigManager
 					obj.data = obj.load_data_DAS4Tracking(filename);
 					obj.data.time_and_date = "2022-09-06, 17:51:06";
 				case 'OOI_Wilcock_2023'
-					dataset = "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5";
-					obj.data = load_data_OOI(dataset);
+					filename = "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5";
+					obj.data = obj.load_data_OOI(filename);
 					obj.data.time_and_date = "2021-11-03, 01:57:31";
+				case 'Norway'
+					filename = "095659.hdf5";
+					obj.data = obj.load_data_Norway(filename);
+					obj.data.time_and_date = "09:56:59";
                 otherwise
                     error('Unknown dataset: %s', dataset_name);
 			end
@@ -105,6 +114,7 @@ classdef ConfigManager
 			bp_cutoff_freq.DAS4Tracking_Ror23				= [5 30];
 			bp_cutoff_freq.DAS4Tracking_airgun_inner		= [5 45];
 			bp_cutoff_freq.DAS4Tracking_airgun_outer		= [5 45];
+			bp_cutoff_freq.Norway							= [5 75];
 			params.bpFilter.cutoff_freq = bp_cutoff_freq.(dataset_name);
 			
 			% filter order
@@ -112,6 +122,7 @@ classdef ConfigManager
 			bp_order.DAS4Tracking_Ror23						= 5;
 			bp_order.DAS4Tracking_airgun_inner				= 5;
 			bp_order.DAS4Tracking_airgun_outer				= 5;
+			bp_order.Norway									= 5;
 			params.bpFilter.order = bp_order.(dataset_name);
 
 % ──────────────────────────────────────────────────────────────────────
@@ -122,6 +133,7 @@ classdef ConfigManager
 			med_filt2D_dim.DAS4Tracking_Ror23				= [3 3];
 			med_filt2D_dim.DAS4Tracking_airgun_inner		= [3 3];
 			med_filt2D_dim.DAS4Tracking_airgun_outer		= [3 3];
+			med_filt2D_dim.Norway							= [3 3];
 			params.medianFilter2D.dimensions = med_filt2D_dim.(dataset_name);
             
 % ──────────────────────────────────────────────────────────────────────
@@ -132,6 +144,7 @@ classdef ConfigManager
 			fk_c_range.DAS4Tracking_Ror23					= [];
 			fk_c_range.DAS4Tracking_airgun_inner			= [];
 			fk_c_range.DAS4Tracking_airgun_outer			= [];
+			fk_c_range.Norway								= [];
 			params.fkFilter.c_range = fk_c_range.(dataset_name);
             
 % ──────────────────────────────────────────────────────────────────────
@@ -142,6 +155,7 @@ classdef ConfigManager
 			time_lim.DAS4Tracking_Ror23						= [];
 			time_lim.DAS4Tracking_airgun_inner				= [];
 			time_lim.DAS4Tracking_airgun_outer				= [];
+			time_lim.Norway									= [];
 			params.txPlot.time_lim = time_lim.(dataset_name);
 
 			% distance limits
@@ -149,6 +163,7 @@ classdef ConfigManager
 			distance_lim.DAS4Tracking_Ror23					= [];
 			distance_lim.DAS4Tracking_airgun_inner			= [];
 			distance_lim.DAS4Tracking_airgun_outer			= [];
+			distance_lim.Norway								= [];
 			params.txPlot.distance_lim = distance_lim.(dataset_name);
 
 			% strain limits
@@ -156,6 +171,7 @@ classdef ConfigManager
 			strain_lim.DAS4Tracking_Ror23					= [-50 -18];
 			strain_lim.DAS4Tracking_airgun_inner			= [-25 -10];
 			strain_lim.DAS4Tracking_airgun_outer			= [-25 -10];
+			strain_lim.Norway								= [-30 -5];
 			params.txPlot.strain_lim = strain_lim.(dataset_name);
 
 			% propagation speed
@@ -163,6 +179,7 @@ classdef ConfigManager
 			prop_speed_km_s.DAS4Tracking_Ror23				= 1.47;
 			prop_speed_km_s.DAS4Tracking_airgun_inner		= 1.47;
 			prop_speed_km_s.DAS4Tracking_airgun_outer		= 1.47;
+			prop_speed_km_s.Norway							= 1.47;
 			params.txPlot.prop_speed_km_s = prop_speed_km_s.(dataset_name);
 
 			% point touched by speed line
@@ -170,6 +187,7 @@ classdef ConfigManager
 			speed_line_points.DAS4Tracking_Ror23			= [118.9 65.5];
 			speed_line_points.DAS4Tracking_airgun_inner		= [54.4 33];
 			speed_line_points.DAS4Tracking_airgun_outer		= [55.4 33];
+			speed_line_points.Norway						= [1 1];
 			params.txPlot.speed_line_points = speed_line_points.(dataset_name);
 
 			% channel position
@@ -177,6 +195,7 @@ classdef ConfigManager
 			channel_position_km.DAS4Tracking_Ror23			= 60;
 			channel_position_km.DAS4Tracking_airgun_inner	= 32.5;
 			channel_position_km.DAS4Tracking_airgun_outer	= 33;
+			channel_position_km.Norway						= 1;
 			params.txPlot.channel_position_km = channel_position_km.(dataset_name);
 
 			% CPA position
@@ -184,6 +203,7 @@ classdef ConfigManager
 			cpa_km.DAS4Tracking_Ror23						= 58.9;
 			cpa_km.DAS4Tracking_airgun_inner				= 31;
 			cpa_km.DAS4Tracking_airgun_outer				= 30.8;
+			cpa_km.Norway									= 10;
 			params.txPlot.cpa_km = cpa_km.(dataset_name);
 
 			% name of time-space plot png file
@@ -197,6 +217,7 @@ classdef ConfigManager
 			channel_position_km.DAS4Tracking_Ror23			= 60;
 			channel_position_km.DAS4Tracking_airgun_inner	= 32.5;
 			channel_position_km.DAS4Tracking_airgun_outer	= 33;
+			channel_position_km.Norway						= 1;
 			params.waveform.channel_position_km = channel_position_km.(dataset_name);
 
 			% CPA position
@@ -204,6 +225,7 @@ classdef ConfigManager
 			cpa_km.DAS4Tracking_Ror23						= 58.9;
 			cpa_km.DAS4Tracking_airgun_inner				= 31;
 			cpa_km.DAS4Tracking_airgun_outer				= 30.8;
+			cpa_km.Norway									= 10;
 			params.waveform.cpa_km = cpa_km.(dataset_name);
 
 			% time limits
@@ -211,6 +233,7 @@ classdef ConfigManager
 			time_lim.DAS4Tracking_Ror23						= [];
 			time_lim.DAS4Tracking_airgun_inner				= [];
 			time_lim.DAS4Tracking_airgun_outer				= [];
+			time_lim.Norway									= [];
 			params.waveform.time_lim = time_lim.(dataset_name);
 
 			% strain limits
@@ -218,6 +241,7 @@ classdef ConfigManager
 			strain_lim.DAS4Tracking_Ror23					= [-1.7*1e-9 1.7*1e-9];
 			strain_lim.DAS4Tracking_airgun_inner			= [-1*1e-9 1*1e-9];
 			strain_lim.DAS4Tracking_airgun_outer			= [-0.6*1e-9 1*0.6e-9];
+			strain_lim.Norway								= [-1.3e-9 1.3e-9];
 			params.waveform.strain_lim = strain_lim.(dataset_name);
 
 			% name of waveform plot png file
@@ -234,6 +258,7 @@ classdef ConfigManager
 			channel_position_km.DAS4Tracking_Ror23			= 60;
 			channel_position_km.DAS4Tracking_airgun_inner	= 32.5;
 			channel_position_km.DAS4Tracking_airgun_outer	= 33;
+			channel_position_km.Norway						= 1;
 			params.spectrogram.channel_position_km = channel_position_km.(dataset_name);
 
 			% number of fft samples
@@ -241,6 +266,7 @@ classdef ConfigManager
 			nfft.DAS4Tracking_Ror23							= 4096;
 			nfft.DAS4Tracking_airgun_inner					= 4096;
 			nfft.DAS4Tracking_airgun_outer					= 4096;
+			nfft.Norway										= 4096;
 			params.spectrogram.nfft = nfft.(dataset_name);
 
 			% window length
@@ -248,6 +274,7 @@ classdef ConfigManager
 			window_len.DAS4Tracking_Ror23					= 512;
 			window_len.DAS4Tracking_airgun_inner			= 512;
 			window_len.DAS4Tracking_airgun_outer			= 512;
+			window_len.Norway								= 512;
 			params.spectrogram.window_len = window_len.(dataset_name);
 
 			% window overlap percentage
@@ -255,6 +282,7 @@ classdef ConfigManager
 			overlap_pct.DAS4Tracking_Ror23					= 0.89;
 			overlap_pct.DAS4Tracking_airgun_inner			= 0.89;
 			overlap_pct.DAS4Tracking_airgun_outer			= 0.89;
+			overlap_pct.Norway								= 0.89;
 			params.spectrogram.overlap_pct = overlap_pct.(dataset_name);
 
 			% window function
@@ -262,6 +290,7 @@ classdef ConfigManager
 			window.DAS4Tracking_Ror23						= hann(params.spectrogram.window_len, 'periodic');
 			window.DAS4Tracking_airgun_inner				= hann(params.spectrogram.window_len, 'periodic');
 			window.DAS4Tracking_airgun_outer				= hann(params.spectrogram.window_len, 'periodic');
+			window.Norway									= hann(params.spectrogram.window_len, 'periodic');
 			params.spectrogram.window = window.(dataset_name);
 
 			% time limits
@@ -269,6 +298,7 @@ classdef ConfigManager
 			time_lim.DAS4Tracking_Ror23						= [];
 			time_lim.DAS4Tracking_airgun_inner				= [];
 			time_lim.DAS4Tracking_airgun_outer				= [];
+			time_lim.Norway									= [];
 			params.spectrogram.time_lim = time_lim.(dataset_name);
 
 			% frequency limits
@@ -276,6 +306,7 @@ classdef ConfigManager
 			frequency_lim.DAS4Tracking_Ror23				= [5 35];
 			frequency_lim.DAS4Tracking_airgun_inner			= [5 45];
 			frequency_lim.DAS4Tracking_airgun_outer			= [5 45];
+			frequency_lim.Norway							= [10 80];
 			params.spectrogram.frequency_lim = frequency_lim.(dataset_name);
 
 			% strain limits
@@ -283,6 +314,7 @@ classdef ConfigManager
 			strain_lim.DAS4Tracking_Ror23					= [-35 -5];
 			strain_lim.DAS4Tracking_airgun_inner			= [-25 -2];
 			strain_lim.DAS4Tracking_airgun_outer			= [-25 -2];
+			strain_lim.Norway								= [-25 0];
 			params.spectrogram.strain_lim = strain_lim.(dataset_name);
 
 			% name of spectrognam png file
@@ -297,6 +329,7 @@ classdef ConfigManager
 			nfft.DAS4Tracking_Ror23							= 4096;
 			nfft.DAS4Tracking_airgun_inner					= 4096;
 			nfft.DAS4Tracking_airgun_outer					= 4096;
+			nfft.Norway										= 4096;
 			params.fxPlot.nfft = nfft.(dataset_name);
 
 			% time interval
@@ -304,6 +337,7 @@ classdef ConfigManager
 			time_interval.DAS4Tracking_Ror23				= [100 123];
 			time_interval.DAS4Tracking_airgun_inner			= [52.5 62.9];
 			time_interval.DAS4Tracking_airgun_outer			= [53.5 63.9];
+			time_interval.Norway							= [1 2];
 			params.fxPlot.time_interval = time_interval.(dataset_name);
 
 			% time window
@@ -311,6 +345,7 @@ classdef ConfigManager
 			time_window.DAS4Tracking_Ror23					= 1.5;
 			time_window.DAS4Tracking_airgun_inner			= 1.5;
 			time_window.DAS4Tracking_airgun_outer			= 1.5;
+			time_window.Norway								= 1.5;
 			params.fxPlot.time_window = time_window.(dataset_name);
 
 			% frequency limits
@@ -318,6 +353,7 @@ classdef ConfigManager
 			frequency_lim.DAS4Tracking_Ror23				= [5 35];
 			frequency_lim.DAS4Tracking_airgun_inner			= [5 45];
 			frequency_lim.DAS4Tracking_airgun_outer			= [5 45];
+			frequency_lim.Norway							= [5 75];
 			params.fxPlot.frequency_lim = frequency_lim.(dataset_name);
 
 			% strain limits
@@ -325,6 +361,7 @@ classdef ConfigManager
 			strain_lim.DAS4Tracking_Ror23					= [-35 -5];
 			strain_lim.DAS4Tracking_airgun_inner			= [-25 -2];
 			strain_lim.DAS4Tracking_airgun_outer			= [-25 -2];
+			strain_lim.Norway								= [-25 -5];
 			params.fxPlot.strain_lim = strain_lim.(dataset_name);
 
 			% name of space-frequency plot png file
@@ -342,6 +379,7 @@ classdef ConfigManager
 			channel_position_km.DAS4Tracking_Ror23			= 60;
 			channel_position_km.DAS4Tracking_airgun_inner	= 32.5;
 			channel_position_km.DAS4Tracking_airgun_outer	= 33;
+			channel_position_km.Norway						= 1;
 			params.correlation.channel_position_km = channel_position_km.(dataset_name);
 
 			% cross correlation spatial offset
@@ -349,6 +387,7 @@ classdef ConfigManager
 			offset_m.DAS4Tracking_Ror23						= 300;
 			offset_m.DAS4Tracking_airgun_inner				= 35;
 			offset_m.DAS4Tracking_airgun_outer				= 35;
+			offset_m.Norway									= 300;
 			params.correlation.offset_m = offset_m.(dataset_name);
 
 			% cross correlation maximum time lag
@@ -356,6 +395,7 @@ classdef ConfigManager
 			time_lag.DAS4Tracking_Ror23						= 0.2;
 			time_lag.DAS4Tracking_airgun_inner				= 0.02;
 			time_lag.DAS4Tracking_airgun_outer				= 0.02;
+			time_lag.Norway									= 0.2;
 			params.correlation.time_lag = time_lag.(dataset_name);
 
 			% time interval of cross correlated signals
@@ -363,6 +403,7 @@ classdef ConfigManager
 			time_interval.DAS4Tracking_Ror23				= [102 105];
 			time_interval.DAS4Tracking_airgun_inner			= [55 58];
 			time_interval.DAS4Tracking_airgun_outer			= [56 59];
+			time_interval.Norway					= [1 2];
 			params.correlation.time_interval = time_interval.(dataset_name);
 
 			% name of correlogram png file
@@ -422,21 +463,37 @@ classdef ConfigManager
 		end
 		
 		%% load data from OOI dataset 
-		function data = load_data_OOI(~, dataset)
+		function data = load_data_OOI(~, filename)
                         
             % Extract data
-            data.strain =					double(h5read(dataset,"/Acquisition/Raw[0]/RawData"))';
-            data.time =						double(h5read(dataset,"/Acquisition/Raw[0]/RawDataTime"))';
+            data.strain =					double(h5read(filename,"/Acquisition/Raw[0]/RawData"))';
+            data.time =						double(h5read(filename,"/Acquisition/Raw[0]/RawDataTime"))';
 			data.time =						(data.time - data.time(1)) .* 1e-6;
             data.sampling_interval_s =		data.time(2) - data.time(1);            
-            data.channel_distance_m =		double(h5readatt(dataset,'/Acquisition','SpatialSamplingInterval'));
-			data.distance_m =				double(0:1:(nb_of_channels - 1)) .* channel_distance;
-            data.distance_km =				data.distance_m .* 1e-3;            
-            data.nb_of_channels =			h5readatt(dataset,'/Acquisition','NumberOfLoci');
+            data.channel_distance_m =		double(h5readatt(filename,'/Acquisition','SpatialSamplingInterval'));
+			data.nb_of_channels =			h5readatt(filename,'/Acquisition','NumberOfLoci');
             data.nb_of_samples =			length(data.time);
+			data.distance_m =				double(0:1:(data.nb_of_channels - 1)) .* data.channel_distance_m;
+            data.distance_km =				data.distance_m .* 1e-3; 
 			data.dimensions =				[data.nb_of_channels data.nb_of_samples];
-            data.sampling_frequency_Hz =	h5readatt(dataset,'/Acquisition/Raw[0]','OutputDataRate');
-            data.gauge_length =				h5readatt(dataset,'/Acquisition','GaugeLength');
+            data.sampling_frequency_Hz =	h5readatt(filename,'/Acquisition/Raw[0]','OutputDataRate');
+            data.gauge_length =				h5readatt(filename,'/Acquisition','GaugeLength');
+		end
+
+		%% load data from Norway dataset 
+		function data = load_data_Norway(~, filename)
+                        
+            % Extract data
+            data.strain =									double(h5read(filename,"/data"))';
+            data.sampling_interval_s =						double(h5read(filename,'/header/dt'));         
+            data.channel_distance_m =						double(h5read(filename,'/header/dx'));
+			[data.nb_of_channels, data.nb_of_samples] =		size(data.strain);
+			data.time =										double(0:1:(data.nb_of_samples - 1)) .* data.sampling_interval_s;
+			data.distance_m =								double(0:1:(data.nb_of_channels - 1)) .* data.channel_distance_m;
+            data.distance_km =								data.distance_m .* 1e-3;
+			data.dimensions =								[data.nb_of_channels data.nb_of_samples];
+            data.sampling_frequency_Hz =					1/data.sampling_interval_s;
+            data.gauge_length =								double(h5read(filename,'/header/gaugeLength'));
 		end
 
 		%% utilities
@@ -466,9 +523,13 @@ classdef ConfigManager
 					obj.data = obj.load_data_DAS4Tracking(filename);
 					obj.data.time_and_date = "2022-09-06, 17:51:06";
 				case 'OOI_Wilcock_2023'
-					dataset = "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5";
-					obj.data = load_data_OOI(dataset);
+					filename = "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5";
+					obj.data = obj.load_data_OOI(filename);
 					obj.data.time_and_date = "2021-11-03, 01:57:31";
+				case 'Norway'
+					filename = "095659.hdf5";
+					obj.data = obj.load_data_Norway(filename);
+					obj.data.time_and_date = "09:56:59";
                 otherwise
                     error('Unknown dataset: %s', obj.dataset_name);
 			end
@@ -488,7 +549,8 @@ classdef ConfigManager
 											'DAS4Tracking_Ror23', ...
 											'DAS4Tracking_airgun_inner', ...
 											'DAS4Tracking_airgun_outer', ...
-											'OOI_Wilcock_2023'})
+											'OOI_Wilcock_2023' ...
+											'Norway'})
 				error('Unknown dataset: %s', obj.dataset_name);
 			end
             obj.params = obj.initialize_parameters(obj.dataset_name);

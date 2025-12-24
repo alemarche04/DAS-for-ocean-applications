@@ -10,8 +10,9 @@ addpath('Dataset', 'filters', 'plots');
 %						DAS4Tracking_Ror23
 %						DAS4Tracking_airgun_inner
 %						DAS4Tracking_airgun_outer
+%						Norway
 
-cfg =		ConfigManager('DAS4Whale_Bou22');
+cfg =		ConfigManager('Norway');
 data =		cfg.data; % load data from dataset
 
 %% butterworth bandpass filter
@@ -165,9 +166,8 @@ correlation =	cfg.params.correlation;	% corss-correlation analysis parameters
 % function parameters
 channel_position_km =	correlation.channel_position_km;	% position of target channel [km]
 offset_m =				correlation.offset_m;				% offset for correlation analysis
-%time_lag =				correlation.time_lag;				% time lag for correlation analysis
+time_lag =				correlation.time_lag;				% time lag for correlation analysis
 time_interval =			correlation.time_interval;			% time interval for correlation analysis
-time_lag =				0.25;
 
 % plot correlogram
 correlogram = get_correlogram(strain_filtered, ...
@@ -191,55 +191,35 @@ exportgraphics(correlogram, correlation.filename_correlogram);
 	time_lag, ...
 	time_interval);
 
-% estimates the distance btw the source and the CPA (at 42.8 km)
-distance_from_CPA = (cfg.params.txPlot.cpa_km - channel_position_km)*1e3; % distance btw reference channel and CPA
-xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
-time_peak = correlation_statistics(:, 3); % peak time of cross correlations
-c = 1470;
-
-% dt = data.gauge_length_m / c; % hypotetical time diffecerence btw different arrival times (TDOA)
-
-% % keeps only realistic TDOA
-% lim_inf = 4.5e-3;
-% lim_sup = 6.5e-3;
-% 
-% diff_prev = [Inf; diff(time_peak(:))]; % difference btw current and previous value
-% diff_next = [diff(time_peak(:)); Inf]; % difference btw current and next value
-% 
-% % ignores elements with unrealistic values
-% mask = (diff_prev >= lim_inf & diff_prev <= lim_sup) & ...
-%        (diff_next >= lim_inf & diff_next <= lim_sup);
-% 
-% % filter vectors
-% time_peak_filt = time_peak(mask);
-% xcorr_offset_m_filt = xcorr_offset_m(mask);
-
-R = sqrt(((distance_from_CPA^2 + (time_peak.^2).*c^2 - (distance_from_CPA - xcorr_offset_m).^2) ...
-	./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
-
-% R = real(R);
-
-% R = sqrt(((distance_from_CPA^2 + (time_peak_filt.^2).*c^2 - (distance_from_CPA - xcorr_offset_m_filt).^2) ...
-% 	./ (2.*time_peak_filt.*c)).^2 - distance_from_CPA^2);
-
-figure;
-plot(xcorr_offset_m, R)
-% plot(xcorr_offset_m_filt, R)
-
-figure(correlogram);
-c = 1470;
-dt= -0.2:0.002:0.2;
-distance_from_CPA = 800;
-
-d1 = sqrt( ( sqrt(R.^2+distance_from_CPA^2) - dt*c ).^2 - R.^2 );
-dsh = distance_from_CPA-d1;
-hold on
-plot(dt,dsh,'k--','LineWidth', 1)
-ylabel('Distance from reference, dx [m]')
-hold off
-
 % export plot as png
 exportgraphics(xcorr_plot, correlation.filename_xcorr);
+
+% estimates the distance btw the source and the CPA (at 42.8 km)
+estimate_R = true;
+if estimate_R
+	distance_from_CPA = (cfg.params.txPlot.cpa_km - channel_position_km)*1e3; % distance btw reference channel and CPA
+	xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
+	time_peak = correlation_statistics(:, 3); % peak time of cross correlations
+	c = 1470;
+	
+	R = sqrt(((distance_from_CPA^2 + (time_peak.^2).*c^2 - (distance_from_CPA - xcorr_offset_m).^2) ...
+		./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
+	
+	figure;
+	plot(xcorr_offset_m, R)
+	
+	figure(correlogram);
+	c = 1470;
+	dt= -0.2:0.002:0.2;
+	distance_from_CPA = 800;
+	
+	d1 = sqrt( ( sqrt(R.^2+distance_from_CPA^2) - dt*c ).^2 - R.^2 );
+	dsh = distance_from_CPA-d1;
+	hold on
+	plot(dt,dsh,'k--','LineWidth', 1)
+	ylabel('Distance from reference, dx [m]')
+	hold off
+end
 
 %% event detection
 cfg =				cfg.reload_params();		% loads any changes in the configuration file
