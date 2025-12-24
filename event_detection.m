@@ -15,12 +15,12 @@ function [events, fig] = event_detection(data, time, distance, varargin)
 %
 %   Optional Parameters:
 %       'threshold'      - Detection threshold in standard deviations. 
-%                          Default: 5
+%                          Default: 3
 %       'min_area'       - Minimum event area in pixels. Default: 50
 %       'filter_size'    - [1x2] median filter kernel size [time, space]. 
-%                          Default: [5 5]
+%                          Default: [3 3]
 %       'energy_window'  - [1x2] energy computation window size [time, space]. 
-%                          Default: [7 7]
+%                          Default: [5 5]
 %       'save_csv'       - Logical flag to save events to CSV file. 
 %                          Default: false
 %
@@ -50,13 +50,13 @@ function [events, fig] = event_detection(data, time, distance, varargin)
     
     % apply 2D median filter to remove outliers and spikes
     % each pixel is replaced by the median of its neighbors
-    printStep("Computing 2D median filter");
+    printStep('Computing 2D median filter');
     data_filt = medfilt2(data, filter_size);
     printTime();
     
     % compute local energy by averaging squared values in a moving window
     % this highlights regions with high signal amplitude
-    printStep("Computing local energy");
+    printStep('Computing local energy');
     data_single = single(data_filt.^2);
     energy_kernel = ones(energy_window) / prod(energy_window);
     energy = imfilter(data_single, energy_kernel, 'replicate');
@@ -64,7 +64,7 @@ function [events, fig] = event_detection(data, time, distance, varargin)
     
     % convert energy to z-scores (number of standard deviations from mean)
     % this allows using a universal threshold regardless of data scale
-    printStep("\nConverting energy to z-scores...\n");
+    printStep('Converting energy to z-scores');
     energy_mean = mean(energy(:));
     energy_std = std(energy(:));
     energy_norm = (energy - energy_mean) / energy_std;
@@ -165,16 +165,16 @@ function results = parse_inputs(data, time, distance, varargin)
     
     % Optional parameters
     valid = @(x) isnumeric(x) && isscalar(x) && x > 0;
-    addParameter(p, 'threshold', 5, valid);
+    addParameter(p, 'threshold', 3, valid);
     
     valid = @(x) isnumeric(x) && isscalar(x) && x > 0;
     addParameter(p, 'min_area', 50, valid);
     
     valid = @(x) isnumeric(x) && isvector(x) && length(x) == 2 && all(x > 0);
-    addParameter(p, 'filter_size', [5 5], valid);
+    addParameter(p, 'filter_size', [3 3], valid);
     
     valid = @(x) isnumeric(x) && isvector(x) && length(x) == 2 && all(x > 0);
-    addParameter(p, 'energy_window', [7 7], valid);
+    addParameter(p, 'energy_window', [5 5], valid);
     
     valid = @(x) islogical(x) || (isnumeric(x) && (x == 0 || x == 1));
     addParameter(p, 'save_csv', false, valid);
