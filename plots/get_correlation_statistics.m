@@ -91,15 +91,19 @@ function [correlation_statistics, fig] = get_correlation_statistics(data, sampli
         xlabel('Time lag (s)');
         title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance));
 
-		% get cross-correlation peak in selected time interval
-		c = 1600; % propagation speed
-		TDOA = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance) / c;
+		% main lobe moving speed
+		c = 1600;
+		% time lag difference of main lobe
+		lag_diff = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance) / c;
 		
-		time_min = max([(TDOA - 0.01), time_lags_xcorr_2(1)]);
-		time_max = TDOA + 0.01;
+		% get time indexes in interval of +-0.01 = main lobe amplitude
+		time_min = max([(lag_diff - 0.01), time_lags_xcorr_2(1)]); 
+		time_max = lag_diff + 0.01;
+
+		% get cross-correlation peak in selected time interval
 		time_idx = (time_lags_xcorr_2 >= time_min) & (time_lags_xcorr_2 <= time_max);
 		hold on 
-		xline(TDOA, '-r');
+		xline(lag_diff, '-r');
 		xline(time_min, '-b');
 		xline(time_max, '-b');
 		hold off
@@ -153,15 +157,19 @@ function [correlation_statistics, fig] = get_correlation_statistics(data, sampli
         xlabel('Time lag (s)');
         title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance));
 
-		% get cross-correlation peak in selected time interval
-		c = 1770; % propagation speed
-		TDOA = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance) / c;
+		% main lobe moving speed
+		c = 1770;
+		% time lag difference of main lobe
+		lag_diff = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance) / c;
 
-		time_min =(TDOA - 0.01); % 0.01 = main lobe amplitude
-		time_max = min([(TDOA + 0.01), time_lags_xcorr_1(end)]);
+		% get time indexes in interval of +-0.01 = main lobe amplitude
+		time_min =(lag_diff - 0.01);
+		time_max = min([(lag_diff + 0.01), time_lags_xcorr_1(end)]);
+
+		% get cross-correlation peak in selected time interval
 		time_idx = (time_lags_xcorr_1 >= time_min) & (time_lags_xcorr_1 <= time_max);
 		hold on 
-		xline(TDOA, '-r');
+		xline(lag_diff, '-r');
 		xline(time_min, '-b');
 		xline(time_max, '-b');
 		hold off
