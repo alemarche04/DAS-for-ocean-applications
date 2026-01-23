@@ -4,7 +4,11 @@ clear all
 close all
 
 %% load data from dataset
-addpath('Dataset', 'filters', 'plots', 'config');
+addpath('Dataset', 'filters', 'plots', ...
+	'DAS4Whale_Bou22_config', ...
+	'DAS4Tracking_Ror23_config', ...
+	'DAS4Tracking_airgun_config', ...
+	'Norway_config');
 
 % Dataset available:	DAS4Whale_Bou22
 %						DAS4Tracking_Ror23
@@ -13,13 +17,12 @@ addpath('Dataset', 'filters', 'plots', 'config');
 %						Norway
 
 dataset_name =	'DAS4Whale_Bou22';
-dataset =		fullfile('config', [dataset_name  '.xlsx']);
-data =			loadDataset(dataset_name);
+data =			feval(str2func(dataset_name + "_data"));
 
 %% butterworth bandpass filter
-bp = readtable(dataset, 'Range', 'bandpass');
+bp = feval(str2func(dataset_name + "_bandpass"));
 bp_cutoff_freq		= bp.bp_cutoff_freq;
-bp_order			= bp.bp_order(1);
+bp_order			= bp.bp_order;
 
 % apply filter
 strain_filtered = butterworth_bp_filter( ...
@@ -29,8 +32,8 @@ strain_filtered = butterworth_bp_filter( ...
 	data.sampling_frequency_Hz);
 
 %% median filter 2D 3x3 symmetric
-med_filt = readtable(dataset, 'Range', 'median_filter');
-med_filt2D_dim = med_filt.med_filt2D_dim;
+medFilt = feval(str2func(dataset_name + "_bandpass"));
+med_filt2D_dim = medFilt.med_filt2D_dim;
 
 % apply filter
 strain_filtered = median_filter_2D( ...
@@ -38,8 +41,8 @@ strain_filtered = median_filter_2D( ...
 	med_filt2D_dim);
 
 %% fk filtering
-fk_filt = readtable(dataset, 'Range', 'fk_filter');
-fk_velocity_range = fk_filt.fk_velocity_range;
+fkFilt = feval(str2func(dataset_name + "_fkFilt"));
+fk_velocity_range = fkFilt.fk_velocity_range;
 
 fk_filter =	fk_filter_design( ...
 	data.dimensions, ...
@@ -55,14 +58,14 @@ strain_filtered = fk_filter_filt( ...
 strain_dB = 20*log10(abs(strain_filtered) ./ max(abs(strain_filtered), [], "all"));
 
 %% time-space plot
-tx = readtable(dataset, 'Range', 'time_space_plot');
+tx = feval(str2func(dataset_name + "_tx"));
 tx_time_lim					= tx.tx_time_lim;
 tx_distance_lim				= tx.tx_distance_lim;
 tx_strain_lim				= tx.tx_strain_lim;
-tx_prop_speed_km_s			= tx.tx_prop_speed_km_s(1);
-tx_spedd_line_points		= tx.tx_spedd_line_points;
-tx_channel_position_km		= tx.tx_channel_position_km(1);
-tx_cpa_km					= tx.tx_cpa_km(1);
+tx_prop_speed_km_s			= tx.tx_prop_speed_km_s;
+tx_speed_line_points		= tx.tx_speed_line_points;
+tx_channel_position_km		= tx.tx_channel_position_km;
+tx_cpa_km					= tx.tx_cpa_km;
 
 % time-space plot
 time_space_plot = get_time_space_plot( ...
@@ -74,20 +77,12 @@ time_space_plot = get_time_space_plot( ...
 	'strain_lim', tx_strain_lim);
 
 hold on;
-
-% propagation speed line
-c = tx_prop_speed_km_s; % propagation speed [km/s]
-x_p = tx_spedd_line_points(1);
-y_p = tx_spedd_line_points(2);
-prop_speed_line = ( c .* (data.time - x_p) ) + y_p;
-plot(data.time, prop_speed_line, 'w--', 'LineWidth', 1);
-prop_speed_txt = ['c = ', num2str(c * 1e3), ' [m/s]  '];
-text(x_p, y_p, prop_speed_txt, 'Color', 'white', 'FontSize', 12, 'HorizontalAlignment','right');
-
-% position of interest
-yline(tx_cpa_km, '--', 'CPA','LineWidth', 1, 'Color', '#FFD1DF');
-yline(tx_channel_position_km, '--', 'far from CPA', 'LineWidth', 1, 'Color', '#D1FFBD');
-
+% draw propagation speed lines on time-space plot
+draw_prop_speed_lines( ...
+	tx_prop_speed_km_s, ...
+	tx_speed_line_points, ...
+	tx_cpa_km, ...
+	tx_channel_position_km);
 hold off;
 
 % export plot as png
@@ -96,12 +91,12 @@ exportgraphics( ...
 	fullfile(dataset_name, ['time_space_plot_' dataset_name  '.png']));
 
 %% strain waveform of a single channel
-wf = readtable(dataset, 'Range', 'waveform');
-wf_channel_position_km		= wf.wf_channel_position_km(1);
-wf_cpa_km					= wf.wf_cpa_km(1);
+wf = feval(str2func(dataset_name + "_waveform"));
+wf_channel_position_km		= wf.wf_channel_position_km;
+wf_cpa_km					= wf.wf_cpa_km;
 wf_time_lim					= wf.wf_time_lim;
 wf_strain_lim				= wf.wf_strain_lim;
-filename_audio				= fullfile(dataset_name, ['strain_waveform_' dataset_name  '.wav']);
+filename_audio				= wf.filename_audio;
 
 % plot strain waveform channel of interest
 strain_waveform = get_strain_waveform( ...
@@ -120,15 +115,16 @@ exportgraphics( ...
 	fullfile(dataset_name, ['strain_waveform_' dataset_name  '.png']));
 
 %% spectrogram of a single channel
-sg = readtable(dataset, 'Range', 'spectrogram');
-sg_channel_position_km		= sg.sg_channel_position_km(1);
-sg_nfft						= sg.sg_nfft(1);
-sg_window_len				= sg.sg_window_len(1);
-sg_overlap_pct				= sg.sg_overlap_pct(1);
-sg_window					= hann(sg_window_len, 'periodic');
+sg = feval(str2func(dataset_name + "_spectrogram"));
+sg_channel_position_km		= sg.sg_channel_position_km;
+sg_nfft						= sg.sg_nfft;
+sg_window_len				= sg.sg_window_len;
+sg_window					= sg.sg_window;
+sg_overlap_pct				= sg.sg_overlap_pct;
 sg_time_lim					= sg.sg_time_lim;
 sg_frequency_lim			= sg.sg_frequency_lim;
 sg_strain_lim				= sg.sg_strain_lim;
+
 
 % plot spectrogram
 spectrogram_plot = get_spectrogram( ...
@@ -150,13 +146,13 @@ exportgraphics( ...
 	fullfile(dataset_name, ['spectrogram_' dataset_name  '.png']));
 
 %% space-frequency plot
-fx = readtable(dataset, 'Range', 'space_frequency_plot');
+fx = feval(str2func(dataset_name + "_fx"));
 fx_nfft				= fx.fx_nfft;
 fx_time_interval	= fx.fx_time_interval;
 fx_time_window		= fx.fx_time_window;
 fx_frequency_lim	= fx.fx_frequency_lim;
 fx_strain_lim		= fx.fx_strain_lim;
-filename_animation	= fullfile(dataset_name, ['fx_animation_' dataset_name  '.avi']);
+filename_animation	= fx.filename_animation;
 
 % plot spatio-spectral representation
 space_frequency_plot = get_space_frequency_plot( ...
@@ -176,13 +172,13 @@ exportgraphics( ...
 	fullfile(dataset_name, ['fx_plot_' dataset_name  '.png']));
 
 %% corss correlation statistics
-xcorr = readtable(dataset, 'Range', 'correlation');
+xcorr = feval(str2func(dataset_name + "_correlation"));
 corr_channel_position_km	= xcorr.corr_channel_position_km;
 corr_offset_m				= xcorr.corr_offset_m;
 corr_time_lag				= xcorr.corr_time_lag;
 corr_time_interval			= xcorr.corr_time_interval;
 corr_cpa_km					= xcorr.corr_cpa_km;
-filename_xcorr_table		= fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.csv']);
+filename_xcorr_table		= xcorr.filename_xcorr_table;
 
 % plot correlogram
 correlogram = get_correlogram( ...

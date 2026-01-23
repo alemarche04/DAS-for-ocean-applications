@@ -73,29 +73,29 @@ end
 
 
 % function for input validation
-    function results = parse_inputs(data, time, distance, varargin)
-    p = inputParser;
-
-    % required parameters
-    valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
-    addRequired(p, 'data', valid);
-
-    valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'vector'});
-    addRequired(p, 'time', valid);
-
-    valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'nonnegative', 'vector'});
-    addRequired(p, 'distance', valid);
-
-    % optional parameters
-    valid = @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x >= 0));
-    addParameter(p, 'time_lim', [], valid);
-    addParameter(p, 'distance_lim', [], valid);
-
-    valid = @(x) isempty(x) || (isnumeric(x) && isvector(x));
-    addParameter(p, 'strain_lim', [], valid);
-
-    parse(p, data, time, distance, varargin{:});
-
-    results = p.Results;
-    end
-    %
+function results = parse_inputs(data, time, distance, varargin)
+	p = inputParser;
+	
+	% required parameters
+	valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
+	addRequired(p, 'data', valid);
+	
+	valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'vector'});
+	addRequired(p, 'time', valid);
+	
+	valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'nonnegative', 'vector'});
+	addRequired(p, 'distance', valid);
+	
+	% optional parameters
+	valid = @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x >= 0));
+	addParameter(p, 'time_lim', [], valid);
+	addParameter(p, 'distance_lim', [], valid);
+	
+	valid = @(x) isempty(x) || (isnumeric(x) && isvector(x));
+	addParameter(p, 'strain_lim', [], valid);
+	
+	parse(p, data, time, distance, varargin{:});
+	
+	results = p.Results;
+end
+%
