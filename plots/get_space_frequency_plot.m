@@ -1,5 +1,5 @@
 function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
-	nfft, time_window, time_interval, varargin)
+	nfft, time_window, time_interval, filename_animation, varargin)
 % GET_SPACE_FREQUENCY_PLOT Generate spatio-spectral (f-x) visualization
 %
 %   fig = GET_SPACE_FREQUENCY_PLOT(data, distance, sampling_frequency, nfft, 
@@ -72,13 +72,7 @@ function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
     
     % open file for animation
     if ~isempty(get_animation) & get_animation
-		try
-            filename_animation = evalin('caller', 'fxPlot.filename_animation');
-            fx_animation = VideoWriter(filename_animation, 'Motion JPEG AVI');
-        catch
-            warning('Unable to find name animation: used default file name space_frequency_animation.avi');
-			fx_animation = VideoWriter('space_frequency_animation.avi', 'Motion JPEG AVI');
-		end
+		fx_animation = VideoWriter(filename_animation, 'Motion JPEG AVI');
         fx_animation.Quality = 95;
         fx_animation.FrameRate = 3;
         open(fx_animation);
@@ -172,42 +166,45 @@ end
 
 
 % function for input validation
-    function results = parse_inputs(data, distance, sampling_frequency, nfft, ...
-    time_window, time_interval, varargin)
+function results = parse_inputs(data, distance, sampling_frequency, nfft, ...
+time_window, time_interval, varargin)
 
-    p = inputParser;
+p = inputParser;
 
-    valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
-    addRequired(p, 'data', valid);
+valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
+addRequired(p, 'data', valid);
 
-    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative'});
-    addRequired(p, 'distance', valid);
+valid = @(x)validateattributes(x,{'numeric'},{'nonnegative'});
+addRequired(p, 'distance', valid);
 
-    valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
-    addRequired(p, 'sampling_frequency', valid);
+valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
+addRequired(p, 'sampling_frequency', valid);
 
-    valid = @(x)validateattributes(x,{'numeric'},{'positive', 'integer', 'scalar'});
-    addRequired(p, 'nfft', valid);
+valid = @(x)validateattributes(x,{'numeric'},{'positive', 'integer', 'scalar'});
+addRequired(p, 'nfft', valid);
 
-    valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
-    addRequired(p, 'time_window', valid);
+valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
+addRequired(p, 'time_window', valid);
 
-    valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
-    addRequired(p, 'time_interval', valid);
-    
-    
-    valid = @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x >= 0));
-    addParameter(p, 'frequency_lim', [], valid);
+valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
+addRequired(p, 'time_interval', valid);
 
-    valid = @(x) isempty(x) || (isnumeric(x) && isvector(x));
-    addParameter(p, 'strain_lim', [], valid);
+valid = @(x)validateattributes(x,{'char'},{'nonempty'});
+addRequired(p, 'filename_animation', valid);
 
-    valid = @(x) isempty(x) || (islogical(x));
-    addParameter(p, 'get_animation', false, valid);
 
-    parse(p, data, distance, sampling_frequency, nfft, ...
-        time_window, time_interval, varargin{:});
+valid = @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x >= 0));
+addParameter(p, 'frequency_lim', [], valid);
 
-    results = p.Results;
-    end
-    %
+valid = @(x) isempty(x) || (isnumeric(x) && isvector(x));
+addParameter(p, 'strain_lim', [], valid);
+
+valid = @(x) isempty(x) || (islogical(x));
+addParameter(p, 'get_animation', false, valid);
+
+parse(p, data, distance, sampling_frequency, nfft, ...
+    time_window, time_interval, varargin{:});
+
+results = p.Results;
+end
+%

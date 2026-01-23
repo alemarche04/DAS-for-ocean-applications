@@ -1,4 +1,4 @@
-function fig = get_strain_waveform(data, distance_km, time, channel_position_km, varargin)
+function fig = get_strain_waveform(data, distance_km, time, channel_position_km, filename_audio, sampling_frequency_Hz, varargin)
 % GET_STRAIN_WAVEFORM Plot strain waveform for a single channel
 %
 %   fig = GET_STRAIN_WAVEFORM(data, distance_km, time, channel_position_km) 
@@ -67,14 +67,8 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
     %
 
 	% export audio file
-	try
-        filename_audio = evalin('caller', 'waveform.filename_audio');
-		sampling_frequency_Hz = evalin('caller', 'data.sampling_frequency_Hz');
-        audiowrite(filename_audio, (channelData .* 1e9), round(sampling_frequency_Hz*3));
-    catch
-        warning('Unable to generate audio from waveform: filename not found');
-	end
-	
+	audiowrite(filename_audio, (channelData .* 1e9), round(sampling_frequency_Hz*3));
+    
 
 end
 
@@ -93,6 +87,12 @@ end
 
 	valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'nonnegative', 'scalar'});
     addRequired(p, 'channel_position_km', valid);    
+
+	valid = @(x)validateattributes(x,{'char'},{'nonempty'});
+    addRequired(p, 'filename_audio', valid); 
+
+	valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'nonnegative', 'scalar'});
+    addRequired(p, 'sampling_frequency_Hz', valid); 
 
     % optional parameters
     valid = @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x >= 0));

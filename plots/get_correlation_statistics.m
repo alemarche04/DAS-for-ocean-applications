@@ -1,5 +1,5 @@
 function [correlation_statistics, fig] = get_correlation_statistics(data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval)
+    channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table)
 % GET_CORRELATION_STATISTICS Compute and visualize correlation statistics of strain data
 %
 %   fig = GET_CORRELATION_STATISTICS(data, sampling_frequency, distance_m, 
@@ -191,16 +191,8 @@ function [correlation_statistics, fig] = get_correlation_statistics(data, sampli
 	correlation_table = array2table(correlation_statistics, ...
     	'VariableNames', {'Offset', 'Max_Value', 'Time'});
 	
-	try
-    	correlation = evalin('caller', 'correlation');
-    	csv_filename = correlation.filename_table;
-    	writetable(correlation_table, csv_filename);
-	catch
-    	warning('Unable to find name for correlation statistics file: used default file name corr_stats.csv');
-    	csv_filename = 'corr_stats.csv';
-    	writetable(correlation_table, csv_filename);
-	end
-	fprintf('Events saved to: %s\n', csv_filename);
+	writetable(correlation_table, filename_xcorr_table);
+	fprintf('Events saved to: %s\n', filename_xcorr_table);
 
 	try
         time_and_date = evalin('caller', 'data.time_and_date');
@@ -235,6 +227,9 @@ function results = parse_inputs(data, sampling_frequency, distance_m, channel_di
 	
 	valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
 	addRequired(p, 'time_interval', valid); 
+
+	valid = @(x)validateattributes(x,{'char'},{'nonempty'});
+	addRequired(p, 'filename_xcorr_table', valid);
 	
 	parse(p, data, sampling_frequency, distance_m, channel_distance_m, ...
 	channel_reference_position_km, offset_m, max_lag, time_interval);
