@@ -4,11 +4,7 @@ clear all
 close all
 
 %% load data from dataset
-addpath('Dataset', 'filters', 'plots', ...
-	'DAS4Whale_Bou22_config', ...
-	'DAS4Tracking_Ror23_config', ...
-	'DAS4Tracking_airgun_config', ...
-	'Norway_config');
+addpath('Dataset', 'filters', 'plots', 'config');
 
 % Dataset available:	DAS4Whale_Bou22
 %						DAS4Tracking_Ror23
@@ -16,11 +12,14 @@ addpath('Dataset', 'filters', 'plots', ...
 %						DAS4Tracking_airgun_outer
 %						Norway
 
-dataset_name =	'DAS4Whale_Bou22';
-data =			feval(str2func(dataset_name + "_data"));
+dataset_name	= 'DAS4Whale_Bou22';
+cfg				= feval(str2func(dataset_name + "_cfg"));
+data			= cfg.data();
 
 %% butterworth bandpass filter
-bp = feval(str2func(dataset_name + "_bandpass"));
+
+% parameters
+bp = cfg.bandpass();
 bp_cutoff_freq		= bp.bp_cutoff_freq;
 bp_order			= bp.bp_order;
 
@@ -32,7 +31,9 @@ strain_filtered = butterworth_bp_filter( ...
 	data.sampling_frequency_Hz);
 
 %% median filter 2D 3x3 symmetric
-medFilt = feval(str2func(dataset_name + "_bandpass"));
+
+% parameters
+medFilt = cfg.medFilt();
 med_filt2D_dim = medFilt.med_filt2D_dim;
 
 % apply filter
@@ -41,7 +42,9 @@ strain_filtered = median_filter_2D( ...
 	med_filt2D_dim);
 
 %% fk filtering
-fkFilt = feval(str2func(dataset_name + "_fkFilt"));
+
+% parameters
+fkFilt = cfg.fkFilt();
 fk_velocity_range = fkFilt.fk_velocity_range;
 
 fk_filter =	fk_filter_design( ...
@@ -58,7 +61,9 @@ strain_filtered = fk_filter_filt( ...
 strain_dB = 20*log10(abs(strain_filtered) ./ max(abs(strain_filtered), [], "all"));
 
 %% time-space plot
-tx = feval(str2func(dataset_name + "_tx"));
+
+% parameters
+tx = cfg.tx();
 tx_time_lim					= tx.tx_time_lim;
 tx_distance_lim				= tx.tx_distance_lim;
 tx_strain_lim				= tx.tx_strain_lim;
@@ -91,7 +96,9 @@ exportgraphics( ...
 	fullfile(dataset_name, ['time_space_plot_' dataset_name  '.png']));
 
 %% strain waveform of a single channel
-wf = feval(str2func(dataset_name + "_waveform"));
+
+% parameters
+wf = cfg.waveform();
 wf_channel_position_km		= wf.wf_channel_position_km;
 wf_cpa_km					= wf.wf_cpa_km;
 wf_time_lim					= wf.wf_time_lim;
@@ -115,7 +122,9 @@ exportgraphics( ...
 	fullfile(dataset_name, ['strain_waveform_' dataset_name  '.png']));
 
 %% spectrogram of a single channel
-sg = feval(str2func(dataset_name + "_spectrogram"));
+
+% parameters
+sg = cfg.spectrogram();
 sg_channel_position_km		= sg.sg_channel_position_km;
 sg_nfft						= sg.sg_nfft;
 sg_window_len				= sg.sg_window_len;
@@ -146,7 +155,9 @@ exportgraphics( ...
 	fullfile(dataset_name, ['spectrogram_' dataset_name  '.png']));
 
 %% space-frequency plot
-fx = feval(str2func(dataset_name + "_fx"));
+
+% parameters
+fx = cfg.fx();
 fx_nfft				= fx.fx_nfft;
 fx_time_interval	= fx.fx_time_interval;
 fx_time_window		= fx.fx_time_window;
@@ -172,7 +183,9 @@ exportgraphics( ...
 	fullfile(dataset_name, ['fx_plot_' dataset_name  '.png']));
 
 %% corss correlation statistics
-xcorr = feval(str2func(dataset_name + "_correlation"));
+
+% parameters
+xcorr = cfg.correlation();
 corr_channel_position_km	= xcorr.corr_channel_position_km;
 corr_offset_m				= xcorr.corr_offset_m;
 corr_time_lag				= xcorr.corr_time_lag;

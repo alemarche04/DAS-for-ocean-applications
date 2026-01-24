@@ -1,38 +1,5 @@
 function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
 	nfft, time_window, time_interval, filename_animation, varargin)
-% GET_SPACE_FREQUENCY_PLOT Generate spatio-spectral (f-x) visualization
-%
-%   fig = GET_SPACE_FREQUENCY_PLOT(data, distance, sampling_frequency, nfft, 
-%   time_window, time_interval) creates a space-frequency domain plot showing 
-%   spectral content across spatial channels for a specified time window.
-%
-%   fig = GET_SPACE_FREQUENCY_PLOT(..., 'Name', Value) specifies optional
-%   parameters using name-value pairs.
-%
-%   Inputs:
-%       data               - [channels x time] data matrix
-%       distance           - Distance axis vector (km)
-%       sampling_frequency - Sampling frequency (Hz)
-%       nfft               - Number of FFT samples for spectral estimation
-%       time_window        - Duration of each f-x plot window (s)
-%       time_interval      - [1x2] vector [start, end] time interval (s)
-%
-%   Optional Parameters:
-%       'frequency_lim'  - [1x2] vector [fmin, fmax] frequency axis limits (Hz)
-%       'strain_lim'     - [1x2] vector [min, max] strain amplitude limits (dB)
-%       'get_animation'  - Logical flag to produce animation of f-x plot. 
-%                          Default: false
-%
-%   Output:
-%       fig - Figure handle containing space-frequency plot
-%
-%   Example:
-%       % Create f-x plot with custom frequency range
-%       fig = get_space_frequency_plot(strain_data, distance, 1000, 2048, ...
-%                                      1.0, [0 30], 'frequency_lim', [0 100], ...
-%                                      'get_animation', true);
-%
-%   See also GET_SPECTROGRAM, PWELCH, FFT
 
     % validate input and set up optional parameters
     params = parse_inputs(data, distance, sampling_frequency, nfft, ...

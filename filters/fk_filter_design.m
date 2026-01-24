@@ -1,40 +1,5 @@
 function fk_filter_out = fk_filter_design(trace_shape, dx, dt, varargin)
-% FK_FILTER_DESIGN Design frequency-wavenumber (f-k) filter for DAS data
-%
-%   fk_filter_out = FK_FILTER_DESIGN(trace_shape, dx, dt) designs an f-k
-%   filter with default propagation speed range [1450-3400] m/s.
-%
-%   fk_filter_out = FK_FILTER_DESIGN(..., 'Name', Value) specifies optional
-%   parameters using name-value pairs.
-%
-%   Inputs:
-%       trace_shape - [1x2] vector [n_channels, n_samples] specifying matrix dimensions
-%       dx          - Channel spacing (m)
-%       dt          - Sampling interval (s)
-%
-%   Optional Parameters:
-%       'c_range'         - [1x4] vector specifying filter speed range (m/s):
-%                           [cs_min, cp_min, cp_max, cs_max] where:
-%                           cs_min: minimum speed for stopband filtering
-%                           cp_min: minimum speed for bandpass filtering
-%                           cp_max: maximum speed for bandpass filtering
-%                           cs_max: maximum speed for stopband filtering
-%                           Default: [1450, 1450, 3400, 3400]
-%       'display_filter'  - Logical flag to plot the filter. Default: false
-%
-%   Output:
-%       fk_filter_out - [space x time] matrix containing the f-k filter
-%
-%   Example:
-%       % Design f-k filter with custom speed range
-%       filter = fk_filter_design([1000, 5000], 10, 0.001, ...
-%                                 'c_range', [1500, 2000, 3000, 3500], ...
-%                                 'display_filter', true);
-%
-%   Reference:
-%       Adapted from: https://github.com/DAS4Whales/DAS4Whales
-%
-%   See also FFT2, IFFT2
+% Adapted from: https://github.com/DAS4Whales/DAS4Whales
 
     % validate input and set up optional parameters
     params = parse_inputs(trace_shape, dx, dt, varargin{:});

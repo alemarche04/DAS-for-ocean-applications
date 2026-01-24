@@ -1,30 +1,5 @@
 function fig = get_correlogram(data, sampling_frequency, distance_m, ...
 	channel_reference_position_km, offset_m, max_lag, time_interval)
-% GET_CORRELOGRAM Generate correlogram visualization of strain data
-%
-%   fig = GET_CORRELOGRAM(data, sampling_frequency, distance_m, 
-%   channel_reference_position_km, offset_m, max_lag, time_interval) 
-%   computes and visualizes the correlogram (cross-correlation as a function 
-%   of spatial offset and time lag) for DAS strain data.
-%
-%   Inputs:
-%       data                         - [channels x time] data matrix
-%       sampling_frequency           - Sampling frequency (Hz)
-%       distance_m                   - Distance axis vector (m)
-%       channel_reference_position_km - Reference channel position (km)
-%       offset_m                     - Maximum spatial offset for correlation (m)
-%       max_lag                      - Maximum time lag for correlation (s)
-%       time_interval                - [1x2] vector [start, end] time interval (s)
-%
-%   Output:
-%       fig - Figure handle containing correlogram plot
-%
-%   Example:
-%       % Generate correlogram for ±500m offset and ±0.2s lag
-%       fig = get_correlogram(strain_data, 1000, distance, 5.0, ...
-%                            500, 0.2, [10 20]);
-%
-%   See also GET_CORRELATION_STATISTICS, XCORR
 
     % validate input
     parse_inputs(data, sampling_frequency, distance_m, channel_reference_position_km, ...

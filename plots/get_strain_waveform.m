@@ -1,31 +1,5 @@
-function fig = get_strain_waveform(data, distance_km, time, channel_position_km, filename_audio, sampling_frequency_Hz, varargin)
-% GET_STRAIN_WAVEFORM Plot strain waveform for a single channel
-%
-%   fig = GET_STRAIN_WAVEFORM(data, distance_km, time, channel_position_km) 
-%   creates a time-domain waveform plot for a specified channel in the DAS data.
-%
-%   fig = GET_STRAIN_WAVEFORM(..., 'Name', Value) specifies optional
-%   parameters using name-value pairs.
-%
-%   Inputs:
-%       data                - [channels x time] data matrix (dB scale)
-%       distance_km         - Distance axis vector (km)
-%       time                - Time axis vector (s)
-%       channel_position_km - Position of target channel (km)
-%
-%   Optional Parameters:
-%       'time_lim'   - [1x2] vector [tmin, tmax] time axis limits (s)
-%       'strain_lim' - [1x2] vector [min, max] amplitude axis limits
-%
-%   Output:
-%       fig - Figure handle containing strain waveform plot
-%
-%   Example:
-%       % Plot waveform for channel at 5.2 km with custom time window
-%       fig = get_strain_waveform(strain_data, distance, time_vector, 5.2, ...
-%                                'time_lim', [10 20], 'strain_lim', [-5 5]);
-%
-%   See also GET_WATERFALL_PLOT, PLOT
+function fig = get_strain_waveform(data, distance_km, time, channel_position_km, ...
+	filename_audio, sampling_frequency_Hz, varargin)
 
     % validate input and set up optional parameters
     params = parse_inputs(data, distance_km, time, channel_position_km, varargin{:});

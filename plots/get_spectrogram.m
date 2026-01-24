@@ -1,37 +1,5 @@
-function fig = get_spectrogram(data, distance_km, sampling_frequency, channel_position_km, nfft, N, window, overlap_pct, varargin)
-% GET_SPECTROGRAM Generate spectrogram for a single channel
-%
-%   fig = GET_SPECTROGRAM(data, distance_km, sampling_frequency, 
-%   channel_position_km, nfft, N, window, overlap_pct) creates a time-frequency 
-%   spectrogram for a specified channel in the DAS data.
-%
-%   fig = GET_SPECTROGRAM(..., 'Name', Value) specifies optional
-%   parameters using name-value pairs.
-%
-%   Inputs:
-%       data               - [channels x time] data matrix (dB scale)
-%       distance_km        - Distance axis vector (km)
-%       sampling_frequency - Sampling frequency (Hz)
-%       channel_position_km - Position of target channel (km)
-%       nfft               - Number of FFT samples
-%       N                  - Window length (samples)
-%       window             - Spectral window (e.g., hamming(N), hann(N))
-%       overlap_pct        - Window overlap percentage (0-100)
-%
-%   Optional Parameters:
-%       'time_lim'       - [1x2] vector [tmin, tmax] time axis limits (s)
-%       'frequency_lim'  - [1x2] vector [fmin, fmax] frequency axis limits (Hz)
-%       'strain_lim'     - [1x2] vector [min, max] strain amplitude limits (dB)
-%
-%   Output:
-%       fig - Figure handle containing spectrogram plot
-%
-%   Example:
-%       % Generate spectrogram with Hamming window and 50% overlap
-%       fig = get_spectrogram(strain_data, distance, 1000, 5.2, 2048, ...
-%                            512, hamming(512), 50, 'frequency_lim', [0 50]);
-%
-%   See also SPECTROGRAM, GET_SPACE_FREQUENCY_PLOT, PWELCH
+function fig = get_spectrogram(data, distance_km, sampling_frequency, ...
+	channel_position_km, nfft, N, window, overlap_pct, varargin)
 
     % validate input and set up optional parameters
     params = parse_inputs(data, distance_km, sampling_frequency, channel_position_km, nfft, N, window, overlap_pct, varargin{:});

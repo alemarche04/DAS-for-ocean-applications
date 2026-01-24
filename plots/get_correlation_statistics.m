@@ -1,32 +1,5 @@
 function [correlation_statistics, fig] = get_correlation_statistics(data, sampling_frequency, distance_m, channel_distance_m, ...
     channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table)
-% GET_CORRELATION_STATISTICS Compute and visualize correlation statistics of strain data
-%
-%   fig = GET_CORRELATION_STATISTICS(data, sampling_frequency, distance_m, 
-%   channel_distance_m, channel_reference_position_km, offset_m, max_lag, 
-%   time_interval, file_name) computes spatial and temporal correlation 
-%   statistics for DAS strain data and generates visualization plots.
-%
-%   Inputs:
-%       data							- [channels x time] data matrix
-%       sampling_frequency				- Sampling frequency (Hz)
-%       distance_m						- Distance axis vector (m)
-%       channel_distance_m				- Spacing between adjacent channels (m)
-%       channel_reference_position_km	- Reference channel position (km)
-%       offset_m						- Maximum spatial offset for correlation (m)
-%       max_lag							- Maximum time lag for correlation (s)
-%       time_interval					- [1x2] vector [start, end] time interval (s)
-%
-%   Output:
-%       fig								- Figure handle containing correlation statistics plots
-%		correlation_statistics			- Matrix containing results of cross correlation
-%
-%   Example:
-%       % Compute correlation statistics for 1 km offset and 0.5s lag
-%       fig = get_correlation_statistics(strain_data, 1000, distance, 10, ...
-%                                        5.0, 1000, 0.5, [0 10], 'corr_stats');
-%
-%   See also XCORR, CORRCOEF
 
     % parse input parameters
     parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
