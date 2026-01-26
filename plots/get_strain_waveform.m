@@ -2,7 +2,7 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
 	filename_audio, sampling_frequency_Hz, varargin)
 
     % validate input and set up optional parameters
-    params = parse_inputs(data, distance_km, time, channel_position_km, varargin{:});
+    params = parse_inputs(data, distance_km, time, channel_position_km, filename_audio, sampling_frequency_Hz, varargin{:});
 
     time_lim = params.time_lim;
     strain_lim = params.strain_lim;
@@ -48,7 +48,7 @@ end
 
 
 % function for input validation
-    function results = parse_inputs(data, distance_km, time, channel_position_km, varargin)
+    function results = parse_inputs(data, distance_km, time, channel_position_km, filename_audio, sampling_frequency_Hz, varargin)
     p = inputParser;
 
     % required parameters
@@ -75,7 +75,7 @@ end
     valid = @(x) isempty(x) || (isnumeric(x) && isvector(x));
     addParameter(p, 'strain_lim', [], valid);
 
-    parse(p, data, distance_km, time, channel_position_km, varargin{:});
+    parse(p, data, distance_km, time, channel_position_km, filename_audio, sampling_frequency_Hz, varargin{:});
 
     results = p.Results;
     end

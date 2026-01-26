@@ -1,9 +1,10 @@
-function [correlation_statistics, fig] = get_correlation_statistics(data, sampling_frequency, distance_m, channel_distance_m, ...
+function [correlation_statistics, fig] = get_correlation_statistics( ...
+	data, sampling_frequency, distance_m, channel_distance_m, ...
     channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table)
 
     % parse input parameters
     parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-        channel_reference_position_km, offset_m, max_lag, time_interval);
+        channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table);
     
     % signal in time interval
     t_start_idx = round(time_interval(1) * sampling_frequency);
@@ -180,7 +181,7 @@ end
 
 % validates and parses input arguments
 function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-	channel_reference_position_km, offset_m, max_lag, time_interval)
+	channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table)
 	p = inputParser;
 	
 	valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
@@ -205,7 +206,7 @@ function results = parse_inputs(data, sampling_frequency, distance_m, channel_di
 	addRequired(p, 'filename_xcorr_table', valid);
 	
 	parse(p, data, sampling_frequency, distance_m, channel_distance_m, ...
-	channel_reference_position_km, offset_m, max_lag, time_interval);
+	channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table);
 	
 	results = p.Results;
 end

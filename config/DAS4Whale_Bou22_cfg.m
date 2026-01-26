@@ -61,7 +61,7 @@ function wf = waveform()
 	wf.wf_cpa_km				= 42.8;
 	wf.wf_time_lim				= [];
 	wf.wf_strain_lim			= [-1.3e-9 1.3e-9];
-	wf.filename_audio			= fullfile(dataset_name, ['strain_waveform_' dataset_name  '.wav']);
+	wf.filename_audio			= fullfile('DAS4Whale_Bou22/', 'strain_waveform_DAS4Whale_Bou22.wav');
 end
 
 function sg = spectrogram()
@@ -81,7 +81,7 @@ function fx = fx()
 	fx.fx_time_window		= 1.5;
 	fx.fx_frequency_lim		= [5 75];
 	fx.fx_strain_lim		= [-25 -5];
-	fx.filename_animation	= fullfile(dataset_name, ['fx_animation_' dataset_name  '.avi']);
+	fx.filename_animation	= fullfile('DAS4Whale_Bou22/', 'fx_animation_DAS4Whale_Bou22.avi');
 end
 
 function xcorr = correlation()
@@ -90,5 +90,5 @@ function xcorr = correlation()
 	xcorr.corr_time_lag				= 0.2;
 	xcorr.corr_time_interval		= [47 50];
 	xcorr.corr_cpa_km				= 42.8;
-	xcorr.filename_xcorr_table		= fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.csv']);
+	xcorr.filename_xcorr_table		= fullfile('DAS4Whale_Bou22/', 'cross_corr_stats_DAS4Whale_Bou22.csv');
 end

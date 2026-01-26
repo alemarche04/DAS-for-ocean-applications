@@ -3,7 +3,7 @@ function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
 
     % validate input and set up optional parameters
     params = parse_inputs(data, distance, sampling_frequency, nfft, ...
-    time_window, time_interval, varargin{:});
+    time_window, time_interval, filename_animation, varargin{:});
   
     frequency_lim = params.frequency_lim;
     strain_lim = params.strain_lim;
@@ -134,7 +134,7 @@ end
 
 % function for input validation
 function results = parse_inputs(data, distance, sampling_frequency, nfft, ...
-time_window, time_interval, varargin)
+time_window, time_interval,filename_animation, varargin)
 
 p = inputParser;
 
@@ -170,7 +170,7 @@ valid = @(x) isempty(x) || (islogical(x));
 addParameter(p, 'get_animation', false, valid);
 
 parse(p, data, distance, sampling_frequency, nfft, ...
-    time_window, time_interval, varargin{:});
+    time_window, time_interval, filename_animation, varargin{:});
 
 results = p.Results;
 end
