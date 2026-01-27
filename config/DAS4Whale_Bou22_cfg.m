@@ -88,7 +88,7 @@ function xcorr = correlation()
 	xcorr.corr_channel_position_km	= 42;
 	xcorr.corr_offset_m				= 300;
 	xcorr.corr_time_lag				= 0.2;
-	xcorr.corr_time_interval		= [47 50];
+	xcorr.corr_time_interval		= [45 60];
 	xcorr.corr_cpa_km				= 42.8;
 	xcorr.filename_xcorr_table		= fullfile('DAS4Whale_Bou22/', 'cross_corr_stats_DAS4Whale_Bou22.csv');
 end

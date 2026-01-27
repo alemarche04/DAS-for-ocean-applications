@@ -12,9 +12,34 @@ addpath('Dataset', 'filters', 'plots', 'config');
 %						DAS4Tracking_airgun_outer
 %						Norway
 
-dataset_name	= 'DAS4Whale_Bou22';
+dataset_name	= 'Norway';
 cfg				= feval(str2func(dataset_name + "_cfg"));
 data			= cfg.data();
+
+%% cable geometry
+
+if strcmp(dataset_name, 'Norway')
+	geoCalble = cfg.geoCable();
+	lat0 = geoCalble.lat(1);
+	lon0 = geoCalble.lon(1);
+	alt0 = geoCalble.alt(1);
+	[x, y, z] = geodetic2enu(geoCalble.lat, geoCalble.lon, geoCalble.alt, lat0, lon0, alt0, wgs84Ellipsoid);
+
+	% plot 2D
+	figure;
+	plot(x,y)
+	axis('equal');
+
+	% plot 3D
+	figure;
+	plot3(x, y, z, 'b.-', 'LineWidth', 1.5, 'MarkerSize', 10);
+	grid on;
+	xlabel('Est (m)');
+	ylabel('Nord (m)');
+	zlabel('Altitudine (m)');
+	axis equal;
+	view(3);
+end
 
 %% butterworth bandpass filter
 
@@ -81,15 +106,15 @@ time_space_plot = get_time_space_plot( ...
 	'distance_lim', tx_distance_lim, ...
 	'strain_lim', tx_strain_lim);
 
-hold on;
-% draw propagation speed lines on time-space plot
-draw_prop_speed_lines( ...
-	data.time, ...
-	tx_prop_speed_km_s, ...
-	tx_speed_line_points, ...
-	tx_cpa_km, ...
-	tx_channel_position_km);
-hold off;
+% % draw propagation speed lines on time-space plot
+% hold on;
+% draw_prop_speed_lines( ...
+% 	data.time, ...
+% 	tx_prop_speed_km_s, ...
+% 	tx_speed_line_points, ...
+% 	tx_cpa_km, ...
+% 	tx_channel_position_km);
+% hold off;
 
 % export plot as png
 exportgraphics( ...
@@ -228,6 +253,7 @@ exportgraphics( ...
 
 % estimates the distance btw the source and the CPA (at 42.8 km)
 estimate_R = true;
+
 if estimate_R
 	distance_from_CPA = (corr_cpa_km - corr_channel_position_km)*1e3; % distance btw reference channel and CPA
 	xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
@@ -238,7 +264,7 @@ if estimate_R
 		./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
 	
 	figure;
-	plot(xcorr_offset_m, R)
+	scatter(xcorr_offset_m, R)
 	
 	figure(correlogram);
 	c = 1470;

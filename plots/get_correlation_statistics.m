@@ -66,27 +66,33 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance));
 
 		% main lobe moving speed
-		c = 1600;
+		% c = 1600;
 		% time lag difference of main lobe
-		lag_diff = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance) / c;
+		% lag_diff = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance) / c;
 		
-		% get time indexes in interval of +-0.01 = main lobe amplitude
-		time_min = max([(lag_diff - 0.01), time_lags_xcorr_2(1)]); 
-		time_max = lag_diff + 0.01;
+		% % get time indexes in interval of +-0.01 = main lobe amplitude
+		% time_min = max([(lag_diff - 0.01), time_lags_xcorr_2(1)]); 
+		% time_max = lag_diff + 0.01;
 
 		% get cross-correlation peak in selected time interval
-		time_idx = (time_lags_xcorr_2 >= time_min) & (time_lags_xcorr_2 <= time_max);
-		hold on 
-		xline(lag_diff, '-r');
-		xline(time_min, '-b');
-		xline(time_max, '-b');
-		hold off
+		% time_idx = (time_lags_xcorr_2 >= time_min) & (time_lags_xcorr_2 <= time_max);
+		% hold on 
+		% xline(lag_diff, '-r');
+		% xline(time_min, '-b');
+		% xline(time_max, '-b');
+		% hold off
 
         % writes (cross)correlation result on txt file
 		% extract data in selected time interval
-        subset_data = x_corr2(time_idx);
-        subset_lags = time_lags_xcorr_2(time_idx);
+        % subset_data = x_corr2(time_idx);
+        % subset_lags = time_lags_xcorr_2(time_idx);
+		time_idx = (x_corr2 >= 0);
+		subset_data = x_corr2(time_idx);
+		subset_lags = time_lags_xcorr_2(time_idx);
         [max_val, rel_idx] = max(subset_data);
+		hold on
+		xline(subset_lags(rel_idx), '-r');
+		hold off
         % save results
         correlation_statistics(csv_position, 1) = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance);
         correlation_statistics(csv_position, 2) = max_val;
@@ -131,28 +137,34 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         xlabel('Time lag (s)');
         title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance));
 
-		% main lobe moving speed
-		c = 1770;
-		% time lag difference of main lobe
-		lag_diff = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance) / c;
-
-		% get time indexes in interval of +-0.01 = main lobe amplitude
-		time_min =(lag_diff - 0.01);
-		time_max = min([(lag_diff + 0.01), time_lags_xcorr_1(end)]);
-
-		% get cross-correlation peak in selected time interval
-		time_idx = (time_lags_xcorr_1 >= time_min) & (time_lags_xcorr_1 <= time_max);
-		hold on 
-		xline(lag_diff, '-r');
-		xline(time_min, '-b');
-		xline(time_max, '-b');
-		hold off
-
-		% writes (cross)correlation result on txt file
-		% extract data in selected time interval
-        subset_data = x_corr1(time_idx);
-        subset_lags = time_lags_xcorr_1(time_idx);
+		% % main lobe moving speed
+		% c = 1770;
+		% % time lag difference of main lobe
+		% lag_diff = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance) / c;
+		% 
+		% % get time indexes in interval of +-0.01 = main lobe amplitude
+		% time_min =(lag_diff - 0.01);
+		% time_max = min([(lag_diff + 0.01), time_lags_xcorr_1(end)]);
+		% 
+		% % get cross-correlation peak in selected time interval
+		% time_idx = (time_lags_xcorr_1 >= time_min) & (time_lags_xcorr_1 <= time_max);
+		% hold on 
+		% xline(lag_diff, '-r');
+		% xline(time_min, '-b');
+		% xline(time_max, '-b');
+		% hold off
+		% 
+		% % writes (cross)correlation result on txt file
+		% % extract data in selected time interval
+        % subset_data = x_corr1(time_idx);
+        % subset_lags = time_lags_xcorr_1(time_idx);
+		time_idx = (x_corr1 >= 0);
+		subset_data = x_corr1(time_idx);
+		subset_lags = time_lags_xcorr_1(time_idx);     
         [max_val, rel_idx] = max(subset_data);
+		hold on
+		xline(subset_lags(rel_idx), '-r');
+		hold off
         % save results
         correlation_statistics(csv_position, 1) = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance);
         correlation_statistics(csv_position, 2) = max_val;
