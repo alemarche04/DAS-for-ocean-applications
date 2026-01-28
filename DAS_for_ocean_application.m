@@ -19,11 +19,11 @@ data			= cfg.data();
 %% cable geometry
 
 if strcmp(dataset_name, 'Norway')
-	geoCalble = cfg.geoCable();
-	lat0 = geoCalble.lat(1);
-	lon0 = geoCalble.lon(1);
-	alt0 = geoCalble.alt(1);
-	[x, y, z] = geodetic2enu(geoCalble.lat, geoCalble.lon, geoCalble.alt, lat0, lon0, alt0, wgs84Ellipsoid);
+	geoCable = cfg.geoCable();
+	lat0 = geoCable.lat(1);
+	lon0 = geoCable.lon(1);
+	alt0 = geoCable.alt(1);
+	[x, y, z] = geodetic2enu(geoCable.lat, geoCable.lon, geoCable.alt, lat0, lon0, alt0, wgs84Ellipsoid);
 
 	% plot 2D
 	figure;

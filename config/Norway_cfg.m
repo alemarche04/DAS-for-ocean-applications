@@ -13,6 +13,7 @@ function cfg = Norway_cfg()
 	
 end
 
+%% LOAD DATA
 function data = data()
 	filename = "095659.hdf5";
     
@@ -32,19 +33,23 @@ function data = data()
 
 end
 
+%% BANDPASS FILTER
 function bp = bandpass()
 	bp.bp_cutoff_freq	= [5 75];
 	bp.bp_order			= 3;
 end
 
+%% 2D MEDIAN FILTER
 function medFilt = medFilt()
 	medFilt.med_filt2D_dim = [3 3];
 end
 
+%% FK FILTER
 function fkFilt = fkFilt()
 	fkFilt.fk_velocity_range = [];
 end
 
+%% TIME-SPACE PLOT
 function tx = tx()
 	tx.tx_time_lim					= [];
 	tx.tx_distance_lim				= [];
@@ -55,6 +60,7 @@ function tx = tx()
 	tx.tx_cpa_km					= 0;
 end
 
+%% STRAIN WAVEFORM
 function wf = waveform()
 	wf.wf_channel_position_km	= 0;
 	wf.wf_cpa_km				= 0;
@@ -63,6 +69,7 @@ function wf = waveform()
 	wf.filename_audio			= fullfile('Norway/', 'strain_waveform_Norway.wav');
 end
 
+%% SPECTROGRAM
 function sg = spectrogram()
 	sg.sg_channel_position_km	= 0;
 	sg.sg_nfft					= 4096;
@@ -74,6 +81,7 @@ function sg = spectrogram()
 	sg.sg_strain_lim			= [];
 end
 
+%% SPACE-FREQUENCY PLOT
 function fx = fx()
 	fx.fx_nfft				= 4096;
 	fx.fx_time_interval		= [0 23];
@@ -83,6 +91,7 @@ function fx = fx()
 	fx.filename_animation	= fullfile('Norway/', 'fx_animation_Norway.avi');
 end
 
+%% CORSS CORRELATION STATISTICS
 function xcorr = correlation()
 	xcorr.corr_channel_position_km	= 0;
 	xcorr.corr_offset_m				= 300;
@@ -92,6 +101,7 @@ function xcorr = correlation()
 	xcorr.filename_xcorr_table		= fullfile('Norway/', 'cross_corr_stats_Norway.csv');
 end
 
+%% CABLE GEOMETRY
 function geoCable = geoCable()
 	S = readstruct("cable-layout.json");
 	C = S.features.geometry.coordinates{1};
@@ -99,4 +109,20 @@ function geoCable = geoCable()
 	geoCable.lon = coord(:,1);
 	geoCable.lat = coord(:,2);
 	geoCable.alt = coord(:,3);
+	for i = 1:length(geoCable.alt)
+		if geoCable.alt(i) == 0
+			if i == 1
+				break
+			end
+			k = i + 1;
+			while geoCable.alt(k) == 0
+				k = k + 1;
+			end
+			if (k > length(geoCable.alt))
+				geoCable.alt(i) = geoCable.alt(i-1);
+			else
+				geoCable.alt(i) = (geoCable.alt(i-1)+geoCable.alt(k))/2;
+			end
+		end
+	end
 end
