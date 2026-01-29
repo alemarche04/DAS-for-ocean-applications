@@ -10,26 +10,53 @@ function cfg = Norway_cfg()
 	cfg.fx			= @fx;
 	cfg.correlation = @correlation;
 	cfg.geoCable	= @geoCable;
+	cfg.sourcePos	= @sourcePos;
 	
 end
 
 %% LOAD DATA
 function data = data()
-	filename = "095659.hdf5";
+	% filename = "095659.hdf5";
     
     % Extract data
-    data.strain =									double(h5read(filename,"/data")) * 1e-9;
-    data.sampling_interval_s =						double(h5read(filename,'/header/dt'));         
-    data.channel_distance_m =						double(h5read(filename,'/header/dx'));
-	[data.nb_of_channels, data.nb_of_samples] =		size(data.strain);
-	data.time =										double(0:1:(data.nb_of_samples - 1)) .* data.sampling_interval_s;
-	data.distance_m =								double(0:1:(data.nb_of_channels - 1)) .* data.channel_distance_m;
-    data.distance_km =								double(data.distance_m .* 1e-3);
-	data.dimensions =								[data.nb_of_channels data.nb_of_samples];
-    data.sampling_frequency_Hz =					1/data.sampling_interval_s;
-    data.gauge_length =								double(h5read(filename,'/header/gaugeLength'));
+    % data.strain =										double(h5read(filename,"/data")) * 1e-9;
+    % data.sampling_interval_s =						double(h5read(filename,'/header/dt'));         
+    % data.channel_distance_m =							double(h5read(filename,'/header/dx'));
+	% [data.nb_of_channels, data.nb_of_samples] =		size(data.strain);
+	% data.time =										double(0:1:(data.nb_of_samples - 1)) .* data.sampling_interval_s;
+	% data.channel_number =								double(h5read(filename,'/header/channels'));
+	% data.distance_m =									double(h5read(filename,'/cableSpec/sensorDistances'));
+    % data.distance_km =								double(data.distance_m .* 1e-3);
+	% data.dimensions =									[data.nb_of_channels data.nb_of_samples];
+    % data.sampling_frequency_Hz =						1/data.sampling_interval_s;
+    % data.gauge_length =								double(h5read(filename,'/header/gaugeLength'));
+	% 
+	% data.time_and_date = "09:56:59";
+	
+	filename = 'norway_095659.hdf5';
 
-	data.time_and_date = "09:56:59";
+	data.strain						= h5read(filename, '/trace');
+	data.time						= h5read(filename, '/tx');
+	data.distance_m					= h5read(filename, '/dist');
+	data.distance_km				= double(data.distance_m .* 1e-3);
+	
+	temp_time						= h5read(filename, '/file_begin_time_utc');
+	data.time_and_date				= temp_time{1}; 
+	
+	data.sampling_frequency_Hz		= h5read(filename, '/metadata/fs');
+	data.channel_distance_m			= h5read(filename, '/metadata/dx');
+	data.gauge_length				= h5read(filename, '/metadata/GL');
+	data.nb_of_channels				= h5read(filename, '/metadata/nx');
+	data.nb_of_samples				= h5read(filename, '/metadata/ns');
+
+	data.sampling_interval_s		= 1/data.sampling_frequency_Hz;
+	data.dimensions					= [data.nb_of_channels data.nb_of_samples];
+	
+	% Python is "Row-Major", MATLAB is "Column-Major", 
+	data.strain	= data.strain'; 
+	
+	% test
+	% disp(['Strain shape: ', num2str(size(data.strain))]);
 
 end
 
@@ -53,7 +80,7 @@ end
 function tx = tx()
 	tx.tx_time_lim					= [];
 	tx.tx_distance_lim				= [];
-	tx.tx_strain_lim				= [];
+	tx.tx_strain_lim				= [-50 0];
 	tx.tx_prop_speed_km_s			= 1.47;
 	tx.tx_speed_line_points			= [1 1];
 	tx.tx_channel_position_km		= 0;
@@ -125,4 +152,13 @@ function geoCable = geoCable()
 			end
 		end
 	end
+end
+
+%% SOURCE POSITION
+function sourcePos = sourcePos()
+	T = readtable("source-position.csv");
+	A = T(:, 3);
+	B = T(:, 4);
+	sourcePos.lat = table2array(A);
+	sourcePos.lon = table2array(B);
 end

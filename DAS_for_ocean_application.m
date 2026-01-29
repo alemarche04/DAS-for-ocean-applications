@@ -16,29 +16,82 @@ dataset_name	= 'Norway';
 cfg				= feval(str2func(dataset_name + "_cfg"));
 data			= cfg.data();
 
-%% cable geometry
+%% cable geometry and source position
 
 if strcmp(dataset_name, 'Norway')
 	geoCable = cfg.geoCable();
 	lat0 = geoCable.lat(1);
 	lon0 = geoCable.lon(1);
-	alt0 = geoCable.alt(1);
-	[x, y, z] = geodetic2enu(geoCable.lat, geoCable.lon, geoCable.alt, lat0, lon0, alt0, wgs84Ellipsoid);
+	alt0 = 0;
+	[x_cable, y_cable, z_cable] = geodetic2enu(geoCable.lat, geoCable.lon, geoCable.alt, lat0, lon0, alt0, wgs84Ellipsoid);
+
+	sourcePos = cfg.sourcePos();
+	[x_source, y_source, z_source] = geodetic2enu(sourcePos.lat, sourcePos.lon, 0, lat0, lon0, alt0, wgs84Ellipsoid);
 
 	% plot 2D
 	figure;
-	plot(x,y)
+	plot(x_cable,y_cable)
 	axis('equal');
+	grid on;
+	hold on
+	scatter(x_source, y_source, 10, 'red', 'filled');
+	legend('Cable','Source');
+	hold off
 
 	% plot 3D
 	figure;
-	plot3(x, y, z, 'b.-', 'LineWidth', 1.5, 'MarkerSize', 10);
+	plot3(x_cable, y_cable, z_cable, 'b.-', 'LineWidth', 1.5, 'MarkerSize', 10);
 	grid on;
-	xlabel('Est (m)');
-	ylabel('Nord (m)');
-	zlabel('Altitudine (m)');
+	xlabel('East (m)');
+	ylabel('North (m)');
+	zlabel('Altitude (m)');
 	axis equal;
+	hold on
+	plot3(x_source, y_source, z_source, '-o','Color','red', 'MarkerSize', 3)
+	legend('Cable','Source');
 	view(3);
+	hold off
+	
+	figure;
+	plot(x_cable, y_cable);
+	axis('equal');
+	grid on;
+	hold on;
+
+	% source position animation
+	% scatter initialization
+	h = scatter(nan, nan, 10, 'red', 'filled'); 
+	legend('Cable', 'Source');
+	
+	% --- video configuration ---
+	filename = fullfile('Norway/', 'source_position_animation.mp4');
+	videoFile = VideoWriter(filename, 'MPEG-4');
+	videoFile.FrameRate = 20; % fps video
+	open(videoFile);
+	% ----------------------------
+	
+	n_points = length(x_source);
+	step = 20; 
+	
+	for k = 1:step:n_points
+    	h.XData = x_source(1:k);
+    	h.YData = y_source(1:k);
+    	
+    	drawnow;
+
+    	frame = getframe(gcf); 
+    	writeVideo(videoFile, frame);
+	end
+	
+	h.XData = x_source;
+	h.YData = y_source;
+	writeVideo(videoFile, getframe(gcf));
+	
+	% close video
+	close(videoFile);
+	hold off;
+	
+	fprintf('Video saved as source_position_animation.mp4\n');
 end
 
 %% butterworth bandpass filter
