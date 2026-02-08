@@ -12,7 +12,7 @@ addpath('Dataset', 'Dataset_Norway', 'filters', 'plots', 'config');
 %						DAS4Tracking_airgun_outer
 %						Norway
 
-dataset_name	= 'Norway';
+dataset_name	= 'DAS4Whale_Bou22';
 DAS				= feval(str2func(dataset_name + "_cfg"));
 data			= DAS.data();
 
@@ -274,6 +274,7 @@ if estimate_R
 	
 	R = sqrt(((distance_from_CPA^2 + (time_peak.^2).*c^2 - (distance_from_CPA - xcorr_offset_m).^2) ...
 		./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
+	R = abs(R);
 	
 	figure;
 	scatter(xcorr_offset_m, R)
@@ -283,12 +284,16 @@ if estimate_R
 	dt= -0.2:0.002:0.2;
 	distance_from_CPA = 800;
 	
-	d1 = sqrt( ( sqrt(R.^2+distance_from_CPA^2) - dt*c ).^2 - R.^2 );
+	R_med = median(R, 'omitnan');
+
+	d1 = sqrt( ( sqrt(R_med^2+distance_from_CPA^2) - dt*c ).^2 - R_med^2 );
 	dsh = distance_from_CPA-d1;
 	hold on
 	plot(dt,dsh,'k--','LineWidth', 1)
 	ylabel('Distance from reference, dx [m]')
 	hold off
+
+	fprintf('Estimate value of R: %d\n', R_med);
 end
 
 % %% event detection

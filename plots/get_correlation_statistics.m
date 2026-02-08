@@ -55,48 +55,26 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         end
         
         % (cross)correlation with negative offset
-        [x_corr2, lags_xcorr_2] = xcorr(channel_reference, data_corr((channel_reference_idx - i * offset_step), :), max_lag_samples);
-        time_lags_xcorr_2 = lags_xcorr_2 / sampling_frequency;
+        [xcorr_negative_offset, lags_xcorr_negative_offset] = xcorr(channel_reference, data_corr((channel_reference_idx - i * offset_step), :), max_lag_samples);
+        time_lags_xcorr_negative_offset = lags_xcorr_negative_offset / sampling_frequency;
+		offset_from_reference = distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance;
         
         % plot result 
         nexttile
-        plot(time_lags_xcorr_2, x_corr2);
+        plot(time_lags_xcorr_negative_offset, xcorr_negative_offset);
         ylim([min_correlation max_correlation]);
         xlabel('Time lag (s)');
-        title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance));
+        title(sprintf('dx= %0.2f m', offset_from_reference));
 
-		% main lobe moving speed
-		% c = 1600;
-		% time lag difference of main lobe
-		% lag_diff = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance) / c;
-		
-		% % get time indexes in interval of +-0.01 = main lobe amplitude
-		% time_min = max([(lag_diff - 0.01), time_lags_xcorr_2(1)]); 
-		% time_max = lag_diff + 0.01;
-
-		% get cross-correlation peak in selected time interval
-		% time_idx = (time_lags_xcorr_2 >= time_min) & (time_lags_xcorr_2 <= time_max);
-		% hold on 
-		% xline(lag_diff, '-r');
-		% xline(time_min, '-b');
-		% xline(time_max, '-b');
-		% hold off
-
-        % writes (cross)correlation result on txt file
-		% extract data in selected time interval
-        % subset_data = x_corr2(time_idx);
-        % subset_lags = time_lags_xcorr_2(time_idx);
-		time_idx = (x_corr2 >= 0);
-		subset_data = x_corr2(time_idx);
-		subset_lags = time_lags_xcorr_2(time_idx);
-        [max_val, rel_idx] = max(subset_data);
+        [max_val, rel_idx] = max(abs(xcorr_negative_offset));
 		hold on
-		xline(subset_lags(rel_idx), '-r');
+		xline(time_lags_xcorr_negative_offset(rel_idx), '-r');
 		hold off
+		
         % save results
-        correlation_statistics(csv_position, 1) = (distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance);
+        correlation_statistics(csv_position, 1) = offset_from_reference;
         correlation_statistics(csv_position, 2) = max_val;
-        correlation_statistics(csv_position, 3) = subset_lags(rel_idx);
+        correlation_statistics(csv_position, 3) = time_lags_xcorr_negative_offset(rel_idx);
 
 		csv_position = csv_position + 1;
         
@@ -127,55 +105,32 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         end
             
         % (cross)correlation with positive offset
-        [x_corr1, lags_xcorr_1] = xcorr(channel_reference, data_corr((channel_reference_idx + i * offset_step), :), max_lag_samples);
-        time_lags_xcorr_1 = lags_xcorr_1 / sampling_frequency;
+        [xcorr_positive_offset, lags_xcorr_positive_offset] = xcorr(channel_reference, data_corr((channel_reference_idx + i * offset_step), :), max_lag_samples);
+        time_lags_xcorr_positive_offset = lags_xcorr_positive_offset / sampling_frequency;
+		offset_from_reference = distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance;
         
         % plot result 
         nexttile
-        plot(time_lags_xcorr_1, x_corr1);
+        plot(time_lags_xcorr_positive_offset, xcorr_positive_offset);
         ylim([min_correlation max_correlation]);
         xlabel('Time lag (s)');
-        title(sprintf('dx= %0.2f m', distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance));
-
-		% % main lobe moving speed
-		% c = 1770;
-		% % time lag difference of main lobe
-		% lag_diff = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance) / c;
-		% 
-		% % get time indexes in interval of +-0.01 = main lobe amplitude
-		% time_min =(lag_diff - 0.01);
-		% time_max = min([(lag_diff + 0.01), time_lags_xcorr_1(end)]);
-		% 
-		% % get cross-correlation peak in selected time interval
-		% time_idx = (time_lags_xcorr_1 >= time_min) & (time_lags_xcorr_1 <= time_max);
-		% hold on 
-		% xline(lag_diff, '-r');
-		% xline(time_min, '-b');
-		% xline(time_max, '-b');
-		% hold off
-		% 
-		% % writes (cross)correlation result on txt file
-		% % extract data in selected time interval
-        % subset_data = x_corr1(time_idx);
-        % subset_lags = time_lags_xcorr_1(time_idx);
-		time_idx = (x_corr1 >= 0);
-		subset_data = x_corr1(time_idx);
-		subset_lags = time_lags_xcorr_1(time_idx);     
-        [max_val, rel_idx] = max(subset_data);
+        title(sprintf('dx= %0.2f m', offset_from_reference));
+   
+        [max_val, rel_idx] = max(abs(xcorr_positive_offset));
 		hold on
-		xline(subset_lags(rel_idx), '-r');
+		xline(time_lags_xcorr_positive_offset(rel_idx), '-r');
 		hold off
-        % save results
-        correlation_statistics(csv_position, 1) = (distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance);
-        correlation_statistics(csv_position, 2) = max_val;
-        correlation_statistics(csv_position, 3) = subset_lags(rel_idx);
-		csv_position = csv_position + 1;
 
+        % save results
+        correlation_statistics(csv_position, 1) = offset_from_reference;
+        correlation_statistics(csv_position, 2) = max_val;
+        correlation_statistics(csv_position, 3) = time_lags_xcorr_positive_offset(rel_idx);
+		csv_position = csv_position + 1;
         
 	end
 
 	correlation_table = array2table(correlation_statistics, ...
-    	'VariableNames', {'Offset', 'Max_Value', 'Time'});
+    	'VariableNames', {'Offset', 'Peak value', 'Time'});
 	
 	writetable(correlation_table, filename_xcorr_table);
 	fprintf('Events saved to: %s\n', filename_xcorr_table);
