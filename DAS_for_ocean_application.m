@@ -4,7 +4,7 @@ clear all
 close all
 
 %% load data from dataset
-addpath('Dataset', 'filters', 'plots', 'config');
+addpath('Dataset', 'Dataset_Norway', 'filters', 'plots', 'config');
 
 % Dataset available:	DAS4Whale_Bou22
 %						DAS4Tracking_Ror23
@@ -13,91 +13,50 @@ addpath('Dataset', 'filters', 'plots', 'config');
 %						Norway
 
 dataset_name	= 'Norway';
-cfg				= feval(str2func(dataset_name + "_cfg"));
-data			= cfg.data();
+DAS				= feval(str2func(dataset_name + "_cfg"));
+data			= DAS.data();
 
 %% cable geometry and source position
 
 if strcmp(dataset_name, 'Norway')
-	geoCable = cfg.geoCable();
-	lat0 = geoCable.lat(1);
-	lon0 = geoCable.lon(1);
-	alt0 = 0;
-	[x_cable, y_cable, z_cable] = geodetic2enu(geoCable.lat, geoCable.lon, geoCable.alt, lat0, lon0, alt0, wgs84Ellipsoid);
+	
+	% plot cable geometry
+	geo_origin = DAS.plot_cable_geometry_2D();
+	exportgraphics( ...
+	gcf, ...
+	fullfile(dataset_name, ['cable_geometry_' dataset_name  '.png']));
 
-	sourcePos = cfg.sourcePos();
-	[x_source, y_source, z_source] = geodetic2enu(sourcePos.lat, sourcePos.lon, 0, lat0, lon0, alt0, wgs84Ellipsoid);
+	% source position first run
+	t_start_run1 = duration(10, 59, 19);
+	t_end_run1 = duration(11, 47, 29);
+	source_run1 = DAS.sourcePos(t_start_run1, t_end_run1);
+	
+	% source position second run
+	t_start_run2 = duration(12, 12, 23);
+	t_end_run2 = duration(13, 00, 33);
+	source_run2 = DAS.sourcePos(t_start_run2, t_end_run2);
 
-	% plot 2D
-	figure;
-	plot(x_cable,y_cable)
-	axis('equal');
-	grid on;
-	hold on
-	scatter(x_source, y_source, 10, 'red', 'filled');
-	legend('Cable','Source');
-	hold off
+	% source position third run
+	t_start_run3 = duration(13, 09, 50);
+	t_end_run3 = duration(13, 47, 10);
+	source_run3 = DAS.sourcePos(t_start_run3, t_end_run3);
 
-	% plot 3D
-	figure;
-	plot3(x_cable, y_cable, z_cable, 'b.-', 'LineWidth', 1.5, 'MarkerSize', 10);
-	grid on;
-	xlabel('East (m)');
-	ylabel('North (m)');
-	zlabel('Altitude (m)');
-	axis equal;
-	hold on
-	plot3(x_source, y_source, z_source, '-o','Color','red', 'MarkerSize', 3)
-	legend('Cable','Source');
-	view(3);
-	hold off
-	
-	figure;
-	plot(x_cable, y_cable);
-	axis('equal');
-	grid on;
-	hold on;
+	% plot cable geometry and rouce postion 2D
+	DAS.plot_source_pos_all_2D(source_run1, source_run2, source_run3, geo_origin);
 
-	% source position animation
-	% scatter initialization
-	h = scatter(nan, nan, 10, 'red', 'filled'); 
-	legend('Cable', 'Source');
-	
-	% --- video configuration ---
-	filename = fullfile('Norway/', 'source_position_animation.mp4');
-	videoFile = VideoWriter(filename, 'MPEG-4');
-	videoFile.FrameRate = 20; % fps video
-	open(videoFile);
-	% ----------------------------
-	
-	n_points = length(x_source);
-	step = 20; 
-	
-	for k = 1:step:n_points
-    	h.XData = x_source(1:k);
-    	h.YData = y_source(1:k);
-    	
-    	drawnow;
+	exportgraphics( ...
+	gcf, ...
+	fullfile(dataset_name, ['cable_source_' dataset_name  '.png']));
 
-    	frame = getframe(gcf); 
-    	writeVideo(videoFile, frame);
-	end
+	% plot cable geometry and rouce postion 3D
+	DAS.plot_calbe_source_3D(source_run1, source_run2, source_run3);
 	
-	h.XData = x_source;
-	h.YData = y_source;
-	writeVideo(videoFile, getframe(gcf));
-	
-	% close video
-	close(videoFile);
-	hold off;
-	
-	fprintf('Video saved as source_position_animation.mp4\n');
 end
 
 %% butterworth bandpass filter
 
 % parameters
-bp = cfg.bandpass();
+bp = DAS.bandpass();
 bp_cutoff_freq		= bp.bp_cutoff_freq;
 bp_order			= bp.bp_order;
 
@@ -111,7 +70,7 @@ strain_filtered = butterworth_bp_filter( ...
 %% median filter 2D 3x3 symmetric
 
 % parameters
-medFilt = cfg.medFilt();
+medFilt = DAS.medFilt();
 med_filt2D_dim = medFilt.med_filt2D_dim;
 
 % apply filter
@@ -122,7 +81,7 @@ strain_filtered = median_filter_2D( ...
 %% fk filtering
 
 % parameters
-fkFilt = cfg.fkFilt();
+fkFilt = DAS.fkFilt();
 fk_velocity_range = fkFilt.fk_velocity_range;
 
 fk_filter =	fk_filter_design( ...
@@ -141,7 +100,7 @@ strain_dB = 20*log10(abs(strain_filtered) ./ max(abs(strain_filtered), [], "all"
 %% time-space plot
 
 % parameters
-tx = cfg.tx();
+tx = DAS.tx();
 tx_time_lim					= tx.tx_time_lim;
 tx_distance_lim				= tx.tx_distance_lim;
 tx_strain_lim				= tx.tx_strain_lim;
@@ -177,7 +136,7 @@ exportgraphics( ...
 %% strain waveform of a single channel
 
 % parameters
-wf = cfg.waveform();
+wf = DAS.waveform();
 wf_channel_position_km		= wf.wf_channel_position_km;
 wf_cpa_km					= wf.wf_cpa_km;
 wf_time_lim					= wf.wf_time_lim;
@@ -203,7 +162,7 @@ exportgraphics( ...
 %% spectrogram of a single channel
 
 % parameters
-sg = cfg.spectrogram();
+sg = DAS.spectrogram();
 sg_channel_position_km		= sg.sg_channel_position_km;
 sg_nfft						= sg.sg_nfft;
 sg_window_len				= sg.sg_window_len;
@@ -236,7 +195,7 @@ exportgraphics( ...
 %% space-frequency plot
 
 % parameters
-fx = cfg.fx();
+fx = DAS.fx();
 fx_nfft				= fx.fx_nfft;
 fx_time_interval	= fx.fx_time_interval;
 fx_time_window		= fx.fx_time_window;
@@ -264,7 +223,7 @@ exportgraphics( ...
 %% corss correlation statistics
 
 % parameters
-xcorr = cfg.correlation();
+xcorr = DAS.correlation();
 corr_channel_position_km	= xcorr.corr_channel_position_km;
 corr_offset_m				= xcorr.corr_offset_m;
 corr_time_lag				= xcorr.corr_time_lag;
