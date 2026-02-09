@@ -29,8 +29,8 @@ function cfg = Norway_cfg()
 	cfg.plot_cable_source_3D	= @plot_cable_source_3D;
 	
 end
-
 % -----------------------------------------------------------------------%
+
 %% DATA LOADING
 function data = load_data()
 % LOAD_DATA Loads DAS strain data and metadata from HDF5 files.
@@ -59,88 +59,130 @@ function data = load_data()
 	% Transpose from Row-Major (Python) to Column-Major (MATLAB)
 	data.strain	= data.strain'; 
 end
-
 % -----------------------------------------------------------------------%
-%% FILTERS
+
+%% BANDPASS FILTER
 function bp = bandpass()
-% BANDPASS Configuration for frequency bandpass filtering.
-    bp.bp_cutoff_freq	= [5 75]; % [Hz]
-    bp.bp_order			= 3;
+% BANDPASS Configuration for the frequency bandpass filter.
+%
+%   Output:
+%       bp - Struct containing cutoff frequencies and filter order.
+    bp.cutoff_freq		= [5 75]; % [Hz]
+    bp.order			= 3;
 end
-
-function medFilt = medFilt()
-% MEDFILT Configuration for 2D median denoising.
-    medFilt.med_filt2D_dim = [3 3];
-end
-
-function fkFilt = fkFilt()
-% FKFILT Configuration for Frequency-Wavenumber filtering.
-    fkFilt.fk_velocity_range = [];
-end
-
 % -----------------------------------------------------------------------%
-%% VISUALIZATION PARAMETERS
+
+%% 2D MEDIAN FILTER
+function medFilt = medFilt()
+% MEDFILT Configuration for the 2D median filter.
+%
+%   Output:
+%       medFilt - Struct containing kernel dimensions for denoising.
+
+    medFilt.dim = [3 3];
+end
+% -----------------------------------------------------------------------%
+
+%% FK FILTER
+function fkFilt = fkFilt()
+% FKFILT Configuration for Frequency-Wavenumber (f-k) domain filtering.
+%
+%   Output:
+%       fkFilt - Struct containing velocity range limits for f-k filtering.
+
+    fkFilt.velocity_range = [];
+end
+% -----------------------------------------------------------------------%
+
+%% TIME-SPACE PLOT (T-X)
 function tx = tx_plot()
-% TX_PLOT Configuration for Time-Space (LTT) plot visualization.
-    tx.tx_time_lim					= [];
-    tx.tx_distance_lim				= [];
-    tx.tx_strain_lim				= [-50 0]; % [dB]
-    tx.tx_prop_speed_km_s			= 1.47;
-    tx.tx_speed_line_points			= [1 1];
-    tx.tx_channel_position_km		= 0;
-    tx.tx_cpa_km					= 0;
-end
+% TX Configuration for time-distance visualization.
+%
+%   Output:
+%       tx - Parameters for axis limits and propagation speed references.
 
+    tx.time_lim					= [];
+    tx.distance_lim				= [];
+    tx.strain_lim				= [-50 0];	% [dB]
+    tx.prop_speed_km_s			= 1.47;     % Sound speed in water [km/s]
+    tx.speed_line_points		= [1 1];
+    tx.channel_position_km		= 0;
+    tx.cpa_km					= 0;
+end
+% -----------------------------------------------------------------------%
+
+%% STRAIN WAVEFORM
 function wf = waveform()
-% WAVEFORM Configuration for strain time-series visualization.
-    wf.wf_channel_position_km	= 0;
-    wf.wf_cpa_km				= 0;
-    wf.wf_time_lim				= [];
-    wf.wf_strain_lim			= [];
-    wf.filename_audio			= fullfile('Norway/', 'strain_waveform_Norway.wav');
-end
+% WAVEFORM Configuration for strain waveform visualization.
+%
+%   Output:
+%       wf - Parameters for time-series plotting and audio export.
 
+    wf.channel_position_km	= 0;
+    wf.cpa_km				= 0;
+    wf.time_lim				= [];
+    wf.strain_lim			= [];
+    wf.filename_audio		= fullfile('Norway/', 'strain_waveform_Norway.wav');
+end
+% -----------------------------------------------------------------------%
+
+%% SPECTROGRAM
 function sg = spectrogram()
-% SPECTROGRAM Configuration for spectral analysis (STFT).
-    sg.sg_channel_position_km	= 0;
-    sg.sg_nfft					= 4096;
-    sg.sg_window_len			= 512;
-    sg.sg_window				= hann(sg.sg_window_len, 'periodic');
-    sg.sg_overlap_pct			= 0.89;
-    sg.sg_time_lim				= [];
-    sg.sg_frequency_lim			= [];
-    sg.sg_strain_lim			= [];
-end
+% SPECTROGRAM Configuration for time-frequency analysis.
+%
+%   Output:
+%       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
+    sg.channel_position_km	= 0;
+    sg.nfft					= 4096;
+    sg.window_len			= 512;
+    sg.window				= hann(sg.window_len, 'periodic');
+    sg.overlap_pct			= 0.89;
+    sg.time_lim				= [];
+    sg.frequency_lim		= []; % [Hz]
+    sg.strain_lim			= [];
+end
+% -----------------------------------------------------------------------%
+
+%% SPACE-FREQUENCY PLOT (F-X)
 function fx = fx_plot()
-% FX_PLOT Configuration for Space-Frequency spectral visualization.
-    fx.fx_nfft				= 4096;
-    fx.fx_time_interval		= [0 23];
-    fx.fx_time_window		= 1.5;
-    fx.fx_frequency_lim		= [];
-    fx.fx_strain_lim		= [];
+% FX Configuration for space-frequency visualization.
+%
+%   Output:
+%       fx - Parameters for spatial-frequency analysis.
+
+    fx.nfft					= 4096;
+    fx.time_interval		= [0 23];
+    fx.time_window			= 1.5;
+    fx.frequency_lim		= [];
+    fx.strain_lim			= [];
     fx.filename_animation	= fullfile('Norway/', 'fx_animation_Norway.avi');
 end
-
 % -----------------------------------------------------------------------%
-%% CROSS-CORRELATION
+
+%% CROSS-CORRELATION STATISTICS
 function xcorr = correlation()
-% CORRELATION Configuration for channel cross-correlation analysis.
-    xcorr.corr_channel_position_km	= 0;
-    xcorr.corr_offset_m				= 300;
-    xcorr.corr_time_lag				= 0.2;
-    xcorr.corr_time_interval		= [0 3];
-    xcorr.corr_cpa_km				= 0;
-    xcorr.filename_xcorr_table		= fullfile('Norway/', 'cross_corr_stats_Norway.csv');
-end
+% CORRELATION Parameters for inter-channel cross-correlation processing.
+%
+%   Output:
+%       xcorr - Channel offsets, time lags, and statistics export settings.
 
+    xcorr.channel_position_km	= 0;
+    xcorr.offset_m				= 300;
+    xcorr.time_lag				= 0.2;
+    xcorr.time_interval			= [0 3];
+    xcorr.cpa_km				= 0;
+    xcorr.filename_table		= fullfile('Norway/', 'cross_corr_stats_Norway.csv');
+end
 % -----------------------------------------------------------------------%
+
 %% GEOGRAPHICAL DATA & PLOTTING
 function geoCable = geoCable()
 % GEOCABLE Loads cable geometry from JSON and interpolates altitude.
 %
 %   Output:
 %       geoCable - Struct with lat, lon, and depth (up) coordinates.
+
     S = readstruct("cable-layout.json");
     C = S.features.geometry.coordinates{1};
     coord = vertcat(C{:});
@@ -148,7 +190,7 @@ function geoCable = geoCable()
     geoCable.lat = coord(:,2);
     geoCable.up = coord(:,3);
     
-    % Linear interpolation for missing altitude data
+    % linear interpolation for missing altitude data
     for i = 1:length(geoCable.up)
         if geoCable.up(i) == 0
             if i == 1, break; end
@@ -182,7 +224,7 @@ function sourcePos = sourcePos(t_start, t_end)
 % SOURCEPOS Loads vessel/source positions from CSV for a specific time range.
 %
 %   Inputs:
-%       t_start, t_end - duration objects/time values for filtering.
+%       t_start, t_end - time range.
     opts = detectImportOptions('source-position.csv');
     opts = setvaropts(opts, 'datetime', 'Type', 'string'); 
     T = readtable('source-position.csv', opts);

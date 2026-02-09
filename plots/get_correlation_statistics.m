@@ -56,6 +56,8 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     nb_subplots = 2 * round(offset_m/(offset_step * channel_distance_m)) + 1;
     nb_columns = floor(sqrt(nb_subplots));
     nb_rows = ceil(nb_subplots / nb_columns);
+
+	c = 1470; % propagation speed
     
     % open figure
     fig = figure('units','normalized','outerposition',[0 0 1 1]);
@@ -97,15 +99,16 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         xlabel('Time lag (s)');
         title(sprintf('dx= %0.2f m', offset_from_reference));
 
-        [max_val, rel_idx] = max(abs(xcorr_negative_offset));
+		% find peak
+        [max_peak, max_peak_idx] = max(xcorr_negative_offset);
 		hold on
-		xline(time_lags_xcorr_negative_offset(rel_idx), '-r');
+		xline(time_lags_xcorr_negative_offset(max_peak_idx), '-r');
 		hold off
 		
         % save results
         correlation_statistics(csv_position, 1) = offset_from_reference;
-        correlation_statistics(csv_position, 2) = max_val;
-        correlation_statistics(csv_position, 3) = time_lags_xcorr_negative_offset(rel_idx);
+        correlation_statistics(csv_position, 2) = max_peak;
+        correlation_statistics(csv_position, 3) = time_lags_xcorr_negative_offset(max_peak_idx);
 
 		csv_position = csv_position + 1;
         
@@ -147,15 +150,16 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         xlabel('Time lag (s)');
         title(sprintf('dx= %0.2f m', offset_from_reference));
    
-        [max_val, rel_idx] = max(abs(xcorr_positive_offset));
+		% find peaks in search winow
+		[max_peak, max_peak_idx] = max(xcorr_positive_offset);
 		hold on
-		xline(time_lags_xcorr_positive_offset(rel_idx), '-r');
+		xline(time_lags_xcorr_negative_offset(max_peak_idx), '-r');
 		hold off
 
         % save results
         correlation_statistics(csv_position, 1) = offset_from_reference;
-        correlation_statistics(csv_position, 2) = max_val;
-        correlation_statistics(csv_position, 3) = time_lags_xcorr_positive_offset(rel_idx);
+        correlation_statistics(csv_position, 2) = max_peak;
+        correlation_statistics(csv_position, 3) = time_lags_xcorr_positive_offset(max_peak_idx);
 		csv_position = csv_position + 1;
         
 	end
