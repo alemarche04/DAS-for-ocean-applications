@@ -7,8 +7,7 @@ function filtered_data = butterworth_bp_filter(data, cutoff_freq, order, samplin
 %   which is critical for maintaining signal timing in DAS applications.
 %
 %   Input Arguments:
-%       data          - Input signal (matrix or vector). If a matrix, filtering 
-%                       is applied across the second dimension (time).
+%       data          - 2D matrix of DAS data [channels x samples].
 %       cutoff_freq   - Two-element vector [f_low, f_high] defining the 
 %                       passband in Hz.
 %       order         - Filter order (e.g., 3 or 5). Note: filtfilt doubles 

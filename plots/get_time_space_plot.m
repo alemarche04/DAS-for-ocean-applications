@@ -6,7 +6,7 @@ function fig = get_time_space_plot(data, time, distance, varargin)
 %   to observe acoustic wave propagation across channels over time.
 %
 %   Input Arguments:
-%       data         - 2D matrix of DAS data (typically [distance x time]).
+%       data         - 2D matrix of DAS data [channels x samples].
 %       time         - Vector of time samples [s].
 %       distance     - Vector of spatial positions [km].
 %

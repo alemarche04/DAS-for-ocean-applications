@@ -6,7 +6,7 @@ function trace_out = fk_filter_filt(trace_in, fk_filter_matrix)
 %   filter mask, and transforms the result back to the t-x domain.
 %
 %   Input Arguments:
-%       trace_in         - 2D matrix of DAS data (channels x samples).
+%       trace_in         - 2D matrix of DAS data [channels x samples].
 %       fk_filter_matrix - 2D filter mask (same size as trace_in) designed 
 %                          using fk_filter_design.
 %

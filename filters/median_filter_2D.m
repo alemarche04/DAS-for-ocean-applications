@@ -6,7 +6,7 @@ function trace_out = median_filter_2D(data, filter_dimensions)
 %   FILTER_DIMENSIONS (e.g., [3 3]).
 %
 %   Input Arguments:
-%       data              - 2D input matrix (typically [channels x samples]).
+%       data              - 2D matrix of DAS data [channels x samples].
 %       filter_dimensions - A 2-element vector [m n] specifying the size of 
 %                           the median filtering window.
 %

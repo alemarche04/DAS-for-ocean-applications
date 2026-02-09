@@ -3,26 +3,26 @@ clc
 clear all
 close all
 
-%% load data from dataset
+%% LOAD DATA FROM DATASET
+% add directories to Matlab search path
 addpath('Dataset', 'Dataset_Norway', 'filters', 'plots', 'config');
 
 % Dataset available:	
 %		DAS4Whale_Bou22
 %		Norway
+%
 % Dataset not yet available:
 %		DAS4Tracking_Ror23
 %		DAS4Tracking_airgun_inner
 %		DAS4Tracking_airgun_outer
-
-
 dataset_name	= 'DAS4Whale_Bou22';
 DAS				= feval(str2func(dataset_name + "_cfg"));
 data			= DAS.load_data();
+% -----------------------------------------------------------------------%
 
-%% cable geometry and source position
-
+%% CABLE GEOMETRY AND SOURCE POSTION
 if strcmp(dataset_name, 'Norway')
-	
+
 	% plot cable geometry
 	geo_origin = DAS.plot_cable_geometry_2D();
 	exportgraphics( ...
@@ -55,9 +55,9 @@ if strcmp(dataset_name, 'Norway')
 	DAS.plot_calbe_source_3D(source_run1, source_run2, source_run3);
 	
 end
+% -----------------------------------------------------------------------%
 
-%% butterworth bandpass filter
-
+%% BUTTERWORTH BANDPASS FILTER
 % parameters
 bp = DAS.bandpass();
 bp_cutoff_freq		= bp.bp_cutoff_freq;
@@ -69,9 +69,9 @@ strain_filtered = butterworth_bp_filter( ...
 	bp_cutoff_freq, ...
 	bp_order, ...
 	data.sampling_frequency_Hz);
+% -----------------------------------------------------------------------%
 
-%% median filter 2D 3x3 symmetric
-
+%% MEDIAN FILTER 2D (3X3 SYMMETRIC)
 % parameters
 medFilt = DAS.medFilt();
 med_filt2D_dim = medFilt.med_filt2D_dim;
@@ -80,27 +80,30 @@ med_filt2D_dim = medFilt.med_filt2D_dim;
 strain_filtered = median_filter_2D( ...
 	strain_filtered, ...
 	med_filt2D_dim);
+% -----------------------------------------------------------------------%
 
-%% fk filtering
-
+%% FK FILTERING
 % parameters
 fkFilt = DAS.fkFilt();
 fk_velocity_range = fkFilt.fk_velocity_range;
 
+% design fk filter
 fk_filter =	fk_filter_design( ...
 	data.dimensions, ...
 	data.channel_distance_m, ...
 	data.sampling_interval_s);
 
+% apply fk filter
 strain_filtered = fk_filter_filt( ...
 	strain_filtered, ...
 	fk_filter);
+% -----------------------------------------------------------------------%
 
-%% dB scale
+%% DB SCALE
 strain_dB = 20*log10(abs(strain_filtered) ./ max(abs(strain_filtered), [], "all"));
+% -----------------------------------------------------------------------%
 
-%% time-space plot
-
+%% TIME-SPACE PLOT
 % parameters
 tx = DAS.tx_plot();
 tx_time_lim					= tx.tx_time_lim;
@@ -121,23 +124,26 @@ time_space_plot = get_time_space_plot( ...
 	'distance_lim', tx_distance_lim, ...
 	'strain_lim', tx_strain_lim);
 
-% % draw propagation speed lines on time-space plot
-% hold on;
-% draw_prop_speed_lines( ...
-% 	data.time, ...
-% 	tx_prop_speed_km_s, ...
-% 	tx_speed_line_points, ...
-% 	tx_cpa_km, ...
-% 	tx_channel_position_km);
-% hold off;
+% draw propagation speed lines on time-space plot
+speedline = false;
+if speedline
+	hold on;
+	draw_prop_speed_lines( ...
+		data.time, ...
+		tx_prop_speed_km_s, ...
+		tx_speed_line_points, ...
+		tx_cpa_km, ...
+		tx_channel_position_km);
+	hold off;
+end
 
 % export plot as png
 exportgraphics( ...
 	time_space_plot, ...
 	fullfile(dataset_name, ['time_space_plot_' dataset_name  '.png']));
+% -----------------------------------------------------------------------%
 
-%% strain waveform of a single channel
-
+%% STRAIN WAVEFORM (SINGLE CHANNEL)
 % parameters
 wf = DAS.waveform();
 wf_channel_position_km		= wf.wf_channel_position_km;
@@ -162,9 +168,9 @@ strain_waveform = get_strain_waveform( ...
 exportgraphics( ...
 	strain_waveform, ...
 	fullfile(dataset_name, ['strain_waveform_' dataset_name  '.png']));
+% -----------------------------------------------------------------------%
 
-%% spectrogram of a single channel
-
+%% SPECTROGRAM (SINGLE CHANNEL)
 % parameters
 sg = DAS.spectrogram();
 sg_channel_position_km		= sg.sg_channel_position_km;
@@ -196,9 +202,9 @@ spectrogram_plot = get_spectrogram( ...
 exportgraphics( ...
 	spectrogram_plot, ...
 	fullfile(dataset_name, ['spectrogram_' dataset_name  '.png']));
+% -----------------------------------------------------------------------%
 
-%% space-frequency plot
-
+%% SPACE-FREQUENCY PLOT
 % parameters
 fx = DAS.fx_plot();
 fx_nfft				= fx.fx_nfft;
@@ -226,9 +232,9 @@ space_frequency_plot = get_space_frequency_plot( ...
 exportgraphics( ...
 	space_frequency_plot, ...
 	fullfile(dataset_name, ['fx_plot_' dataset_name  '.png']));
+% -----------------------------------------------------------------------%
 
-%% corss correlation statistics
-
+%% CROSS-CORRELATION STATISTICS
 % parameters
 xcorr = DAS.correlation();
 corr_channel_position_km	= xcorr.corr_channel_position_km;
@@ -274,7 +280,6 @@ exportgraphics( ...
 
 % estimates the distance btw the source and the CPA (at 42.8 km)
 estimate_R = false;
-
 if estimate_R
 	distance_from_CPA = (corr_cpa_km - corr_channel_position_km)*1e3; % distance btw reference channel and CPA
 	xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
@@ -304,6 +309,7 @@ if estimate_R
 
 	fprintf('Estimate value of R: %d\n', R_med);
 end
+% -----------------------------------------------------------------------%
 
 % %% event detection
 % cfg =				cfg.reload_params();		% loads any changes in the configuration file

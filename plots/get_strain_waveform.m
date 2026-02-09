@@ -25,7 +25,7 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
 %       fig                   - Handle to the generated figure.
 %
 %   Audio Export Note:
-%       The function scales the signal (1e9) and applies a 3x resampling 
+%       The function scales the signal and applies a 3x resampling 
 %       factor to the output audio to shift low-frequency signals into 
 %       a more audible range.
 %
@@ -69,7 +69,7 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
     	audioSignal = (audioSignal / peakVal) * 0.9; % scale so max peak is 0.9
 	end
 	% audiowrite(filename_audio, audioSignal, round(sampling_frequency_Hz*3));
-	audiowrite(filename_audio, audioSignal, round(sampling_frequency_Hz*2), 'BitsPerSample', 24);
+	audiowrite(filename_audio, audioSignal, round(sampling_frequency_Hz*3), 'BitsPerSample', 24);
     
 end
 % -----------------------------------------------------------------------%
