@@ -1,14 +1,45 @@
 function [correlation_statistics, fig] = get_correlation_statistics( ...
 	data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table)
+    channel_reference_position_km, offset_m, max_lag, time_interval, ...
+	filename_xcorr_table, varargin)
+% GET_CORRELATION_STATISTICS Quantifies cross-correlation peaks across the array.
+%
+%   [STATS, FIG] = GET_CORRELATION_STATISTICS(DATA, SAMPLING_FREQUENCY, ...) 
+%   calculates the auto-correlation of a reference channel and the 
+%   cross-correlation of surrounding channels at specific spatial steps. 
+%   It identifies the time-lag of the maximum correlation peak for each 
+%   channel and exports the results to a CSV table.
+%
+%   Input Arguments:
+%       data                - 2D matrix of DAS data [channels x samples].
+%       sampling_frequency  - System sampling rate [Hz].
+%       distance_m          - Vector of spatial coordinates for channels [m].
+%       channel_distance_m  - Nominal spacing between channels [m].
+%       channel_reference_position_km - Target position for the reference [km].
+%       offset_m            - Maximum distance from reference to analyze [m].
+%       max_lag             - Maximum time lag for correlation [s].
+%       time_interval       - 2-element vector [start end] for data segment [s].
+%       filename_xcorr_table - Filename (string) for the output CSV table.
+%
+%   Output Arguments:
+%       correlation_statistics - Matrix [Offset, Peak Value, Time Lag].
+%       fig                    - Handle to the tiled layout figure.
+%
+%   Notes:
+%       - The function uses an 'offset_step' of 2, skipping every other 
+%         channel to optimize processing and visualization.
+%       - Red vertical lines in the plots indicate the identified peak lag.
+%
+%   See also: XCORR, WRITETABLE, GET_CORRELOGRAM
 
     % parse input parameters
-    parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-        channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table);
+    params = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
+        channel_reference_position_km, offset_m, max_lag, time_interval, ...
+		filename_xcorr_table, varargin{:});
     
     % signal in time interval
-    t_start_idx = round(time_interval(1) * sampling_frequency);
-    t_end_idx = round(time_interval(2) * sampling_frequency);
+    t_start_idx = max(1, round(time_interval(1) * sampling_frequency));
+    t_end_idx = min(size(data, 2), round(time_interval(2) * sampling_frequency));
     data_corr = data(:, t_start_idx:t_end_idx);
     
     % number of samples
@@ -130,50 +161,42 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 	end
 
 	correlation_table = array2table(correlation_statistics, ...
-    	'VariableNames', {'Offset', 'Peak value', 'Time'});
+    	'VariableNames', {'Offset', 'Peak_value', 'Time'});
 	
 	writetable(correlation_table, filename_xcorr_table);
 	fprintf('Events saved to: %s\n', filename_xcorr_table);
 
-	try
-        time_and_date = evalin('caller', 'data.time_and_date');
-        sgtitle({sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', channel_reference_position_km, offset_m), ...
-        sprintf('Signals duration: from %.2f s to %.2f s', time_interval), time_and_date});
-    catch
-        warning('Unable to create subtitle: time and date not found');
+	% apply optional subtitle
+	if ~isempty(params.subtitle)
+		 sgtitle({sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', channel_reference_position_km, offset_m), ...
+        sprintf('Signals duration: from %.2f s to %.2f s', time_interval), params.subtitle});
 	end
-
+    %
 end
+% -----------------------------------------------------------------------%
 
-
-% validates and parses input arguments
+%% INPUT PARSING
 function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-	channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table)
+	channel_reference_position_km, offset_m, max_lag, time_interval, ...
+	filename_xcorr_table, varargin)
 	p = inputParser;
 	
-	valid = @(x)validateattributes(x,{'numeric'},{'nonempty'});
-	addRequired(p, 'data', valid);
-	
-	valid = @(x)validateattributes(x,{'numeric'},{'positive', 'scalar'});
-	addRequired(p, 'sampling_frequency', valid);
-	
-	valid = @(x)validateattributes(x,{'numeric'},{'nonempty', 'vector'});
-	addRequired(p, 'distance_m', valid);
-	
-	valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'scalar'});
-	addRequired(p, 'channel_distance_m', valid);
-	addRequired(p, 'channel_reference_position_km', valid);
-	addRequired(p, 'offset_m', valid);
-	addRequired(p, 'max_lag', valid);
-	
-	valid = @(x)validateattributes(x,{'numeric'},{'nonnegative', 'vector'});
-	addRequired(p, 'time_interval', valid); 
+	% required parameters
+	addRequired(p, 'data', @isnumeric);
+    addRequired(p, 'sampling_frequency', @(x) isnumeric(x) && isscalar(x) && x>0);
+    addRequired(p, 'distance_m', @(x) isnumeric(x) && isvector(x));
+    addRequired(p, 'channel_distance_m', @(x) isnumeric(x) && isscalar(x) && x>=0);
+    addRequired(p, 'channel_reference_position_km', @(x) isnumeric(x) && isscalar(x) && x>=0);
+    addRequired(p, 'offset_m', @(x) isnumeric(x) && isscalar(x) && x>=0);
+    addRequired(p, 'max_lag', @(x) isnumeric(x) && isscalar(x) && x>=0 );
+    addRequired(p, 'time_interval', @(x) isnumeric(x) && isvector(x) && all(x>=0));
+	addRequired(p, 'filename_xcorr_table', @(x) (ischar(x) || isstring(x)));	
 
-	valid = @(x)validateattributes(x,{'char'},{'nonempty'});
-	addRequired(p, 'filename_xcorr_table', valid);
+	% optional parameters
+	addParameter(p, 'subtitle', [], @(x) isempty(x) || ischar(x) || isstring(x));
 	
 	parse(p, data, sampling_frequency, distance_m, channel_distance_m, ...
-	channel_reference_position_km, offset_m, max_lag, time_interval, filename_xcorr_table);
-	
+	channel_reference_position_km, offset_m, max_lag, time_interval, ...
+	filename_xcorr_table, varargin{:});
 	results = p.Results;
 end
