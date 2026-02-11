@@ -49,7 +49,7 @@ function fig = get_spectrogram(data, distance_km, sampling_frequency, ...
     spectrogram_dB = 20*log10(abs(spectrogram) ./ max(abs(spectrogram), [], "all"));
     %
     % plot spectrogram
-    fig = figure;
+    fig = figure(Name="Spectrogram", NumberTitle="off");
     imagesc(time_axis, freq_axis, spectrogram_dB);
     axis xy;
     c = colorbar;

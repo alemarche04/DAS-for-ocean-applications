@@ -60,7 +60,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 	c = 1470; % propagation speed
     
     % open figure
-    fig = figure('units','normalized','outerposition',[0 0 1 1]);
+    fig = figure('units','normalized','outerposition',[0 0 1 1], Name="Corss-Correlation", NumberTitle="off");
     t = tiledlayout(nb_rows,nb_columns,'TileSpacing','Compact', 'Padding', 'compact');
     
     % (auto)correlation of refernce channel signal

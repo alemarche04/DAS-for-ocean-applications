@@ -58,7 +58,7 @@ function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
     nb_rows = ceil(nb_subplots / nb_columns);
 
     % open figure and set up subplots
-    fig = figure;
+    fig = figure(Name="Space-Frequency plot", NumberTitle="off");
     t = tiledlayout(nb_rows, nb_columns, 'TileSpacing', 'Compact', 'Padding', 'compact');
     
     % prepare VideoWriter

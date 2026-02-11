@@ -33,7 +33,7 @@ function fig = get_correlogram(data, sampling_frequency, distance_m, ...
     params = parse_inputs(data, sampling_frequency, distance_m, channel_reference_position_km, ...
         offset_m, max_lag, time_interval, varargin{:});
 
-    % --- Signal Selection ---
+    % signal selection
     % ensure index is at least 1
     t_start_idx = max(1, round(time_interval(1) * sampling_frequency));
     t_end_idx = min(size(data, 2), round(time_interval(2) * sampling_frequency));
@@ -42,13 +42,13 @@ function fig = get_correlogram(data, sampling_frequency, distance_m, ...
     % calculate lag samples
     max_lag_samples = round(max_lag * sampling_frequency);
     
-    % --- Reference Channel Selection ---
+    % reference channel selection
     channel_position_m = channel_reference_position_km * 1e3;
     [~, channel_reference_idx] = min(abs(distance_m - channel_position_m)); 
     actual_channel_distance = distance_m(channel_reference_idx); 
     channel_reference = data_corr(channel_reference_idx, :);
         
-    % --- Spatial Subset Selection ---
+    % spatial subset selection
     distance_from_reference_channel = abs(distance_m - actual_channel_distance);
     nearby_idx = find(distance_from_reference_channel <= offset_m); 
     
@@ -71,7 +71,7 @@ function fig = get_correlogram(data, sampling_frequency, distance_m, ...
     offset_axis = distance_m(nearby_idx) - actual_channel_distance;
         
     % --- Plotting ---
-    fig = figure;
+    fig = figure(Name="Correlogram", NumberTitle="off");
     imagesc(time_lags, offset_axis, correlation_matrix);
     axis xy;
     colormap(redblue);

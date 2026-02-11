@@ -31,7 +31,7 @@ function fig = get_time_space_plot(data, time, distance, varargin)
 	data_dB = 20*log10(abs(data) ./ max(abs(data), [], "all"));
 	%
     % plot figure
-    fig = figure;
+    fig = figure(Name="Time-Space plot", NumberTitle="off");
     imagesc(time, distance, data_dB);
     axis xy;
     colormap(parula);

@@ -41,7 +41,7 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
 	channelData = data(channel_position_idx, :);
     
     % plot figure
-    fig = figure;
+    fig = figure(Name="Strain Waveform", NumberTitle="off");
     plot(time, channelData)
     xlabel('Time (s)', 'FontSize', 12);
     ylabel('Strain Amplitude', 'FontSize', 12);

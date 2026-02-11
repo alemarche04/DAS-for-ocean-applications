@@ -10,11 +10,7 @@ addpath('Dataset', 'Dataset_Norway', 'filters', 'plots', 'config');
 % Dataset available:	
 %		DAS4Whale_Bou22
 %		Norway
-%
-% Dataset not yet available:
-%		DAS4Tracking_Ror23
-%		DAS4Tracking_airgun_inner
-%		DAS4Tracking_airgun_outer
+
 dataset_name	= 'Norway';
 DAS				= feval(str2func(dataset_name + "_cfg"));
 data			= DAS.load_data();
@@ -64,6 +60,9 @@ clear t_start_run1 t_end_run1 t_start_run2 t_end_run2 t_start_run3 t_end_run3
 channel_no = 178;
 channel_position_m = channel_no * data.channel_distance_m;
 DAS.plot_channel_on_cable(channel_position_m);
+
+% clear variables
+clear channel_no channel_position_m
 % -----------------------------------------------------------------------%
 
 %% CABLE GEOMETRY AND SOURCE POSITION AT TIME OF RECORDING
@@ -74,6 +73,9 @@ DAS.plot_source_on_cable(data.time_and_date);
 channel_no = 178;
 channel_position_m = channel_no * data.channel_distance_m;
 DAS.plot_source_channel_on_cable(data.time_and_date, channel_position_m);
+
+% clear variables
+clear channel_no channel_position_m
 % -----------------------------------------------------------------------%
 
 %% BUTTERWORTH BANDPASS FILTER
@@ -121,7 +123,7 @@ strain_filtered = fk_filter_filt( ...
 	fk_filter);
 
 % clear variables
-clear fkFilt
+clear fkFilt fk_filter
 % -----------------------------------------------------------------------%
 
 %% TIME-SPACE PLOT
@@ -137,6 +139,13 @@ time_space_plot = get_time_space_plot( ...
     'time_lim', tx.time_lim, ...
 	'distance_lim', tx.distance_lim, ...
 	'strain_lim', tx.strain_lim);
+
+% draw channel position
+channel_no = 178;
+channel_position_m = channel_no * data.channel_distance_m;
+hold on;
+yline(channel_position_m*1e-3, '--', 'CHANNEL','LineWidth', 1, 'Color', '#FFD1DF');
+hold off;
 
 % draw propagation speed lines on time-space plot
 speedline = false;
@@ -157,7 +166,7 @@ exportgraphics( ...
 	fullfile(dataset_name, ['time_space_plot_' dataset_name  '.png']));
 
 % clear variables
-clear tx
+clear tx speedline channel_no channel_position_m time_space_plot
 % -----------------------------------------------------------------------%
 
 %% STRAIN WAVEFORM (SINGLE CHANNEL)
@@ -182,7 +191,7 @@ exportgraphics( ...
 	fullfile(dataset_name, ['strain_waveform_' dataset_name  '.png']));
 
 % clear variables
-clear wf
+clear wf strain_waveform
 % -----------------------------------------------------------------------%
 
 %% SPECTROGRAM (SINGLE CHANNEL)
@@ -210,7 +219,7 @@ exportgraphics( ...
 	fullfile(dataset_name, ['spectrogram_' dataset_name  '.png']));
 
 % clear variables
-clear sg
+clear sg spectrogram_plot
 % -----------------------------------------------------------------------%
 
 %% SPACE-FREQUENCY PLOT
@@ -237,7 +246,7 @@ exportgraphics( ...
 	fullfile(dataset_name, ['fx_plot_' dataset_name  '.png']));
 
 % clear variables
-clear fx
+clear fx space_frequency_plot
 % -----------------------------------------------------------------------%
 
 %% CROSS-CORRELATION STATISTICS
@@ -311,7 +320,7 @@ if estimate_R
 end
 
 % clear variables
-clear xcorr
+clear xcorr correlogram correlation_statistics xcorr_plot estimate_R
 % -----------------------------------------------------------------------%
 
 %% EVENT DETECTION
