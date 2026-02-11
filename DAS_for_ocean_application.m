@@ -66,6 +66,16 @@ channel_position_m = channel_no * data.channel_distance_m;
 DAS.plot_channel_on_cable(channel_position_m);
 % -----------------------------------------------------------------------%
 
+%% CABLE GEOMETRY AND SOURCE POSITION AT TIME OF RECORDING
+DAS.plot_source_on_cable(data.time_and_date);
+% -----------------------------------------------------------------------%
+
+%% CABLE GEOMETRY, CHANNEL POSITION AND SOURCE POSITION AT TIME OF RECORDING
+channel_no = 178;
+channel_position_m = channel_no * data.channel_distance_m;
+DAS.plot_source_channel_on_cable(data.time_and_date, channel_position_m);
+% -----------------------------------------------------------------------%
+
 %% BUTTERWORTH BANDPASS FILTER
 % parameters
 bp = DAS.bandpass();

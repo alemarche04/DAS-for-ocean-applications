@@ -12,22 +12,24 @@ function cfg = Norway_cfg()
 %
 %   See also: GEODETIC2ENU, H5READ, READSTRUCT
 
-	cfg.load_data				= @load_data;
-	cfg.bandpass				= @bandpass;
-	cfg.medFilt					= @medFilt;
-	cfg.fkFilt					= @fkFilt;
-	cfg.tx_plot					= @tx_plot;
-	cfg.waveform				= @waveform;
-	cfg.spectrogram				= @spectrogram;
-	cfg.fx_plot					= @fx_plot;
-	cfg.correlation				= @correlation;
-	cfg.geoCable				= @geoCable;
-	cfg.sourcePos				= @sourcePos;
-	cfg.plot_cable_geometry_2D	= @plot_cable_geometry_2D;
-	cfg.plot_source_pos_2D		= @plot_source_pos_2D;
-	cfg.plot_source_pos_all_2D	= @plot_source_pos_all_2D;
-	cfg.plot_cable_source_3D	= @plot_cable_source_3D;
-	cfg.plot_channel_on_cable	= @plot_channel_on_cable;
+	cfg.load_data						= @load_data;
+	cfg.bandpass						= @bandpass;
+	cfg.medFilt							= @medFilt;
+	cfg.fkFilt							= @fkFilt;
+	cfg.tx_plot							= @tx_plot;
+	cfg.waveform						= @waveform;
+	cfg.spectrogram						= @spectrogram;
+	cfg.fx_plot							= @fx_plot;
+	cfg.correlation						= @correlation;
+	cfg.geoCable						= @geoCable;
+	cfg.sourcePos						= @sourcePos;
+	cfg.plot_cable_geometry_2D			= @plot_cable_geometry_2D;
+	cfg.plot_source_pos_2D				= @plot_source_pos_2D;
+	cfg.plot_source_pos_all_2D			= @plot_source_pos_all_2D;
+	cfg.plot_cable_source_3D			= @plot_cable_source_3D;
+	cfg.plot_channel_on_cable			= @plot_channel_on_cable;
+	cfg.plot_source_on_cable			= @plot_source_on_cable;
+	cfg.plot_source_channel_on_cable	= @plot_source_channel_on_cable;
 	
 end
 % -----------------------------------------------------------------------%
@@ -266,7 +268,8 @@ function plot_cable_source_3D(sourcePos1, sourcePos2, sourcePos3)
         geo_origin.lat, geo_origin.lon, geo_origin.up, wgs84Ellipsoid);
     
     figure(Name="Cable and Source 3D", NumberTitle="off");
-    plot3(xE_c, yN_c, zU_c, 'b.-', 'LineWidth', 1.5); hold on;
+    plot3(xE_c, yN_c, zU_c, 'b.-', 'LineWidth', 1.5); 
+	hold on;
     
     sources = {sourcePos1, sourcePos2, sourcePos3};
     colors = {'r', 'g', 'b'};
@@ -277,16 +280,23 @@ function plot_cable_source_3D(sourcePos1, sourcePos2, sourcePos3)
     end
     grid on; axis equal; view(3);
     xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
+	legend('Cable', 'Run 1', 'Run 2', 'Run 3');
+	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
+	hold off;
 end
 
 function plot_channel_on_cable(target_channel_m)
 % PLOT_CAHNNEL_ON_CABLE Creates a 2D and 3D visualization of a channel on
 % the fiber optic cable
+
+	% get cable geometry
     cable_geometry = geoCable();
     geo_origin = cable_geometry.origin;
     [xE_cable, yN_cable, zU_cable] = geodetic2enu(cable_geometry.lat, cable_geometry.lon, cable_geometry.up, ...
         geo_origin.lat, geo_origin.lon, geo_origin.up, wgs84Ellipsoid);
+	%
 
+	% compute incremental and cumulative distance of the FO cable
 	dx = diff(xE_cable);
 	dy = diff(yN_cable);
 	dz = diff(zU_cable);
@@ -294,15 +304,20 @@ function plot_channel_on_cable(target_channel_m)
 	dist_inc = sqrt(dx.^2 + dy.^2 + dz.^2);
 	dist_cum = [0; cumsum(dist_inc)]; % start from 0m
 	total_distance = dist_cum(end);
+	%
 
+	% check FO cable length bounds
 	if target_channel_m < 0 || target_channel_m > total_distance
 		warning("Target channel out of range.")
 		return
 	end
+	%
 
+	% compute channel position on the FO cable
 	x_target = interp1(dist_cum, xE_cable, target_channel_m);
 	y_target = interp1(dist_cum, yN_cable, target_channel_m);
 	z_target = interp1(dist_cum, zU_cable, target_channel_m);
+	%
 
 	% plot 2D
 	figure(Name="Cable Geometry and Channel position (2D)", NumberTitle="off");
@@ -312,6 +327,7 @@ function plot_channel_on_cable(target_channel_m)
 	title(['Channel at meter: ', num2str(target_channel_m)]);
 	hold on
 	plot(x_target, y_target, 'ro', 'MarkerSize', 6, 'MarkerFaceColor', 'r');
+	legend('Cable', 'Channel');
 	hold off
 
 	% plot 3D
@@ -321,5 +337,153 @@ function plot_channel_on_cable(target_channel_m)
 	grid on; axis equal; view(3);
     xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
 	title(['Channel at meter: ', num2str(target_channel_m)]);
+	legend('Cable', 'Channel');
 	hold off
+end
+
+function plot_source_on_cable(time_and_date)
+% PLOT_SOURCE_ON_CABLE Creates a 2D and 3D visualization of the source on 
+% the FO cable at the time of recording
+
+	% get cable geometry
+    cable_geometry = geoCable();
+    geo_origin = cable_geometry.origin;
+    [xE_cable, yN_cable, zU_cable] = geodetic2enu(cable_geometry.lat, cable_geometry.lon, cable_geometry.up, ...
+        geo_origin.lat, geo_origin.lon, geo_origin.up, wgs84Ellipsoid);
+	%
+
+	% import source position and time indexes from file
+	opts = detectImportOptions('source-position.ods');
+    opts = setvaropts(opts, 'datetime', 'Type', 'string'); 
+    T = readtable('source-position.ods', opts);
+    T.datetime = datetime(T.datetime, 'InputFormat', 'dd/MM/yyyy HH:mm:ss');
+    time_index = timeofday(T.datetime);
+
+    sourcePos.lat = table2array(T(:, 3));
+    sourcePos.lon = table2array(T(:, 4));
+
+	[xE_source, yN_source, ~] = geodetic2enu(sourcePos.lat, sourcePos.lon, 0, ...
+        geo_origin.lat, geo_origin.lon, geo_origin.up, wgs84Ellipsoid);
+	%
+	
+	% get time and date of the recording (current file)
+	datetime_source = datetime(time_and_date, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+	time_source = timeofday(datetime_source);
+
+	[~, source_pos_idx] = min(abs(time_index - time_source));
+	%
+	
+	% find source position at the time of recording
+	xE_position = xE_source(source_pos_idx);
+	yN_position = yN_source(source_pos_idx);
+	zU_position = 0;
+	%
+
+	% plot 2D
+	figure(Name="Cable Geometry and Source position (2D)", NumberTitle="off");
+    plot(xE_cable, yN_cable); axis equal; grid on;
+	ylim([-50 2300]);
+    xlabel('East (m)'); ylabel('North (m)');
+	hold on
+	plot(xE_position, yN_position, 'go', 'MarkerSize', 6, 'MarkerFaceColor', 'g');
+	legend('Cable', 'Source');
+	hold off
+
+	% plot 3D
+	figure(Name="Cable Geometry and Source position (3D)", NumberTitle="off");
+    plot3(xE_cable, yN_cable, zU_cable, 'b.-', 'LineWidth', 1.5); hold on;
+	plot3(xE_position, yN_position, zU_position, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6);
+	grid on; axis equal; view(3);
+    xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
+	legend('Cable', 'Source');
+	hold off
+
+end
+
+function plot_source_channel_on_cable(time_and_date, target_channel_m)
+% PLOT_SOURCE_CHANNEL_ON_CABLE Creates a 2D and 3D visualization of a channel  
+% and the source on the FO cable at the time of recording
+	
+	% get cable geometry
+    cable_geometry = geoCable();
+    geo_origin = cable_geometry.origin;
+    [xE_cable, yN_cable, zU_cable] = geodetic2enu(cable_geometry.lat, cable_geometry.lon, cable_geometry.up, ...
+        geo_origin.lat, geo_origin.lon, geo_origin.up, wgs84Ellipsoid);
+	%
+
+	% import source position and time indexes from file
+	opts = detectImportOptions('source-position.ods');
+    opts = setvaropts(opts, 'datetime', 'Type', 'string'); 
+    T = readtable('source-position.ods', opts);
+    T.datetime = datetime(T.datetime, 'InputFormat', 'dd/MM/yyyy HH:mm:ss');
+    time_index = timeofday(T.datetime);
+
+    sourcePos.lat = table2array(T(:, 3));
+    sourcePos.lon = table2array(T(:, 4));
+
+	[xE_source, yN_source, ~] = geodetic2enu(sourcePos.lat, sourcePos.lon, 0, ...
+        geo_origin.lat, geo_origin.lon, geo_origin.up, wgs84Ellipsoid);
+	%
+	
+	% get time and date of the recording (current file)
+	datetime_source = datetime(time_and_date, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+	time_source = timeofday(datetime_source);
+
+	[~, source_pos_idx] = min(abs(time_index - time_source));
+	%
+	
+	% find source position at the time of recording
+	xE_position = xE_source(source_pos_idx);
+	yN_position = yN_source(source_pos_idx);
+	zU_position = 0;
+	%
+
+	% compute incremental and cumulative distance of the FO cable
+	dx = diff(xE_cable);
+	dy = diff(yN_cable);
+	dz = diff(zU_cable);
+
+	dist_inc = sqrt(dx.^2 + dy.^2 + dz.^2);
+	dist_cum = [0; cumsum(dist_inc)]; % start from 0m
+	total_distance = dist_cum(end);
+	%
+
+	% check FO cable length bounds
+	if target_channel_m < 0 || target_channel_m > total_distance
+		warning("Target channel out of range.")
+		return
+	end
+	%
+
+	% compute channel position on the FO cable
+	x_target = interp1(dist_cum, xE_cable, target_channel_m);
+	y_target = interp1(dist_cum, yN_cable, target_channel_m);
+	z_target = interp1(dist_cum, zU_cable, target_channel_m);
+	%
+
+	% plot 2D
+	figure(Name="Cable Geometry< Channel and Source position (2D)", NumberTitle="off");
+    plot(xE_cable, yN_cable); axis equal; grid on;
+	ylim([-50 2300]);
+    xlabel('East (m)'); ylabel('North (m)');
+	title(['Channel at meter: ', num2str(target_channel_m)]);
+	hold on
+	plot(xE_position, yN_position, 'go', 'MarkerSize', 6, 'MarkerFaceColor', 'g');
+	plot(x_target, y_target, 'ro', 'MarkerSize', 6, 'MarkerFaceColor', 'r');
+	legend('Cable', 'Source', 'Channel');
+	hold off
+
+	% plot 3D
+	figure(Name="Cable Geometry, Channel and Source position (3D)", NumberTitle="off");
+    plot3(xE_cable, yN_cable, zU_cable, 'b.-', 'LineWidth', 1.5); 
+	hold on;
+	plot3(xE_position, yN_position, zU_position, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6);
+	plot3(x_target, y_target, z_target, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
+	grid on; axis equal; view(3);
+	title(['Channel at meter: ', num2str(target_channel_m)]);
+    xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
+	legend('Cable', 'Source', 'Channel');
+	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
+	hold off
+
 end
