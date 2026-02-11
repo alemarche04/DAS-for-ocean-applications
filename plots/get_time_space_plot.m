@@ -27,9 +27,12 @@ function fig = get_time_space_plot(data, time, distance, varargin)
     distance_lim = params.distance_lim;
     strain_lim = params.strain_lim;
     %
+	% data is plotted in dB scale
+	data_dB = 20*log10(abs(data) ./ max(abs(data), [], "all"));
+	%
     % plot figure
     fig = figure;
-    imagesc(time, distance, data);
+    imagesc(time, distance, data_dB);
     axis xy;
     colormap(parula);
     c = colorbar;

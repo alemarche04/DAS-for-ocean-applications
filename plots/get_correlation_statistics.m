@@ -69,9 +69,9 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     
     % parameters for plot scaling
     min_correlation = min(auto_correlation);
-    min_correlation = min_correlation + min_correlation/2;
+    min_correlation = min_correlation + min_correlation/4;
     max_correlation = max(auto_correlation);
-    max_correlation = max_correlation + max_correlation/2;
+    max_correlation = max_correlation + max_correlation/4;
     
 	% correlation statistics matrix
     correlation_statistics = zeros(nb_subplots, 3); % [offset, max_value, time]

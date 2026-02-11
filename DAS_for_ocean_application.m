@@ -15,7 +15,7 @@ addpath('Dataset', 'Dataset_Norway', 'filters', 'plots', 'config');
 %		DAS4Tracking_Ror23
 %		DAS4Tracking_airgun_inner
 %		DAS4Tracking_airgun_outer
-dataset_name	= 'DAS4Whale_Bou22';
+dataset_name	= 'Norway';
 DAS				= feval(str2func(dataset_name + "_cfg"));
 data			= DAS.load_data();
 % -----------------------------------------------------------------------%
@@ -52,9 +52,18 @@ if strcmp(dataset_name, 'Norway')
 	fullfile(dataset_name, ['cable_source_' dataset_name  '.png']));
 
 	% plot cable geometry and rouce postion 3D
-	DAS.plot_calbe_source_3D(source_run1, source_run2, source_run3);
-	
+	DAS.plot_cable_source_3D(source_run1, source_run2, source_run3);
 end
+
+% clear variables
+clear geo_origin source_run1 source_run2 source_run3
+clear t_start_run1 t_end_run1 t_start_run2 t_end_run2 t_start_run3 t_end_run3
+% -----------------------------------------------------------------------%
+
+%% CABLE GEOMETRY AND CHANNEL POSITION
+channel_no = 178;
+channel_position_m = channel_no * data.channel_distance_m;
+DAS.plot_channel_on_cable(channel_position_m);
 % -----------------------------------------------------------------------%
 
 %% BUTTERWORTH BANDPASS FILTER
@@ -93,7 +102,8 @@ fkFilt = DAS.fkFilt();
 fk_filter =	fk_filter_design( ...
 	data.dimensions, ...
 	data.channel_distance_m, ...
-	data.sampling_interval_s);
+	data.sampling_interval_s, ...
+	'c_range', fkFilt.velocity_range);
 
 % apply fk filter
 strain_filtered = fk_filter_filt( ...
@@ -104,17 +114,13 @@ strain_filtered = fk_filter_filt( ...
 clear fkFilt
 % -----------------------------------------------------------------------%
 
-%% DB SCALE
-strain_dB = 20*log10(abs(strain_filtered) ./ max(abs(strain_filtered), [], "all"));
-% -----------------------------------------------------------------------%
-
 %% TIME-SPACE PLOT
 % parameters
 tx = DAS.tx_plot();
 
 % time-space plot
 time_space_plot = get_time_space_plot( ...
-	strain_dB, ...
+	strain_filtered, ...
 	data.time, ...
 	data.distance_km, ...
 	'subtitle', data.time_and_date, ...
@@ -244,7 +250,6 @@ exportgraphics( ...
 	correlogram, ...
 	fullfile(dataset_name, ['correlogram_' dataset_name  '.png']));
 
-%%
 % plot correlation statistics and export data to csv file
 [correlation_statistics, xcorr_plot] = get_correlation_statistics( ...
 	strain_filtered, ...
@@ -257,16 +262,16 @@ exportgraphics( ...
 	xcorr.time_interval, ...
 	xcorr.filename_table, ...
 	'subtitle', data.time_and_date);
-%%
+
 % export plot as png
 exportgraphics( ...
 	xcorr_plot, ...
 	fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.png']));
 
 % estimates the distance btw the source and the CPA (at 42.8 km)
-estimate_R = false;
+estimate_R = true;
 if estimate_R
-	distance_from_CPA = (corr_cpa_km - corr_channel_position_km)*1e3; % distance btw reference channel and CPA
+	distance_from_CPA = (xcorr.cpa_km - xcorr.channel_position_km)*1e3; % distance btw reference channel and CPA
 	xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
 	time_peak = correlation_statistics(:, 3); % peak time of cross correlations
 	c = 1470;
@@ -294,8 +299,12 @@ if estimate_R
 
 	fprintf('Estimate value of R: %d\n', R_med);
 end
+
+% clear variables
+clear xcorr
 % -----------------------------------------------------------------------%
 
+%% EVENT DETECTION
 % %% event detection
 % cfg =				cfg.reload_params();		% loads any changes in the configuration file
 % eventDetection =	cfg.params.eventDetection;	% event detection parameters

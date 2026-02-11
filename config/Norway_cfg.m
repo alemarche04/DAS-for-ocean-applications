@@ -27,6 +27,7 @@ function cfg = Norway_cfg()
 	cfg.plot_source_pos_2D		= @plot_source_pos_2D;
 	cfg.plot_source_pos_all_2D	= @plot_source_pos_all_2D;
 	cfg.plot_cable_source_3D	= @plot_cable_source_3D;
+	cfg.plot_channel_on_cable	= @plot_channel_on_cable;
 	
 end
 % -----------------------------------------------------------------------%
@@ -39,7 +40,7 @@ function data = load_data()
 %       data - Struct containing transposed strain matrix, time vectors,
 %              distances, and sensor metadata (fs, dx, GL).
 
-	filename = 'norway_095659.hdf5';
+	filename = '122403_norway.hdf5';
 	data.strain						= h5read(filename, '/trace');
 	data.time						= h5read(filename, '/tx');
 	data.distance_m					= h5read(filename, '/dist');
@@ -67,8 +68,8 @@ function bp = bandpass()
 %
 %   Output:
 %       bp - Struct containing cutoff frequencies and filter order.
-    bp.cutoff_freq		= [5 75]; % [Hz]
-    bp.order			= 3;
+    bp.cutoff_freq		= [800 4000]; % [Hz]
+    bp.order			= 6;
 end
 % -----------------------------------------------------------------------%
 
@@ -90,7 +91,7 @@ function fkFilt = fkFilt()
 %   Output:
 %       fkFilt - Struct containing velocity range limits for f-k filtering.
 
-    fkFilt.velocity_range = [];
+    fkFilt.velocity_range = [1400 1435 1575 1600];
 end
 % -----------------------------------------------------------------------%
 
@@ -103,7 +104,7 @@ function tx = tx_plot()
 
     tx.time_lim					= [];
     tx.distance_lim				= [];
-    tx.strain_lim				= [-50 0];	% [dB]
+    tx.strain_lim				= [-60 -25];	% [dB]
     tx.prop_speed_km_s			= 1.47;     % Sound speed in water [km/s]
     tx.speed_line_points		= [1 1];
     tx.channel_position_km		= 0;
@@ -133,14 +134,14 @@ function sg = spectrogram()
 %   Output:
 %       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
-    sg.channel_position_km	= 0;
+    sg.channel_position_km	= 0.18156; 
     sg.nfft					= 4096;
     sg.window_len			= 512;
     sg.window				= hann(sg.window_len, 'periodic');
     sg.overlap_pct			= 0.89;
     sg.time_lim				= [];
-    sg.frequency_lim		= []; % [Hz]
-    sg.strain_lim			= [];
+    sg.frequency_lim		= [800 4000]; % [Hz]
+    sg.strain_lim			= [-30 0];
 end
 % -----------------------------------------------------------------------%
 
@@ -179,10 +180,6 @@ end
 %% GEOGRAPHICAL DATA & PLOTTING
 function geoCable = geoCable()
 % GEOCABLE Loads cable geometry from JSON and interpolates altitude.
-%
-%   Output:
-%       geoCable - Struct with lat, lon, and depth (up) coordinates.
-
     S = readstruct("cable-layout.json");
     C = S.features.geometry.coordinates{1};
     coord = vertcat(C{:});
@@ -217,17 +214,15 @@ function geo_origin = plot_cable_geometry_2D()
     
     figure(Name="Cable Geometry (2D)", NumberTitle="off");
     plot(xEast, yNorth); axis equal; grid on;
+	ylim([-50 2300]);
     xlabel('East (m)'); ylabel('North (m)');
 end
 
 function sourcePos = sourcePos(t_start, t_end)
 % SOURCEPOS Loads vessel/source positions from CSV for a specific time range.
-%
-%   Inputs:
-%       t_start, t_end - time range.
-    opts = detectImportOptions('source-position.csv');
+    opts = detectImportOptions('source-position.ods');
     opts = setvaropts(opts, 'datetime', 'Type', 'string'); 
-    T = readtable('source-position.csv', opts);
+    T = readtable('source-position.ods', opts);
     T.datetime = datetime(T.datetime, 'InputFormat', 'dd/MM/yyyy HH:mm:ss');
     time_index = timeofday(T.datetime);
     
@@ -259,6 +254,7 @@ function plot_source_pos_all_2D(sourcePos1, sourcePos2, sourcePos3, geo_origin)
         scatter(xE, yN, 10, colors{i}, 'filled');
     end
     legend('Cable', 'Run 1', 'Run 2', 'Run 3');
+	xlim([-50 450]); ylim([-200 100]);
     hold off;
 end
 
@@ -281,4 +277,49 @@ function plot_cable_source_3D(sourcePos1, sourcePos2, sourcePos3)
     end
     grid on; axis equal; view(3);
     xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
+end
+
+function plot_channel_on_cable(target_channel_m)
+% PLOT_CAHNNEL_ON_CABLE Creates a 2D and 3D visualization of a channel on
+% the fiber optic cable
+    cable_geometry = geoCable();
+    geo_origin = cable_geometry.origin;
+    [xE_cable, yN_cable, zU_cable] = geodetic2enu(cable_geometry.lat, cable_geometry.lon, cable_geometry.up, ...
+        geo_origin.lat, geo_origin.lon, geo_origin.up, wgs84Ellipsoid);
+
+	dx = diff(xE_cable);
+	dy = diff(yN_cable);
+	dz = diff(zU_cable);
+
+	dist_inc = sqrt(dx.^2 + dy.^2 + dz.^2);
+	dist_cum = [0; cumsum(dist_inc)]; % start from 0m
+	total_distance = dist_cum(end);
+
+	if target_channel_m < 0 || target_channel_m > total_distance
+		warning("Target channel out of range.")
+		return
+	end
+
+	x_target = interp1(dist_cum, xE_cable, target_channel_m);
+	y_target = interp1(dist_cum, yN_cable, target_channel_m);
+	z_target = interp1(dist_cum, zU_cable, target_channel_m);
+
+	% plot 2D
+	figure(Name="Cable Geometry and Channel position (2D)", NumberTitle="off");
+    plot(xE_cable, yN_cable); axis equal; grid on;
+	ylim([-50 2300]);
+    xlabel('East (m)'); ylabel('North (m)');
+	title(['Channel at meter: ', num2str(target_channel_m)]);
+	hold on
+	plot(x_target, y_target, 'ro', 'MarkerSize', 6, 'MarkerFaceColor', 'r');
+	hold off
+
+	% plot 3D
+	figure(Name="Cable Geometry and Channel position (3D)", NumberTitle="off");
+    plot3(xE_cable, yN_cable, zU_cable, 'b.-', 'LineWidth', 1.5); hold on;
+	plot3(x_target, y_target, z_target, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
+	grid on; axis equal; view(3);
+    xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
+	title(['Channel at meter: ', num2str(target_channel_m)]);
+	hold off
 end

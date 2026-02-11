@@ -2,7 +2,7 @@ import data_handle
 import numpy as np
 import h5py
 
-data = data_handle.get_acquisition_parameters("095659.hdf5", "asn")
+data = data_handle.get_acquisition_parameters("122403.hdf5", "asn")
 # fs: the sampling frequency (Hz)\n
 # dx: interval between two virtual sensing points also called channel spacing (m)\n
 # nx: the number of spatial samples also called channels\n
@@ -17,7 +17,7 @@ for name in data.keys():
         print(f"  Valore: {item[()]}")
 
 channels = [0, 1200, 1]
-[trace, tx, dist, file_begin_time_utc] = data_handle.load_das_data("095659.hdf5", channels, data, "asn")
+[trace, tx, dist, file_begin_time_utc] = data_handle.load_das_data("122403.hdf5", channels, data, "asn")
 #print(trace)
 #print(tx)
 #print(dist)
