@@ -49,33 +49,39 @@ if strcmp(dataset_name, 'Norway')
 
 	% plot cable geometry and rouce postion 3D
 	DAS.plot_cable_source_3D(source_run1, source_run2, source_run3);
-end
 
-% clear variables
-clear geo_origin source_run1 source_run2 source_run3
-clear t_start_run1 t_end_run1 t_start_run2 t_end_run2 t_start_run3 t_end_run3
+	% clear variables
+	clear geo_origin source_run1 source_run2 source_run3
+	clear t_start_run1 t_end_run1 t_start_run2 t_end_run2 t_start_run3 t_end_run3
+end
 % -----------------------------------------------------------------------%
 
 %% CABLE GEOMETRY AND CHANNEL POSITION
-channel_no = 178;
-channel_position_m = channel_no * data.channel_distance_m;
-DAS.plot_channel_on_cable(channel_position_m);
+if strcmp(dataset_name, 'Norway')
+	channel_no = 178;
+	channel_position_m = channel_no * data.channel_distance_m;
+	DAS.plot_channel_on_cable(channel_position_m);
 
-% clear variables
-clear channel_no channel_position_m
+	% clear variables
+	clear channel_no channel_position_m
+end
 % -----------------------------------------------------------------------%
 
 %% CABLE GEOMETRY AND SOURCE POSITION AT TIME OF RECORDING
-DAS.plot_source_on_cable(data.time_and_date);
+if strcmp(dataset_name, 'Norway')
+	DAS.plot_source_on_cable(data.time_and_date);
+end
 % -----------------------------------------------------------------------%
 
 %% CABLE GEOMETRY, CHANNEL POSITION AND SOURCE POSITION AT TIME OF RECORDING
-channel_no = 178;
-channel_position_m = channel_no * data.channel_distance_m;
-DAS.plot_source_channel_on_cable(data.time_and_date, channel_position_m);
+if strcmp(dataset_name, 'Norway')
+	channel_no = 178;
+	channel_position_m = channel_no * data.channel_distance_m;
+	DAS.plot_source_channel_on_cable(data.time_and_date, channel_position_m);
 
-% clear variables
-clear channel_no channel_position_m
+	% clear variables
+	clear channel_no channel_position_m
+end
 % -----------------------------------------------------------------------%
 
 %% BUTTERWORTH BANDPASS FILTER
@@ -126,6 +132,40 @@ strain_filtered = fk_filter_filt( ...
 clear fkFilt fk_filter
 % -----------------------------------------------------------------------%
 
+%% MATCHED FILTER AND TIME-SPACE PLOT
+if strcmp(dataset_name, 'Norway')
+	preamble_filename = 'preamble-B_4-25000.wav';
+	strain_matched_filtered = matched_filter(strain_filtered, preamble_filename);
+
+	% parameters
+	tx = DAS.tx_plot();
+
+	% time-space plot
+	time_space_plot = get_time_space_plot( ...
+	strain_matched_filtered(50:end, :), ...
+	data.time, ...
+	data.distance_km(50:end), ...
+	'subtitle', data.time_and_date, ...
+    'time_lim', tx.time_lim, ...
+	'distance_lim', tx.distance_lim, ...
+	'strain_lim', tx.strain_lim);
+
+	% export plot as png
+	exportgraphics( ...
+	time_space_plot, ...
+	fullfile(dataset_name, ['tx_matched_filt_plot_' dataset_name  '.png']));
+
+	% draw channel position
+	channel_no = 178;
+	channel_position_m = channel_no * data.channel_distance_m;
+	hold on;
+	yline(channel_position_m*1e-3, '--', 'channel','LineWidth', 1, 'Color', '#FFD1DF');
+	hold off;
+
+	% clear variables
+	clear preamble_filename tx time_space_plot  channel_no channel_position_m
+end
+% -----------------------------------------------------------------------%
 %% TIME-SPACE PLOT
 % parameters
 tx = DAS.tx_plot();
@@ -139,13 +179,6 @@ time_space_plot = get_time_space_plot( ...
     'time_lim', tx.time_lim, ...
 	'distance_lim', tx.distance_lim, ...
 	'strain_lim', tx.strain_lim);
-
-% draw channel position
-channel_no = 178;
-channel_position_m = channel_no * data.channel_distance_m;
-hold on;
-yline(channel_position_m*1e-3, '--', 'CHANNEL','LineWidth', 1, 'Color', '#FFD1DF');
-hold off;
 
 % draw propagation speed lines on time-space plot
 speedline = false;
@@ -166,12 +199,13 @@ exportgraphics( ...
 	fullfile(dataset_name, ['time_space_plot_' dataset_name  '.png']));
 
 % clear variables
-clear tx speedline channel_no channel_position_m time_space_plot
+clear tx speedline time_space_plot
 % -----------------------------------------------------------------------%
 
 %% STRAIN WAVEFORM (SINGLE CHANNEL)
 % parameters
 wf = DAS.waveform();
+wf.channel_position_km = 178 * data.channel_distance_m;
 
 % plot strain waveform channel of interest
 strain_waveform = get_strain_waveform( ...

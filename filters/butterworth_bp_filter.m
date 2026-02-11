@@ -24,20 +24,20 @@ function filtered_data = butterworth_bp_filter(data, cutoff_freq, order, samplin
 %
 %   See also: BUTTER, FILTFILT, DESIGNFILT
 
-    % Normalize cutoff frequencies relative to the Nyquist frequency
+    % normalize cutoff frequencies relative to the Nyquist frequency
     cutoff_bp = cutoff_freq / (sampling_freq / 2);
     
-    % Design the Butterworth filter coefficients
+    % design the Butterworth filter coefficients
     [B, A] = butter(order, cutoff_bp, 'bandpass');
     
-    % Log processing step and start timer
+    % log processing step and start timer
     printStep('Applying Butterworth bandpass filter');
     
-    % Apply zero-phase filtering
-    % Data is transposed to ensure filtering occurs along the time dimension
+    % apply zero-phase filtering
+    % data is transposed to ensure filtering occurs along the time dimension
     filtered_data = filtfilt(B, A, data')';
     
-    % Output elapsed time
+    % output elapsed time
     printTime();
 end
 

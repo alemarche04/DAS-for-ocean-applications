@@ -106,7 +106,7 @@ function tx = tx_plot()
 
     tx.time_lim					= [];
     tx.distance_lim				= [];
-    tx.strain_lim				= [-60 -25];	% [dB]
+    tx.strain_lim				= [-40 -10];	% [dB]
     tx.prop_speed_km_s			= 1.47;     % Sound speed in water [km/s]
     tx.speed_line_points		= [1 1];
     tx.channel_position_km		= 0;
