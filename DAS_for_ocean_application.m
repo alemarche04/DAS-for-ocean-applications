@@ -205,7 +205,6 @@ clear tx speedline time_space_plot
 %% STRAIN WAVEFORM (SINGLE CHANNEL)
 % parameters
 wf = DAS.waveform();
-wf.channel_position_km = 178 * data.channel_distance_m;
 
 % plot strain waveform channel of interest
 strain_waveform = get_strain_waveform( ...

@@ -121,7 +121,7 @@ function wf = waveform()
 %   Output:
 %       wf - Parameters for time-series plotting and audio export.
 
-    wf.channel_position_km	= 0;
+    wf.channel_position_km	= 0.12;
     wf.cpa_km				= 0;
     wf.time_lim				= [];
     wf.strain_lim			= [];
@@ -136,14 +136,14 @@ function sg = spectrogram()
 %   Output:
 %       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
-    sg.channel_position_km	= 0.18156; 
+    sg.channel_position_km	= 177 * (1.02 * 1e-3); 
     sg.nfft					= 4096;
     sg.window_len			= 512;
     sg.window				= hann(sg.window_len, 'periodic');
     sg.overlap_pct			= 0.89;
     sg.time_lim				= [];
     sg.frequency_lim		= [800 4000]; % [Hz]
-    sg.strain_lim			= [-30 0];
+    sg.strain_lim			= [-155 -125];
 end
 % -----------------------------------------------------------------------%
 
