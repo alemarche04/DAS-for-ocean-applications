@@ -120,6 +120,23 @@ Median filtering is a non-linear operation often used in DAS to remove impulsive
 
 ---
 
+#### `matched_filter`
+
+Computes and applies a matched filter for packet detection.
+
+```matlab
+trace_out = matched_filter(data, filename)
+```
+
+**Input Arguments:**
+- `data` - 2D matrix of DAS data [channels × samples]
+- `filename` - String with the name of the .wav file for the filter template
+
+**Output Arguments:**
+- `trace_out` - The filtered data matrix
+
+---
+
 ### Visualization Functions
 
 #### `get_time_space_plot`

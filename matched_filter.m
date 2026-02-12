@@ -7,7 +7,7 @@ function output = matched_filter(data, filename)
 %
 %   Input Arguments:
 %       data                - 2D matrix of DAS data [channels x samples].
-%       filename            - String with the name of a .wav file
+%       filename            - String with the name of the .wav file for the filter template
 %
 %   Output Arguments:
 %       output              - Matrix with filtered data
