@@ -28,10 +28,6 @@ function fig = get_spectrogram(data, distance_km, sampling_frequency, ...
 %   Output Arguments:
 %       fig                 - Handle to the generated figure.
 %
-%   Scaling Note:
-%       The spectrogram is normalized such that the maximum value is 0 dB:
-%       dB = 20 * log10( |S| / max(|S|) )
-%
 %   See also: STFT, IMAGESC, HANN, GET_STRAIN_WAVEFORM
 
     % validate input and set up optional parameters

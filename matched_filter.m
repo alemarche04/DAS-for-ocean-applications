@@ -1,4 +1,18 @@
 function output = matched_filter(data, filename)
+% MATCHED_FILTER Computes and applies a matched filter for packet detection.
+%
+%   OUTPUT = MATCHED_FILTER(DATA, FILENAME)
+%   reads data from a .wav file, from which it creates the matched filter
+%   and applies it to the data matrix
+%
+%   Input Arguments:
+%       data                - 2D matrix of DAS data [channels x samples].
+%       filename            - String with the name of a .wav file
+%
+%   Output Arguments:
+%       output              - Matrix with filtered data
+%
+%   See also: AUDIOREAD, FLIPUD, FFTFILT
 
 	% load and prepare template
     [template, fs] = audioread(filename);
