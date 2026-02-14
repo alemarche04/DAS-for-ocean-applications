@@ -1,5 +1,5 @@
-function fig = get_spectrogram(data, distance_km, sampling_frequency, ...
-	channel_position_km, nfft, N, window, overlap_pct, varargin)
+function fig = get_spectrogram(data, distance, sampling_frequency, ...
+	channel_position_m, nfft, N, window, overlap_pct, varargin)
 % GET_SPECTROGRAM Computes and plots the STFT of a specific DAS channel.
 %
 %   FIG = GET_SPECTROGRAM(DATA, DISTANCE_KM, SAMPLING_FREQUENCY, ...
@@ -9,9 +9,9 @@ function fig = get_spectrogram(data, distance_km, sampling_frequency, ...
 %
 %   Input Arguments:
 %       data                - 2D matrix of DAS data [channels x samples].
-%       distance_km         - Vector mapping channel indices to distances [km].
+%       distance            - Vector mapping channel indices to distances [m].
 %       sampling_frequency  - System sampling rate [Hz].
-%       channel_position_km - The specific spatial location to analyze [km].
+%       channel_position_m  - The specific spatial location to analyze [m].
 %       nfft                - Number of FFT points.
 %       N                   - Segment length (window size in samples).
 %       window              - Window coefficients (vector, e.g., hann(N)).
@@ -31,19 +31,24 @@ function fig = get_spectrogram(data, distance_km, sampling_frequency, ...
 %   See also: STFT, IMAGESC, HANN, GET_STRAIN_WAVEFORM
 
     % validate input and set up optional parameters
-    params = parse_inputs(data, distance_km, sampling_frequency, channel_position_km, nfft, N, window, overlap_pct, varargin{:});
+    params = parse_inputs(data, distance, sampling_frequency, channel_position_m, nfft, N, window, overlap_pct, varargin{:});
     time_lim = params.time_lim;
     frequency_lim = params.frequency_lim;
     strain_lim = params.strain_lim;
 	norm = params.norm;
     %
+
 	% extract the channel data for the specified position
-    channel = get_channel(data, distance_km, channel_position_km);
+    [~, channel_idx] = min(abs(distance - channel_position_m));
+	channel_data = data(channel_idx, :);
+	%
+
     % calculater short-time Fourier Transform
     noverlap = round(overlap_pct*N);
-    [spectrogram, freq_axis, time_axis] = stft(channel.data, sampling_frequency, ...
+    [spectrogram, freq_axis, time_axis] = stft(channel_data, sampling_frequency, ...
         "Window", window, "OverlapLength", noverlap, "FFTLength", nfft);
     %
+
 	if norm
     	% normalized dB scale
     	spectrogram_dB = 20*log10(abs(spectrogram) ./ max(abs(spectrogram), [], "all"));
@@ -53,6 +58,7 @@ function fig = get_spectrogram(data, distance_km, sampling_frequency, ...
     	spectrogram_dB = 20*log10(abs(spectrogram));
     	c.Label.String = 'Strain (dB)';
 	end
+
     % plot spectrogram
 	fig = figure(Name="Spectrogram", NumberTitle="off");
 	imagesc(time_axis, freq_axis, spectrogram_dB);
@@ -64,7 +70,7 @@ function fig = get_spectrogram(data, distance_km, sampling_frequency, ...
 	%
 	% apply optional subtitle
 	if ~isempty(params.subtitle)
-		subtitle({sprintf("Channel at km %.3f (n° %d)", channel_position_km, channel.idx), params.subtitle}, "FontSize", 12);
+		subtitle({sprintf("Channel at m %.2f (n° %d)", channel_position_m, channel_idx), params.subtitle}, "FontSize", 12);
 	end
     %
     
@@ -83,22 +89,22 @@ end
 % -----------------------------------------------------------------------%
 
 %% HELP FUNCTIONS
-function channel = get_channel(data, distance_km, channel_position_km)
+function channel = get_channel(data, distance_m, channel_position_m)
 % GET_CHANNEL Helper function to find the nearest channel by distance.
-	[~, channel.idx] = min(abs(distance_km - channel_position_km));
+	[~, channel.idx] = min(abs(distance_m - channel_position_m));
 	channel.data = data(channel.idx, :);
 end
 % -----------------------------------------------------------------------%
 
 %% INPUT PARSING
-function results = parse_inputs(data, distance_km, sampling_frequency, channel_position_km, nfft, N, window, overlap_pct, varargin)
+function results = parse_inputs(data, distance, sampling_frequency, channel_position_m, nfft, N, window, overlap_pct, varargin)
     p = inputParser;
 
     % required parameters
     addRequired(p, 'data', @isnumeric);
     addRequired(p, 'distance', @(x) isnumeric(x) && isvector(x) && all(x>=0));
     addRequired(p, 'sampling_frequency', @(x) isnumeric(x) && isscalar(x) && x > 0);
-	addRequired(p, 'channel_position_km', @(x) isnumeric(x) && isscalar(x) && x>=0);
+	addRequired(p, 'channel_position_m', @(x) isnumeric(x) && isscalar(x) && x>=0);
     addRequired(p, 'nfft', @(x) isnumeric(x) && x > 0);
     addRequired(p, 'N', @(x) isnumeric(x) && x > 0);
     addRequired(p, 'window', @(x) isnumeric(x) && isvector(x));
@@ -111,6 +117,6 @@ function results = parse_inputs(data, distance_km, sampling_frequency, channel_p
     addParameter(p, 'strain_lim', [], @(x) isempty(x) || (isnumeric(x) && isvector(x)));
 	addParameter(p, 'norm', false, @islogical);
 
-    parse(p, data, distance_km, sampling_frequency, channel_position_km, nfft, N, window, overlap_pct, varargin{:});
+    parse(p, data, distance, sampling_frequency, channel_position_m, nfft, N, window, overlap_pct, varargin{:});
     results = p.Results;
 end

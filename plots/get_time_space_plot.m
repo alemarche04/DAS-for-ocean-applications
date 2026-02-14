@@ -8,7 +8,7 @@ function fig = get_time_space_plot(data, time, distance, varargin)
 %   Input Arguments:
 %       data         - 2D matrix of DAS data [channels x samples].
 %       time         - Vector of time samples [s].
-%       distance     - Vector of spatial positions [km].
+%       distance     - Vector of spatial positions [m].
 %
 %   Optional Parameters (Name-Value Pairs):
 %       'subtitle'     - Plot subtitle string (typically time and date)
@@ -27,9 +27,11 @@ function fig = get_time_space_plot(data, time, distance, varargin)
     distance_lim = params.distance_lim;
     strain_lim = params.strain_lim;
     %
+
 	% data is plotted in dB scale
 	data_dB = 20*log10(abs(data) ./ max(abs(data), [], "all"));
 	%
+
     % plot figure
     fig = figure(Name="Time-Space plot", NumberTitle="off");
     imagesc(time, distance, data_dB);
@@ -38,7 +40,7 @@ function fig = get_time_space_plot(data, time, distance, varargin)
     c = colorbar;
     title('Time-Space plot', 'FontSize', 14, 'FontWeight', 'bold');
     xlabel('Time (s)', 'FontSize', 12);
-    ylabel('Distance (km)', 'FontSize', 12);
+    ylabel('Distance (m)', 'FontSize', 12);
     c.Label.String = 'Strain (dB)';
 	%
 	% apply optional subtitle
@@ -66,7 +68,7 @@ function results = parse_inputs(data, time, distance, varargin)
 	
 	% required parameters
 	addRequired(p, 'data', @isnumeric);
-	addRequired(p, 'distance_km', @(x) isnumeric(x) && isvector(x) && all(x>=0));
+	addRequired(p, 'distance', @(x) isnumeric(x) && isvector(x) && all(x>=0));
     addRequired(p, 'time', @(x) isnumeric(x) && isvector(x) && all(x>=0));
 	
 	% optional parameters

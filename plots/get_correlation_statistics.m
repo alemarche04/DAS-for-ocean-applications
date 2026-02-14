@@ -1,6 +1,6 @@
 function [correlation_statistics, fig] = get_correlation_statistics( ...
-	data, sampling_frequency, distance_m, channel_distance_m, ...
-    channel_reference_position_km, offset_m, max_lag, time_interval, ...
+	data, sampling_frequency, distance, channel_distance_m, ...
+    channel_reference_position_m, offset_m, max_lag, time_interval, ...
 	filename_xcorr_table, varargin)
 % GET_CORRELATION_STATISTICS Quantifies cross-correlation peaks across the array.
 %
@@ -10,15 +10,15 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 %   It identifies the time-lag of the maximum correlation peak for each 
 %   channel and exports the results to a CSV table.
 %
-%   Input Arguments:
-%       data                - 2D matrix of DAS data [channels x samples].
-%       sampling_frequency  - System sampling rate [Hz].
-%       distance_m          - Vector of spatial coordinates for channels [m].
-%       channel_distance_m  - Nominal spacing between channels [m].
-%       channel_reference_position_km - Target position for the reference [km].
-%       offset_m            - Maximum distance from reference to analyze [m].
-%       max_lag             - Maximum time lag for correlation [s].
-%       time_interval       - 2-element vector [start end] for data segment [s].
+%   Input Arguments: 
+%       data                 - 2D matrix of DAS data [channels x samples].
+%       sampling_frequency   - System sampling rate [Hz].
+%       distance             - Vector of spatial coordinates for channels [m].
+%       channel_distance_m   - Nominal spacing between channels [m].
+%       channel_reference_position_m - Target position for the reference [m].
+%       offset_m             - Maximum distance from reference to analyze [m].
+%       max_lag              - Maximum time lag for correlation [s].
+%       time_interval        - 2-element vector [start end] for data segment [s].
 %       filename_xcorr_table - Filename (string) for the output CSV table.
 %
 %   Output Arguments:
@@ -33,8 +33,8 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 %   See also: XCORR, WRITETABLE, GET_CORRELOGRAM
 
     % parse input parameters
-    params = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-        channel_reference_position_km, offset_m, max_lag, time_interval, ...
+    params = parse_inputs(data, sampling_frequency, distance, channel_distance_m, ...
+        channel_reference_position_m, offset_m, max_lag, time_interval, ...
 		filename_xcorr_table, varargin{:});
     
     % signal in time interval
@@ -45,10 +45,9 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     % number of samples
     max_lag_samples = round(max_lag * sampling_frequency);
     
-    % closest channel to channel reference km
-    channel_reference_position_m = channel_reference_position_km * 1e3;
-    [~, channel_reference_idx] = min(abs(distance_m - channel_reference_position_m)); % index of the closest channel to channel_reference_position_km
-    actual_channel_distance = distance_m(channel_reference_idx); % distance of the closest channel to channel_reference_position_km
+    % closest channel to reference channel
+    [~, channel_reference_idx] = min(abs(distance - channel_reference_position_m)); % index of the closest channel to channel_reference_position_km
+    actual_channel_distance = distance(channel_reference_idx); % distance of the closest channel to channel_reference_position_km
     channel_reference = data_corr(channel_reference_idx, :);
         
     % sets up subplots
@@ -90,7 +89,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         % (cross)correlation with negative offset
         [xcorr_negative_offset, lags_xcorr_negative_offset] = xcorr(channel_reference, data_corr((channel_reference_idx - i * offset_step), :), max_lag_samples);
         time_lags_xcorr_negative_offset = lags_xcorr_negative_offset / sampling_frequency;
-		offset_from_reference = distance_m(channel_reference_idx - i * offset_step) - actual_channel_distance;
+		offset_from_reference = distance(channel_reference_idx - i * offset_step) - actual_channel_distance;
         
         % plot result 
         nexttile
@@ -141,7 +140,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         % (cross)correlation with positive offset
         [xcorr_positive_offset, lags_xcorr_positive_offset] = xcorr(channel_reference, data_corr((channel_reference_idx + i * offset_step), :), max_lag_samples);
         time_lags_xcorr_positive_offset = lags_xcorr_positive_offset / sampling_frequency;
-		offset_from_reference = distance_m(channel_reference_idx + i * offset_step) - actual_channel_distance;
+		offset_from_reference = distance(channel_reference_idx + i * offset_step) - actual_channel_distance;
         
         % plot result 
         nexttile
@@ -172,7 +171,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 
 	% apply optional subtitle
 	if ~isempty(params.subtitle)
-		 sgtitle({sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', channel_reference_position_km, offset_m), ...
+		 sgtitle({sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', channel_reference_position_m, offset_m), ...
         sprintf('Signals duration: from %.2f s to %.2f s', time_interval), params.subtitle});
 	end
     %
@@ -180,17 +179,17 @@ end
 % -----------------------------------------------------------------------%
 
 %% INPUT PARSING
-function results = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...
-	channel_reference_position_km, offset_m, max_lag, time_interval, ...
+function results = parse_inputs(data, sampling_frequency, distance, channel_distance_m, ...
+	channel_reference_position_m, offset_m, max_lag, time_interval, ...
 	filename_xcorr_table, varargin)
 	p = inputParser;
 	
 	% required parameters
 	addRequired(p, 'data', @isnumeric);
     addRequired(p, 'sampling_frequency', @(x) isnumeric(x) && isscalar(x) && x>0);
-    addRequired(p, 'distance_m', @(x) isnumeric(x) && isvector(x));
+    addRequired(p, 'distance', @(x) isnumeric(x) && isvector(x));
     addRequired(p, 'channel_distance_m', @(x) isnumeric(x) && isscalar(x) && x>=0);
-    addRequired(p, 'channel_reference_position_km', @(x) isnumeric(x) && isscalar(x) && x>=0);
+    addRequired(p, 'channel_reference_position_m', @(x) isnumeric(x) && isscalar(x) && x>=0);
     addRequired(p, 'offset_m', @(x) isnumeric(x) && isscalar(x) && x>=0);
     addRequired(p, 'max_lag', @(x) isnumeric(x) && isscalar(x) && x>=0 );
     addRequired(p, 'time_interval', @(x) isnumeric(x) && isvector(x) && all(x>=0));
@@ -199,8 +198,8 @@ function results = parse_inputs(data, sampling_frequency, distance_m, channel_di
 	% optional parameters
 	addParameter(p, 'subtitle', [], @(x) isempty(x) || ischar(x) || isstring(x));
 	
-	parse(p, data, sampling_frequency, distance_m, channel_distance_m, ...
-	channel_reference_position_km, offset_m, max_lag, time_interval, ...
+	parse(p, data, sampling_frequency, distance, channel_distance_m, ...
+	channel_reference_position_m, offset_m, max_lag, time_interval, ...
 	filename_xcorr_table, varargin{:});
 	results = p.Results;
 end

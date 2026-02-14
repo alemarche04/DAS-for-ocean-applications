@@ -95,13 +95,13 @@ function tx = tx()
 %   Output:
 %       tx - Parameters for axis limits and propagation speed references.
 
-    tx.time_lim                  = [];
-    tx.distance_lim              = [];
-    tx.strain_lim                = [-30 -5]; % [dB]
-    tx.prop_speed_km_s           = 1.47;     % Sound speed in water [km/s]
-    tx.speed_line_points         = [47.75 45.48];
-    tx.channel_position_km       = 42;
-    tx.cpa_km                    = 42.8;
+    tx.time_lim                 = [];
+    tx.distance_lim             = [];
+    tx.strain_lim               = [-30 -5]; % [dB]
+	tx.p1						= [49.65 45925.8]; % [time space]
+	tx.p2						= [48.15 43752.5]; % [time space]
+    tx.channel_position_m       = 42000;
+    tx.cpa_m                    = 42800;
 end
 
 % -----------------------------------------------------------------------%
@@ -113,8 +113,8 @@ function wf = waveform()
 %   Output:
 %       wf - Parameters for time-series plotting and audio export.
 
-    wf.channel_position_km   = 42;
-    wf.cpa_km                = 42.8;
+    wf.channel_position_m    = 42000;
+    wf.cpa_m                 = 42800;
     wf.time_lim              = [];
     wf.strain_lim            = [-1.3e-9 1.3e-9];
     wf.filename_audio        = fullfile('DAS4Whale_Bou22/', 'strain_waveform_DAS4Whale_Bou22.wav');
@@ -128,7 +128,7 @@ function sg = spectrogram()
 %   Output:
 %       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
-    sg.channel_position_km   = 42;
+    sg.channel_position_m    = 42000;
     sg.nfft                  = 4096;
     sg.window_len            = 512;
     sg.window                = hann(sg.window_len, 'periodic');
@@ -162,10 +162,10 @@ function xcorr = correlation()
 %   Output:
 %       xcorr - Channel offsets, time lags, and statistics export settings.
 
-    xcorr.channel_position_km	= 42;
+    xcorr.channel_position_m	= 42000;
     xcorr.offset_m				= 300;
     xcorr.time_lag				= 0.2;
     xcorr.time_interval			= [47 50];
-    xcorr.cpa_km				= 42.8;
+    xcorr.cpa_m					= 42800;
     xcorr.filename_table		= fullfile('DAS4Whale_Bou22/', 'cross_corr_stats_DAS4Whale_Bou22.csv');
 end

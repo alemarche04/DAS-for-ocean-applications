@@ -10,7 +10,7 @@ function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
 %
 %   Input Arguments:
 %       data                - 2D matrix of DAS data [channels x samples].
-%       distance            - Vector of spatial coordinates for channels [km].
+%       distance            - Vector of spatial coordinates for channels [m].
 %       sampling_frequency  - System sampling rate [Hz].
 %       nfft                - Number of FFT points for frequency resolution.
 %       time_window         - Duration of each analysis segment [s].
@@ -74,7 +74,7 @@ function fig = get_space_frequency_plot(data, distance, sampling_frequency, ...
         % initialize with zeros
         hImg = imagesc(ax_anim, frequency_axis, distance, zeros(length(distance), length(frequency_axis)));
         axis xy; colormap(parula);
-        xlabel('Frequency (Hz)'); ylabel('Distance (km)');
+        xlabel('Frequency (Hz)'); ylabel('Distance (m)');
         c_anim = colorbar; c_anim.Label.String = 'Strain (dB)';
         if ~isempty(strain_lim), clim(ax_anim, strain_lim); end
         if ~isempty(frequency_lim), xlim(ax_anim, frequency_lim); end

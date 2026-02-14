@@ -1,5 +1,5 @@
-function fig = get_correlogram(data, sampling_frequency, distance_m, ...
-	channel_reference_position_km, offset_m, max_lag, time_interval, varargin)
+function fig = get_correlogram(data, sampling_frequency, distance, ...
+	channel_reference_position_m, offset_m, max_lag, time_interval, varargin)
 % GET_CORRELOGRAM Computes and plots spatial cross-correlation (correlogram).
 %
 %   FIG = GET_CORRELOGRAM(DATA, SAMPLING_FREQUENCY, DISTANCE_M, ...
@@ -11,8 +11,8 @@ function fig = get_correlogram(data, sampling_frequency, distance_m, ...
 %   Input Arguments:
 %       data                - 2D matrix of DAS data [channels x samples].
 %       sampling_frequency  - System sampling rate [Hz].
-%       distance_m          - Vector of spatial coordinates for channels [meters].
-%       channel_reference_position_km - Target position for the reference [km].
+%       distance            - Vector of spatial coordinates for channels [m].
+%       channel_reference_position_m - Target position for the reference [m].
 %       offset_m            - Maximum distance from reference to correlate [m].
 %       max_lag             - Maximum time lag for correlation [s].
 %       time_interval       - 2-element vector [start end] for signal segment [s].
@@ -30,7 +30,7 @@ function fig = get_correlogram(data, sampling_frequency, distance_m, ...
 %   See also: XCORR, IMAGESC, GET_TIME_SPACE_PLOT
 
     % validate input
-    params = parse_inputs(data, sampling_frequency, distance_m, channel_reference_position_km, ...
+    params = parse_inputs(data, sampling_frequency, distance, channel_reference_position_m, ...
         offset_m, max_lag, time_interval, varargin{:});
 
     % signal selection
@@ -43,13 +43,13 @@ function fig = get_correlogram(data, sampling_frequency, distance_m, ...
     max_lag_samples = round(max_lag * sampling_frequency);
     
     % reference channel selection
-    channel_position_m = channel_reference_position_km * 1e3;
-    [~, channel_reference_idx] = min(abs(distance_m - channel_position_m)); 
-    actual_channel_distance = distance_m(channel_reference_idx); 
+    channel_position_m = channel_reference_position_m;
+    [~, channel_reference_idx] = min(abs(distance - channel_position_m)); 
+    actual_channel_distance = distance(channel_reference_idx); 
     channel_reference = data_corr(channel_reference_idx, :);
         
     % spatial subset selection
-    distance_from_reference_channel = abs(distance_m - actual_channel_distance);
+    distance_from_reference_channel = abs(distance - actual_channel_distance);
     nearby_idx = find(distance_from_reference_channel <= offset_m); 
     
     % pre-allocate cross-correlation matrix
@@ -68,7 +68,7 @@ function fig = get_correlogram(data, sampling_frequency, distance_m, ...
     
     % axis Generation
     time_lags = lags/sampling_frequency;
-    offset_axis = distance_m(nearby_idx) - actual_channel_distance;
+    offset_axis = distance(nearby_idx) - actual_channel_distance;
         
     % --- Plotting ---
     fig = figure(Name="Correlogram", NumberTitle="off");
@@ -81,8 +81,8 @@ function fig = get_correlogram(data, sampling_frequency, distance_m, ...
     ylabel(c, 'Correlation Intensity'); 
     ylabel('Distance from reference (m)');
     xlabel('Time lag (s)');
-    title(sprintf('Cross-correlation (Ref: %.3f km, max offset: %d m)', ...
-        actual_channel_distance .* 1e-3, offset_m), 'FontSize', 14, 'FontWeight', 'bold');
+    title(sprintf('Cross-correlation (Ref: %.2f m, max offset: %d m)', ...
+        actual_channel_distance, offset_m), 'FontSize', 14, 'FontWeight', 'bold');
 	%
 	% apply optional subtitle
 	if ~isempty(params.subtitle)
@@ -93,15 +93,15 @@ end
 % -----------------------------------------------------------------------%
 
 %% INPUT PARSING
-function results = parse_inputs(data, sampling_frequency, distance_m, channel_reference_position_km, ...
+function results = parse_inputs(data, sampling_frequency, distance, channel_reference_position_m, ...
             offset_m, max_lag, time_interval, varargin)
     p = inputParser;
 
 	% required parameters
     addRequired(p, 'data', @isnumeric);
     addRequired(p, 'sampling_frequency', @(x) isnumeric(x) && isscalar(x) && x>0);
-    addRequired(p, 'distance_m', @(x) isnumeric(x) && isvector(x));
-    addRequired(p, 'channel_reference_position_km', @(x) isnumeric(x) && isscalar(x) && x>=0);
+    addRequired(p, 'distance', @(x) isnumeric(x) && isvector(x));
+    addRequired(p, 'channel_reference_position_m', @(x) isnumeric(x) && isscalar(x) && x>=0);
     addRequired(p, 'offset_m', @(x) isnumeric(x) && isscalar(x) && x>=0);
     addRequired(p, 'max_lag', @(x) isnumeric(x) && isscalar(x) && x>=0 );
     addRequired(p, 'time_interval', @(x) isnumeric(x) && isvector(x) && all(x>=0));
@@ -109,7 +109,7 @@ function results = parse_inputs(data, sampling_frequency, distance_m, channel_re
 	% optional parameters
 	addParameter(p, 'subtitle', [], @(x) isempty(x) || ischar(x) || isstring(x));
 
-    parse(p, data, sampling_frequency, distance_m, channel_reference_position_km, ...
+    parse(p, data, sampling_frequency, distance, channel_reference_position_m, ...
         offset_m, max_lag, time_interval, varargin{:});
     results = p.Results;
 end

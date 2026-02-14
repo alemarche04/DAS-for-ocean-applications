@@ -107,10 +107,10 @@ function tx = tx_plot()
     tx.time_lim					= [];
     tx.distance_lim				= [];
     tx.strain_lim				= [-40 -10];	% [dB]
-    tx.prop_speed_km_s			= 1.47;     % Sound speed in water [km/s]
-    tx.speed_line_points		= [1 1];
-    tx.channel_position_km		= 0;
-    tx.cpa_km					= 0;
+    tx.p1						= [1 1]; % [time space]
+	tx.p2						= [2 2]; % [time space]
+    tx.channel_position_m		= 0;
+    tx.cpa_m					= 0;
 end
 % -----------------------------------------------------------------------%
 
@@ -121,8 +121,8 @@ function wf = waveform()
 %   Output:
 %       wf - Parameters for time-series plotting and audio export.
 
-    wf.channel_position_km	= 0.12;
-    wf.cpa_km				= 0;
+    wf.channel_position_m	= 120;
+    wf.cpa_m				= 0;
     wf.time_lim				= [];
     wf.strain_lim			= [];
     wf.filename_audio		= fullfile('Norway/', 'strain_waveform_Norway.wav');
@@ -136,7 +136,7 @@ function sg = spectrogram()
 %   Output:
 %       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
-    sg.channel_position_km	= 177 * (1.02 * 1e-3); 
+    sg.channel_position_m	= 177 * 1.02;
     sg.nfft					= 4096;
     sg.window_len			= 512;
     sg.window				= hann(sg.window_len, 'periodic');
@@ -170,11 +170,11 @@ function xcorr = correlation()
 %   Output:
 %       xcorr - Channel offsets, time lags, and statistics export settings.
 
-    xcorr.channel_position_km	= 0;
+    xcorr.channel_position_m	= 0;
     xcorr.offset_m				= 300;
     xcorr.time_lag				= 0.2;
     xcorr.time_interval			= [0 3];
-    xcorr.cpa_km				= 0;
+    xcorr.cpa_m					= 0;
     xcorr.filename_table		= fullfile('Norway/', 'cross_corr_stats_Norway.csv');
 end
 % -----------------------------------------------------------------------%

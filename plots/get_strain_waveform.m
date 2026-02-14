@@ -1,4 +1,4 @@
-function fig = get_strain_waveform(data, distance_km, time, channel_position_km, ...
+function fig = get_strain_waveform(data, distance, time, channel_position_m, ...
 	filename_audio, sampling_frequency_Hz, varargin)
 % GET_STRAIN_WAVEFORM Extracts a specific channel, plots its waveform, and exports audio.
 %
@@ -10,9 +10,9 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
 %
 %   Input Arguments:
 %       data                  - 2D matrix of DAS data [channels x samples].
-%       distance_km           - Vector mapping channel indices to distances [km].
+%       distance              - Vector mapping channel indices to distances [m].
 %       time                  - Time vector for the X-axis [s].
-%       channel_position_km   - The specific spatial location to extract [km].
+%       channel_position_m    - The specific spatial location to extract [m].
 %       filename_audio        - String/Path for the output .wav file.
 %       sampling_frequency_Hz - System sampling rate [Hz].
 %
@@ -32,24 +32,26 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
 %   See also: AUDIOWRITE, MIN, GET_TIME_SPACE_PLOT
 
     % validate input and set up optional parameters
-    params = parse_inputs(data, distance_km, time, channel_position_km, filename_audio, sampling_frequency_Hz, varargin{:});
+    params = parse_inputs(data, distance, time, channel_position_m, filename_audio, sampling_frequency_Hz, varargin{:});
     time_lim = params.time_lim;
     strain_lim = params.strain_lim;
     %
+
 	% extract the channel data for the specified position
-    [~, channel_position_idx] = min(abs(distance_km - channel_position_km));
-	channelData = data(channel_position_idx, :);
+    [~, channel_idx] = min(abs(distance - channel_position_m));
+	channel_data = data(channel_idx, :);
+	%
     
     % plot figure
     fig = figure(Name="Strain Waveform", NumberTitle="off");
-    plot(time, channelData)
+    plot(time, channel_data)
     xlabel('Time (s)', 'FontSize', 12);
     ylabel('Strain Amplitude', 'FontSize', 12);
     title('Strain Waveform', 'FontSize', 14, 'FontWeight', 'bold');
     %
 	% apply optional subtitle
 	if ~isempty(params.subtitle)
-		subtitle({sprintf("Channel at km %.2f", channel_position_km), params.subtitle}, "FontSize", 12);
+		subtitle({sprintf("Channel at m %.2f", channel_position_m), params.subtitle}, "FontSize", 12);
 	end
     %
     % plot limits configuration
@@ -63,7 +65,7 @@ function fig = get_strain_waveform(data, distance_km, time, channel_position_km,
     end
     %
 	% Audio file processing and saving
-	audioSignal = channelData - mean(channelData); % remove DC offset
+	audioSignal = channel_data - mean(channel_data); % remove DC offset
 	peakVal = max(abs(audioSignal)); % find absolute peak
 	if peakVal > 0 % normalize non silent signal
     	audioSignal = (audioSignal / peakVal) * 0.9; % scale so max peak is 0.9
@@ -75,14 +77,14 @@ end
 % -----------------------------------------------------------------------%
 
 %% INPUT PARSING
-function results = parse_inputs(data, distance_km, time, channel_position_km, filename_audio, sampling_frequency_Hz, varargin)
+function results = parse_inputs(data, distance, time, channel_position_m, filename_audio, sampling_frequency_Hz, varargin)
     p = inputParser;
 	
     % required parameters
     addRequired(p, 'data', @isnumeric);
-	addRequired(p, 'distance_km', @(x) isnumeric(x) && isvector(x) && all(x>=0));
+	addRequired(p, 'distance', @(x) isnumeric(x) && isvector(x) && all(x>=0));
     addRequired(p, 'time', @(x) isnumeric(x) && isvector(x) && all(x>=0));
-    addRequired(p, 'channel_position_km', @(x) isnumeric(x) && isscalar(x) && x>=0);    
+    addRequired(p, 'channel_position_m', @(x) isnumeric(x) && isscalar(x) && x>=0);    
     addRequired(p, 'filename_audio', @ischar); 
     addRequired(p, 'sampling_frequency_Hz', @(x) isnumeric(x) && isscalar(x) && x>=0); 
 
@@ -91,6 +93,6 @@ function results = parse_inputs(data, distance_km, time, channel_position_km, fi
     addParameter(p, 'time_lim', [], @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x >= 0)));
     addParameter(p, 'strain_lim', [], @(x) isempty(x) || (isnumeric(x) && isvector(x)));
 	
-    parse(p, data, distance_km, time, channel_position_km, filename_audio, sampling_frequency_Hz, varargin{:});
+    parse(p, data, distance, time, channel_position_m, filename_audio, sampling_frequency_Hz, varargin{:});
     results = p.Results;
 end
