@@ -1,12 +1,12 @@
 %% FIRST RUN
 
 % load data file (first run)
-load("ellyandcable_run1.mat");
+run1 = load("ellyandcable_run1.mat");
 
 Earth = referenceSphere('Earth'); % ECEF coordinates system uses a shperical model
 
 % get geodetic coordinates for the cable
-[lat_cable, lon_cable, alt_cable] = ecef2geodetic(Earth, cable(3, :), cable(1, :), cable(2, :));
+[lat_cable, lon_cable, alt_cable] = ecef2geodetic(Earth, run1.cable(3, :), run1.cable(1, :), run1.cable(2, :));
 % origin (reference point for cartesian coordinate system)
 lat0 = lat_cable(1);
 lon0 = lon_cable(1);
@@ -18,33 +18,41 @@ figure(Name="Cable and Source (first run)", NumberTitle="off");
 plot3(xE_cable, yN_cable, zU_cable, 'b.-', 'LineWidth', 1.5); 
 grid on; axis equal; view(3);
 xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
+title('Cable geometry and Elly position (first run)', 'FontSize', 12);
 hold on;
 
 % get geodetic coordinates for Elly (source)
-[lat_elly, lon_elly, alt_elly] = ecef2geodetic(Earth, elly(3, :), elly(1, :), elly(2, :));
+[elly1.lat, elly1.lon, elly1.alt] = ecef2geodetic(Earth, run1.elly(3, :), run1.elly(1, :), run1.elly(2, :));
 % transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
-[xE_elly, yN_elly, zU_elly] = geodetic2enu(lat_elly, lon_elly, alt_elly, lat0, lon0, alt0, wgs84Ellipsoid);
+[elly1.xE, elly1.yN, elly1.zU] = geodetic2enu(elly1.lat, elly1.lon, elly1.alt, lat0, lon0, alt0, wgs84Ellipsoid);
 % plot 3D geometry of the source
-plot3(xE_elly, yN_elly, zU_elly, '-o', 'Color', 'r', 'MarkerSize', 3);
+plot3(elly1.xE, elly1.yN, elly1.zU, '-o', 'Color', 'r', 'MarkerSize', 3);
 view(3);
 
 % add colormap for time progression
 colormap("jet");
-scatter3(xE_elly, yN_elly, zU_elly, 50, t, 'filled');
+scatter3(elly1.xE, elly1.yN, elly1.zU, 50, run1.t, 'filled');
 cb = colorbar;
 cb.Label.String = 'Time (s)';
-clim([min(t) max(t)]);
-xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
+clim([min(run1.t) max(run1.t)]);
+xlim([-50 450]); ylim([-200 300]); zlim([-150 0]);
 hold off;
 
-% print distance info
-fprintf("\n --- FIRST RUN --- \n");
-fprintf('\nDistance info:\n');
-[dist_min, idx_min] = min(dist(:));
-[channel_min, sample_min] = ind2sub(size(dist), idx_min);
-fprintf('  -Minimum distance: %.2f\n', dist_min);
-fprintf('     Channel: %d, Sample: %d (t = %.1f)\n', channel_min, sample_min, t(sample_min));
-[dist_max, idx_max] = max(dist(:));
-[channel_max, sample_max] = ind2sub(size(dist), idx_max);
-fprintf('  -Maximum distance: %.2f m\n', dist_max);
-fprintf('     Channel: %d, Sample: %d (t = %.1f)\n', channel_max, sample_max, t(sample_max));
+%% DISTANCE INFO (CABLE-ELLY)
+function d = get_distance(channel_idx, time_s, dist, t)
+    % validity check on channel index
+    if channel_idx < 1 || channel_idx > size(dist, 1)
+        error('Channel index out of range. It must be a value between 1 and %d', size(dist, 1));
+    end
+
+    % find time index
+    [~, time_idx] = min(abs(t - time_s));
+    
+    % validity check on time index
+    if time_idx < 1 || time_idx > size(dist, 2)
+        error('Time index out of range. It must be a value between 1 and %d', size(dist, 2));
+    end
+    
+    % get distance from distance matrix
+    d = dist(channel_idx, time_idx);
+end
