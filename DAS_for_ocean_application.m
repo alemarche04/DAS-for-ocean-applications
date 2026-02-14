@@ -11,7 +11,7 @@ addpath('Dataset', 'Dataset_Norway', 'filters', 'plots', 'config');
 %		DAS4Whale_Bou22
 %		Norway
 
-dataset_name	= 'DAS4Whale_Bou22';
+dataset_name	= 'Norway';
 DAS				= feval(str2func(dataset_name + "_cfg"));
 data			= DAS.load_data();
 % -----------------------------------------------------------------------%
@@ -244,7 +244,7 @@ spectrogram_plot = get_spectrogram( ...
 	'time_lim', sg.time_lim, ...
 	'frequency_lim', sg.frequency_lim, ...
 	'strain_lim', sg.strain_lim, ...
-	'norm', true);
+	'norm', false);
 
 % export plot as png
 exportgraphics( ...

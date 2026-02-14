@@ -149,7 +149,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         xlabel('Time lag (s)');
         title(sprintf('dx= %0.2f m', offset_from_reference));
    
-		% find peaks in search winow
+		% find peak
 		[max_peak, max_peak_idx] = max(xcorr_positive_offset);
 		hold on
 		xline(time_lags_xcorr_negative_offset(max_peak_idx), '-r');

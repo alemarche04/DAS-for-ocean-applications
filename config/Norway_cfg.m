@@ -121,7 +121,7 @@ function wf = waveform()
 %   Output:
 %       wf - Parameters for time-series plotting and audio export.
 
-    wf.channel_position_m	= 120;
+    wf.channel_position_m	= 177 * 1.02;
     wf.cpa_m				= 0;
     wf.time_lim				= [];
     wf.strain_lim			= [];
@@ -207,6 +207,8 @@ function geoCable = geoCable()
     geoCable.origin.up = 0;
 end
 
+% _______________________________________________________________________%
+
 function geo_origin = plot_cable_geometry_2D()
 % PLOT_CABLE_GEOMETRY_2D Plots cable layout in Local ENU coordinates.
     cable_geometry = geoCable();
@@ -219,6 +221,8 @@ function geo_origin = plot_cable_geometry_2D()
 	ylim([-50 2300]);
     xlabel('East (m)'); ylabel('North (m)');
 end
+
+% _______________________________________________________________________%
 
 function sourcePos = sourcePos(t_start, t_end)
 % SOURCEPOS Loads vessel/source positions from CSV for a specific time range.
@@ -233,6 +237,8 @@ function sourcePos = sourcePos(t_start, t_end)
     sourcePos.lon = table2array(sourcePos(:, 4));
 end
 
+% _______________________________________________________________________%
+
 function plot_source_pos_2D(sourcePos, geo_origin)
 % PLOT_SOURCE_POS_2D Overlays a single source track on the cable geometry.
     plot_cable_geometry_2D();
@@ -243,6 +249,8 @@ function plot_source_pos_2D(sourcePos, geo_origin)
     scatter(xEast, yNorth, 10, 'red', 'filled');
     hold off;
 end
+
+% _______________________________________________________________________%
 
 function plot_source_pos_all_2D(sourcePos1, sourcePos2, sourcePos3, geo_origin)
 % PLOT_SOURCE_POS_ALL_2D Plots three different source tracks (runs) on one map.
@@ -259,6 +267,8 @@ function plot_source_pos_all_2D(sourcePos1, sourcePos2, sourcePos3, geo_origin)
 	xlim([-50 450]); ylim([-200 100]);
     hold off;
 end
+
+% _______________________________________________________________________%
 
 function plot_cable_source_3D(sourcePos1, sourcePos2, sourcePos3)
 % PLOT_CABLE_SOURCE_3D Creates a 3D visualization of cable depth and source tracks.
@@ -284,6 +294,8 @@ function plot_cable_source_3D(sourcePos1, sourcePos2, sourcePos3)
 	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
 	hold off;
 end
+
+% _______________________________________________________________________%
 
 function plot_channel_on_cable(target_channel_m)
 % PLOT_CAHNNEL_ON_CABLE Creates a 2D and 3D visualization of a channel on
@@ -340,6 +352,8 @@ function plot_channel_on_cable(target_channel_m)
 	legend('Cable', 'Channel');
 	hold off
 end
+
+% _______________________________________________________________________%
 
 function plot_source_on_cable(time_and_date)
 % PLOT_SOURCE_ON_CABLE Creates a 2D and 3D visualization of the source on 
@@ -399,6 +413,8 @@ function plot_source_on_cable(time_and_date)
 	hold off
 
 end
+
+% _______________________________________________________________________%
 
 function plot_source_channel_on_cable(time_and_date, target_channel_m)
 % PLOT_SOURCE_CHANNEL_ON_CABLE Creates a 2D and 3D visualization of a channel  
@@ -487,3 +503,5 @@ function plot_source_channel_on_cable(time_and_date, target_channel_m)
 	hold off
 
 end
+
+% _______________________________________________________________________%
