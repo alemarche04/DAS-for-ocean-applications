@@ -15,6 +15,7 @@ dataset_name	= 'Norway';
 DAS				= feval(str2func(dataset_name + "_cfg"));
 if strcmp(dataset_name, 'Norway')
 	GEO			= geo_norway();
+	EllyCable	= ellyandcable();
 end
 data			= DAS.load_data();
 % -----------------------------------------------------------------------%
@@ -84,6 +85,37 @@ if strcmp(dataset_name, 'Norway')
 
 	% clear variables
 	clear channel_no channel_position_m
+end
+% -----------------------------------------------------------------------%
+
+%% ELLY AND CABLE: PLOT RUN 1
+if strcmp(dataset_name, 'Norway')
+	EllyCable.plot_run1();
+end
+% -----------------------------------------------------------------------%
+
+%% ELLY AND CABLE: PLOT RUN 2
+if strcmp(dataset_name, 'Norway')
+	EllyCable.plot_run2();
+end
+% -----------------------------------------------------------------------%
+
+%% ELLY AND CABLE: PLOT RUN 3
+if strcmp(dataset_name, 'Norway')
+	EllyCable.plot_run3();
+end
+% -----------------------------------------------------------------------%
+
+%% ELLY AND CABLE: SOURCE POSITION
+if strcmp(dataset_name, 'Norway')
+	EllyCable.source_pos(data.time_and_date);
+end
+% -----------------------------------------------------------------------%
+
+%% ELLY AND CABLE: CHANNEL-SOURCE DISTANCE
+if strcmp(dataset_name, 'Norway')
+	channel_no = 178;
+	EllyCable.get_distance(channel_no, data.time_and_date);
 end
 % -----------------------------------------------------------------------%
 

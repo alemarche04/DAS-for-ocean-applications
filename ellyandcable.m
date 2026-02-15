@@ -222,6 +222,7 @@ function d = get_distance(channel_idx, time_and_date)
 	% convert timestamp to duration
 	datetime_source = datetime(time_and_date, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
 	source_time = timeofday(datetime_source);
+	fprintf('\n%s', char(['Input time: ', string(source_time)]));
 
 	% check timestamp
 	if source_time >= t_start_run1 && source_time <= t_end_run1 % RUN1
@@ -235,6 +236,8 @@ function d = get_distance(channel_idx, time_and_date)
 
 		% find time index on time axis closest to source time
 		[~, time_idx] = min(abs(time_run1 - source_time));
+		fprintf('\n%s', char(['Transmission time: ', string(time_run1(time_idx))]));
+
 
 		% get distance from distance matrix
 		d = dist(channel_idx, time_idx);
@@ -250,6 +253,7 @@ function d = get_distance(channel_idx, time_and_date)
 
 		% find time index on time axis closest to source time
 		[~, time_idx] = min(abs(time_run2 - source_time));
+		fprintf('\n%s', char(['Transmission time: ', string(time_run2(time_idx))]));
 
 		% get distance from distance matrix
 		d = dist(channel_idx, time_idx);
@@ -265,6 +269,7 @@ function d = get_distance(channel_idx, time_and_date)
 
 		% find time index on time axis closest to source time
 		[~, time_idx] = min(abs(time_run3 - source_time));
+		fprintf('\n%s', char(['Transmission time: ', string(time_run3(time_idx))]));
 
 		% get distance from distance matrix
 		d = dist(channel_idx, time_idx);
@@ -272,6 +277,9 @@ function d = get_distance(channel_idx, time_and_date)
 	else
 		error('Time out of range');
 	end
+
+	fprintf('\nDistance from channel %d: %.4f\n\n', channel_idx, d);
+
 end
 %========================================================================%
 
@@ -340,7 +348,6 @@ function source_pos(time_and_date)
 	% plot cable geometry
 	figure(Name="Cable and Source (second run)", NumberTitle="off");
 	plot3(cable.xE, cable.yN, cable.zU, 'b.-', 'LineWidth', 1.5); 
-	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
 	grid on; axis equal; view(3);
 	xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
 	title('Cable geometry and Elly position (second run)', 'FontSize', 12);
@@ -350,6 +357,7 @@ function source_pos(time_and_date)
 	plot3(source_xE, source_yN, source_zU, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6);
 	subtitle(time_and_date);
 	legend('Cable', 'Source');
+	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
 	hold off
 end
 %========================================================================%
