@@ -35,6 +35,12 @@ end
 function elly1 = run1()
 	% load data file first run (cable geometry is the same for all runs)
 	run1 = load("ellyandcable_run1.mat", "elly");
+
+	% get cable geometry
+	cable = cable_geometry();
+
+	% ECEF coordinates system uses a shperical model
+	Earth = referenceSphere('Earth'); 
 	
 	% get geodetic coordinates for Elly (source)
 	[elly1.lat, elly1.lon, elly1.alt] = ecef2geodetic(Earth, run1.elly(3, :), run1.elly(1, :), run1.elly(2, :));
@@ -57,6 +63,9 @@ function plot_run1()
 	xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
 	title('Cable geometry and Elly position (first run)', 'FontSize', 12);
 	hold on;
+
+	% ECEF coordinates system uses a shperical model
+	Earth = referenceSphere('Earth'); 
 	
 	% get geodetic coordinates for Elly (source)
 	[elly1.lat, elly1.lon, elly1.alt] = ecef2geodetic(Earth, run1.elly(3, :), run1.elly(1, :), run1.elly(2, :));
@@ -82,6 +91,12 @@ function elly2 = run2()
 	% load data file second run
 	run2 = load("ellyandcable_run2.mat", "elly");
 
+	% get cable geometry
+	cable = cable_geometry();
+
+	% ECEF coordinates system uses a shperical model
+	Earth = referenceSphere('Earth'); 
+
 	% get geodetic coordinates for Elly (source)
 	[elly2.lat, elly2.lon, elly2.alt] = ecef2geodetic(Earth, run2.elly(3, :), run2.elly(1, :), run2.elly(2, :));
 	% transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
@@ -92,6 +107,9 @@ end
 function plot_run2()
 	% load data file second run
 	run2 = load("ellyandcable_run2.mat");
+
+	% get cable geometry
+	cable = cable_geometry();
 	
 	% plot 3D geometry of the FO cable
 	figure(Name="Cable and Source (second run)", NumberTitle="off");
@@ -100,6 +118,9 @@ function plot_run2()
 	xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
 	title('Cable geometry and Elly position (second run)', 'FontSize', 12);
 	hold on;
+
+	% ECEF coordinates system uses a shperical model
+	Earth = referenceSphere('Earth'); 
 	
 	% get geodetic coordinates for Elly (source)
 	[elly2.lat, elly2.lon, elly2.alt] = ecef2geodetic(Earth, run2.elly(3, :), run2.elly(1, :), run2.elly(2, :));
@@ -124,6 +145,12 @@ end
 function elly3 = run3()
 	% load data file third run
 	run3 = load("ellyandcable_run3.mat", "elly");
+
+	% get cable geometry
+	cable = cable_geometry();
+
+	% ECEF coordinates system uses a shperical model
+	Earth = referenceSphere('Earth'); 
 	
 	% get geodetic coordinates for Elly (source)
 	[elly3.lat, elly3.lon, elly3.alt] = ecef2geodetic(Earth, run3.elly(3, :), run3.elly(1, :), run3.elly(2, :));
@@ -135,6 +162,9 @@ end
 function plot_run3()
 	% load data file third run
 	run3 = load("ellyandcable_run3.mat");
+
+	% get cable geometry
+	cable = cable_geometry();
 	
 	% plot 3D geometry of the FO cable
 	figure(Name="Cable and Source (third run)", NumberTitle="off");
@@ -143,21 +173,24 @@ function plot_run3()
 	xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
 	title('Cable geometry and Elly position (third run)', 'FontSize', 12);
 	hold on;
+
+	% ECEF coordinates system uses a shperical model
+	Earth = referenceSphere('Earth'); 
 	
 	% get geodetic coordinates for Elly (source)
 	[elly3.lat, elly3.lon, elly3.alt] = ecef2geodetic(Earth, run3.elly(3, :), run3.elly(1, :), run3.elly(2, :));
 	% transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
 	[elly3.xE, elly3.yN, elly3.zU] = geodetic2enu(elly3.lat, elly3.lon, elly3.alt, cable.lat0, cable.lon0, cable.alt0, wgs84Ellipsoid);
 	% plot 3D geometry of the source
-	plot3(elly3.xE, elly3.yN, elly3.zU, '-o', 'Color', 'r', 'MarkerSize', 3);
+	plot3(elly3.xE(:, 1:99), elly3.yN(:, 1:99), elly3.zU(:, 1:99), '-o', 'Color', 'r', 'MarkerSize', 3);
 	view(3);
 	
 	% add colormap for time progression
 	colormap("jet");
-	scatter3(elly3.xE, elly3.yN, elly3.zU, 50, run3.t, 'filled');
+	scatter3(elly3.xE(:, 1:99), elly3.yN(:, 1:99), elly3.zU(:, 1:99), 50, run3.t(1:99), 'filled');
 	cb = colorbar;
 	cb.Label.String = 'Time (s)';
-	clim([min(run3.t) max(run3.t)]);
+	clim([run3.t(1) run3.t(99)]);
 	xlim([-50 450]); ylim([-200 300]); zlim([-150 0]);
 	hold off;
 end
@@ -200,6 +233,9 @@ function d = get_distance(channel_idx, time_and_date)
         	error('Channel index out of range. It must be a value between 1 and %d', size(dist, 1));
 		end
 
+		% find time index on time axis closest to source time
+		[~, time_idx] = min(abs(time_run1 - source_time));
+
 		% get distance from distance matrix
 		d = dist(channel_idx, time_idx);
 		
@@ -212,6 +248,9 @@ function d = get_distance(channel_idx, time_and_date)
         	error('Channel index out of range. It must be a value between 1 and %d', size(dist, 1));
 		end
 
+		% find time index on time axis closest to source time
+		[~, time_idx] = min(abs(time_run2 - source_time));
+
 		% get distance from distance matrix
 		d = dist(channel_idx, time_idx);
 		
@@ -223,6 +262,9 @@ function d = get_distance(channel_idx, time_and_date)
 		if channel_idx < 1 || channel_idx > size(dist, 1)
         	error('Channel index out of range. It must be a value between 1 and %d', size(dist, 1));
 		end
+
+		% find time index on time axis closest to source time
+		[~, time_idx] = min(abs(time_run3 - source_time));
 
 		% get distance from distance matrix
 		d = dist(channel_idx, time_idx);
@@ -306,7 +348,7 @@ function source_pos(time_and_date)
 	
 	% plot source position
 	plot3(source_xE, source_yN, source_zU, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6);
-	subtitle(time_string);
+	subtitle(time_and_date);
 	legend('Cable', 'Source');
 	hold off
 end
