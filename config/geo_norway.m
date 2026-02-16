@@ -323,7 +323,7 @@ function plot_source_channel_on_cable(time_and_date, target_channel_m)
 	plot(source.xE, source.yN, 'go', 'MarkerSize', 6, 'MarkerFaceColor', 'g');
 	ylim([-50 2300]);
 	title('Cable Geometry, Source and Channel position (2D)')
-	subtitle([time_and_date, 'Channel at meter:', num2str(target_channel_m)]);
+	subtitle([time_and_date, ' | Channel at meter: ', num2str(target_channel_m)]);
 	legend('Cable', 'Channel', 'Source');
 	hold off
 	%
@@ -336,7 +336,7 @@ function plot_source_channel_on_cable(time_and_date, target_channel_m)
 	plot3(channel.x, channel.y, channel.z, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
 	plot3(source.xE, source.yN, source.zU, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6);
 	title('Cable Geometry, Source and Channel position (3D)')
-	subtitle([time_and_date, 'Channel at meter:', num2str(target_channel_m)]);
+	subtitle([time_and_date, ' | Channel at meter: ', num2str(target_channel_m)]);
 	legend('Cable', 'Channel', 'Source'); 
 	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
 	hold off

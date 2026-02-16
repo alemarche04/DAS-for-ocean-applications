@@ -80,7 +80,7 @@ end
 %% CABLE GEOMETRY, CHANNEL POSITION AND SOURCE POSITION AT TIME OF RECORDING
 if strcmp(dataset_name, 'Norway')
 	channel_no = 178;
-	channel_position_m = channel_no * data.channel_distance_m;
+	channel_position_m = (channel_no)* data.channel_distance_m;
 	GEO.plot_source_channel_on_cable(data.time_and_date, channel_position_m);
 
 	% clear variables
@@ -108,7 +108,29 @@ end
 
 %% ELLY AND CABLE: SOURCE POSITION
 if strcmp(dataset_name, 'Norway')
-	EllyCable.source_pos(data.time_and_date);
+	EllyCable.plot_source_pos(data.time_and_date);
+end
+% -----------------------------------------------------------------------%
+
+%% ELLY AND CABLE: CHANNEL POSITION
+if strcmp(dataset_name, 'Norway')
+	channel_no = 178;
+	channel_position_m = (channel_no)* data.channel_distance_m;
+	EllyCable.plot_channel_pos(channel_position_m);
+
+	% clear variables
+	clear channel_no channel_position_m
+end
+% -----------------------------------------------------------------------%
+
+%% ELLY AND CABLE: SOURCE AND CHANNEL POSITION
+if strcmp(dataset_name, 'Norway')
+	channel_no = 178;
+	channel_position_m = (channel_no)* data.channel_distance_m;
+	EllyCable.plot_source_channel(data.time_and_date, channel_position_m, data.channel_distance_m);
+
+	% clear variables
+	clear channel_no channel_position_m
 end
 % -----------------------------------------------------------------------%
 
