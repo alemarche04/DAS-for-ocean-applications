@@ -1,4 +1,13 @@
 function EllyCable = ellyandcable()
+% GEO_NORWAY Functions for position files ellyandcable_run1.mat, 
+% ellyandcable_run2.mat, ellyandcable_run3.mat from Trondheim dataset.
+%
+%   Geographical mapping of the cable and vessel (source) positions.
+%
+%   Output:
+%       EllyCable - Struct containing sub-configuration and plotting functions.
+%
+%   See also: REFERENCESPHERE, ECEF2GEODETIC, GEODETIC2ENU, DIFF, CUMCUM, PLOT, PLOT3
 
 	EllyCable.cable_geometry		= @cable_geometry;
 	EllyCable.run1					= @run1;
@@ -17,6 +26,7 @@ end
 
 %% CABLE GEOMETRY
 function cable_geo = cable_geometry()
+% CABLE_GEOMETRY Loads cable geometry from file.
 	% load data file first run (cable geometry is the same for all runs)
 	load("ellyandcable_run1.mat", "cable");
 	
@@ -37,6 +47,7 @@ end
 
 %% FIRST RUN
 function elly1 = run1()
+% RUN1 Loads Elly (source) position from ellyandcable_run1.mat.
 	% load data file first run (cable geometry is the same for all runs)
 	run1 = load("ellyandcable_run1.mat", "elly");
 
@@ -54,6 +65,7 @@ end
 %========================================================================%
 
 function plot_run1()
+% PLOT_RUN1 Plot Elly (source) position for run1, relative to cable geometry.
 	% load data file first run (cable geometry is the same for all runs)
 	run1 = load("ellyandcable_run1.mat");
 
@@ -92,6 +104,7 @@ end
 
 %% SECOND RUN
 function elly2 = run2()
+% RUN2 Loads Elly (source) position from ellyandcable_run2.mat.
 	% load data file second run
 	run2 = load("ellyandcable_run2.mat", "elly");
 
@@ -109,6 +122,7 @@ end
 %========================================================================%
 
 function plot_run2()
+% PLOT_RUN2 Plot Elly (source) position for run2, relative to cable geometry.
 	% load data file second run
 	run2 = load("ellyandcable_run2.mat");
 
@@ -147,6 +161,7 @@ end
 
 %% THIRD RUN
 function elly3 = run3()
+% RUN3 Loads Elly (source) position from ellyandcable_run3.mat.
 	% load data file third run
 	run3 = load("ellyandcable_run3.mat", "elly");
 
@@ -164,6 +179,7 @@ end
 %========================================================================%
 
 function plot_run3()
+% PLOT_RUN3 Plot Elly (source) position for run3, relative to cable geometry.
 	% load data file third run
 	run3 = load("ellyandcable_run3.mat");
 
@@ -202,6 +218,7 @@ end
 
 %% DISTANCE INFO (CHANNEL-ELLY)
 function d = get_distance(channel_idx, time_and_date)
+% GET_DISTANCE Compute distance between a channel and Elly at a given time.
 
 	% set up time axis and format
 	load("ellyandcable_run1.mat", "t");
@@ -289,6 +306,7 @@ end
 
 %% FIND SOURCE POSITION AT GIVEN TIME
 function sourcePos = get_source_pos(time_and_date)
+% GET_SOURCE_POS Compute Elly position at a given time.
 
 	% set up time axis and format
 	load("ellyandcable_run1.mat", "t");
@@ -350,6 +368,7 @@ end
 
 %% PLOT SOURCE POSITION AT GIVEN TIME
 function plot_source_pos(time_and_date)
+% PLOT_SOURCE_POS Plot Elly position at a given time (relative to FO cable).
 
 	% get cable geometry
 	cable = cable_geometry();
@@ -376,6 +395,8 @@ end
 
 %% FIND CHANNEL POSITION ON FO CABLE
 function channelPos = get_channel_pos(channel_m)
+% GET_CHANNEL_POS Compute channel position on FO cable.
+
 	% get cable geometry
 	cable = cable_geometry();
 
@@ -408,6 +429,7 @@ end
 
 %% PLOT CHANNEL POSITION ON FO CABLE
 function plot_channel_pos(channel_m)
+% PLOT_CHANNEL_POS Plot channel position on FO cable.
 
 	% get cable geometry
 	cable = cable_geometry();
@@ -434,6 +456,7 @@ end
 
 %% PLOT SOURCE POSITION AT GIVEN TIME AND CHANNEL ON FO CABLE
 function plot_source_channel(time_and_date, channel_m, channel_len)
+% PLOT_SOURCE_CHANNEL Plot channel and Elly position at given time.
 
 	% get cable geometry
 	cable = cable_geometry();

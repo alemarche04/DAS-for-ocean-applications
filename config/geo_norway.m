@@ -1,5 +1,5 @@
 function geo = geo_norway()
-% GEO_NORWAY Function file for position file from Trondheim dataset.
+% GEO_NORWAY Functions for position file source-position.ods from Trondheim dataset.
 %
 %   Geographical mapping of the cable and vessel (source) positions.
 %

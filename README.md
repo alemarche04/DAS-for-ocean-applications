@@ -19,7 +19,57 @@ This toolset provides a complete suite of functions for processing and analyzing
 - **Audio export capabilities** for audible signal analysis
 - **Cross-correlation analysis** with automated peak detection
 
-## Function Reference
+## Functions
+
+### Configuration Functions
+
+#### `DAS4Whale_Bou22_cfg`
+
+Configuration file for the DAS4Whale dataset. Returns a structure containing function handles and predefined parameters for loading, processing, and  visualizing Distributed Acoustic Sensing (DAS) data.
+
+```matlab
+cfg = DAS4Whale_Bou22_cfg()
+```
+**Output Arguments:**
+- `cfg` - Struct containing processing parameters and handles to sub-configuration and plotting functions
+
+---
+
+#### `Norway_cfg`
+
+Configuration file for the Trondheimsfjord dataset. Returns a structure containing function handles and parameters for processing DAS data from the Norway experiment.
+
+```matlab
+cfg = Norway_cfg()
+```
+**Output Arguments:**
+- `cfg` - Struct containing processing parameters and handles to sub-configuration and plotting functions
+
+---
+
+#### `geo_norway`
+
+Functions for position file source-position.ods from Trondheim dataset. Geographical mapping of the cable and vessel (source) positions.
+
+```matlab
+geo = geo_norway()
+```
+**Output Arguments:**
+- `geo` - Struct containing sub-configuration and plotting functions.
+
+---
+
+#### `ellyandcable`
+
+Functions for position files ellyandcable_run1.mat, ellyandcable_run2.mat, ellyandcable_run3.mat from Trondheim dataset.
+
+```matlab
+EllyCable = ellyandcable()
+```
+**Output Arguments:**
+- `EllyCable` - Struct containing sub-configuration and plotting functions.
+
+---
 
 ### Filtering Functions
 
