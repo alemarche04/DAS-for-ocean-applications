@@ -109,7 +109,7 @@ function wf = waveform()
 %   Output:
 %       wf - Parameters for time-series plotting and audio export.
 
-    wf.channel_position_m	= 177 * 1.02;
+    wf.channel_position_m	= (178 -1) * 1.02;
     wf.cpa_m				= 0;
     wf.time_lim				= [];
     wf.strain_lim			= [];
@@ -124,7 +124,7 @@ function sg = spectrogram()
 %   Output:
 %       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
-    sg.channel_position_m	= 177 * 1.02;
+    sg.channel_position_m	= (178 -1) * 1.02;
     sg.nfft					= 4096;
     sg.window_len			= 512;
     sg.window				= hann(sg.window_len, 'periodic');
@@ -158,11 +158,11 @@ function xcorr = correlation()
 %   Output:
 %       xcorr - Channel offsets, time lags, and statistics export settings.
 
-    xcorr.channel_position_m	= 0;
-    xcorr.offset_m				= 300;
-    xcorr.time_lag				= 0.2;
-    xcorr.time_interval			= [0 3];
-    xcorr.cpa_m					= 0;
+    xcorr.channel_position_m	= (178 -1) * 1.02;
+    xcorr.offset_m				= 30;
+    xcorr.time_lag				= 0.02;
+    xcorr.time_interval			= [3.8 4];
+    xcorr.cpa_m					= 207;
     xcorr.filename_table		= fullfile('Norway/', 'cross_corr_stats_Norway.csv');
 end
 % -----------------------------------------------------------------------%

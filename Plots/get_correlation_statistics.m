@@ -21,6 +21,11 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 %       time_interval        - 2-element vector [start end] for data segment [s].
 %       filename_xcorr_table - Filename (string) for the output CSV table.
 %
+%   Optional Parameters (Name-Value Pairs):
+%       'subtitle'     - Plot subtitle string (typically time and date)
+%       'offset_step'  - Spatial sample rate
+%		'use_hilbert'  - Logical (true/false) for Hilbert tranform (envelope)
+%
 %   Output Arguments:
 %       correlation_statistics - Matrix [Offset, Peak Value, Time Lag].
 %       fig                    - Handle to the tiled layout figure.
@@ -36,6 +41,8 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     params = parse_inputs(data, sampling_frequency, distance, channel_distance_m, ...
         channel_reference_position_m, offset_m, max_lag, time_interval, ...
 		filename_xcorr_table, varargin{:});
+	offset_step = params.offset_step;
+	use_hilbert = params.use_hilbert;
     
     % signal in time interval
     t_start_idx = max(1, round(time_interval(1) * sampling_frequency));
@@ -51,20 +58,24 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     channel_reference = data_corr(channel_reference_idx, :);
         
     % sets up subplots
-    offset_step = 2; % calculates cross correlation every 2 channels (⁓8.16m)
     nb_subplots = 2 * round(offset_m/(offset_step * channel_distance_m)) + 1;
     nb_columns = floor(sqrt(nb_subplots));
     nb_rows = ceil(nb_subplots / nb_columns);
-
-	c = 1470; % propagation speed
     
     % open figure
     fig = figure('units','normalized','outerposition',[0 0 1 1], Name="Corss-Correlation", NumberTitle="off");
     t = tiledlayout(nb_rows,nb_columns,'TileSpacing','Compact', 'Padding', 'compact');
     
     % (auto)correlation of refernce channel signal
-    [auto_correlation, lags_auto] = xcorr(channel_reference, max_lag_samples);
+    [acorr_result, lags_auto] = xcorr(channel_reference, max_lag_samples);
     auto_time_lags = lags_auto/sampling_frequency;
+	
+	% use hilbert tranform if required
+	if use_hilbert
+        auto_correlation = abs(hilbert(acorr_result));
+	else
+		auto_correlation = acorr_result;
+	end
     
     % parameters for plot scaling
     min_correlation = min(auto_correlation);
@@ -87,14 +98,21 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         end
         
         % (cross)correlation with negative offset
-        [xcorr_negative_offset, lags_xcorr_negative_offset] = xcorr(channel_reference, data_corr((channel_reference_idx - i * offset_step), :), max_lag_samples);
+        [xcorr_result, lags_xcorr_negative_offset] = xcorr(channel_reference, data_corr((channel_reference_idx - i * offset_step), :), max_lag_samples);
         time_lags_xcorr_negative_offset = lags_xcorr_negative_offset / sampling_frequency;
 		offset_from_reference = distance(channel_reference_idx - i * offset_step) - actual_channel_distance;
+
+		% use hilbert tranform if required
+		if use_hilbert
+            xcorr_negative_offset = abs(hilbert(xcorr_result));
+		else
+			xcorr_negative_offset = xcorr_result;
+		end
         
         % plot result 
         nexttile
         plot(time_lags_xcorr_negative_offset, xcorr_negative_offset);
-        ylim([min_correlation max_correlation]);
+        ylim([min_correlation max_correlation]); xlim([-max_lag max_lag]);
         xlabel('Time lag (s)');
         title(sprintf('dx= %0.2f m', offset_from_reference));
 
@@ -115,8 +133,9 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 
 	% plot auto-correlation
     nexttile
+
     plot(auto_time_lags, auto_correlation);
-    ylim([min_correlation max_correlation]);
+    ylim([min_correlation max_correlation]); xlim([-max_lag max_lag]);
     xlabel('Time lag (s)');
     title('Auto-correlation');
     
@@ -138,14 +157,21 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         end
             
         % (cross)correlation with positive offset
-        [xcorr_positive_offset, lags_xcorr_positive_offset] = xcorr(channel_reference, data_corr((channel_reference_idx + i * offset_step), :), max_lag_samples);
+        [xcorr_result, lags_xcorr_positive_offset] = xcorr(channel_reference, data_corr((channel_reference_idx + i * offset_step), :), max_lag_samples);
         time_lags_xcorr_positive_offset = lags_xcorr_positive_offset / sampling_frequency;
 		offset_from_reference = distance(channel_reference_idx + i * offset_step) - actual_channel_distance;
+
+		% use hilbert tranform if required
+		if use_hilbert
+            xcorr_positive_offset = abs(hilbert(xcorr_result));
+		else
+			xcorr_positive_offset = xcorr_result;
+		end
         
         % plot result 
         nexttile
         plot(time_lags_xcorr_positive_offset, xcorr_positive_offset);
-        ylim([min_correlation max_correlation]);
+        ylim([min_correlation max_correlation]); xlim([-max_lag max_lag]);
         xlabel('Time lag (s)');
         title(sprintf('dx= %0.2f m', offset_from_reference));
    
@@ -197,6 +223,8 @@ function results = parse_inputs(data, sampling_frequency, distance, channel_dist
 
 	% optional parameters
 	addParameter(p, 'subtitle', [], @(x) isempty(x) || ischar(x) || isstring(x));
+	addParameter(p, 'offset_step', 2, @(x) isempty(x) || isnumeric(x) && isscalar(x))
+	addParameter(p, 'use_hilbert', false, @islogical);
 	
 	parse(p, data, sampling_frequency, distance, channel_distance_m, ...
 	channel_reference_position_m, offset_m, max_lag, time_interval, ...

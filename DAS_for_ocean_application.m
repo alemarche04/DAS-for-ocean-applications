@@ -1,11 +1,11 @@
-%%
+%% CLEAR VARIABLES
 clc
 clear all
 close all
 
 %% LOAD DATA FROM DATASET
 % add directories to Matlab search path
-addpath('Dataset', 'Dataset_Norway', 'filters', 'plots', 'config');
+addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration');
 
 % Dataset available:	
 %		DAS4Whale_Bou22
@@ -57,34 +57,6 @@ if strcmp(dataset_name, 'Norway')
 	% clear variables
 	clear source_run1 source_run2 source_run3
 	clear t_start_run1 t_end_run1 t_start_run2 t_end_run2 t_start_run3 t_end_run3
-end
-% -----------------------------------------------------------------------%
-
-%% CABLE GEOMETRY AND CHANNEL POSITION
-if strcmp(dataset_name, 'Norway')
-	channel_no = 178;
-	channel_position_m = channel_no * data.channel_distance_m;
-	GEO.plot_channel_on_cable(channel_position_m);
-
-	% clear variables
-	clear channel_no channel_position_m
-end
-% -----------------------------------------------------------------------%
-
-%% CABLE GEOMETRY AND SOURCE POSITION AT TIME OF RECORDING
-if strcmp(dataset_name, 'Norway')
-	GEO.plot_source_on_cable(data.time_and_date);
-end
-% -----------------------------------------------------------------------%
-
-%% CABLE GEOMETRY, CHANNEL POSITION AND SOURCE POSITION AT TIME OF RECORDING
-if strcmp(dataset_name, 'Norway')
-	channel_no = 210;
-	channel_position_m = (channel_no)* data.channel_distance_m;
-	GEO.plot_source_channel_on_cable(data.time_and_date, channel_position_m);
-
-	% clear variables
-	clear channel_no channel_position_m
 end
 % -----------------------------------------------------------------------%
 
@@ -342,6 +314,7 @@ clear fx space_frequency_plot
 %% CROSS-CORRELATION STATISTICS
 % parameters
 xcorr = DAS.correlation();
+strain_filtered = strain_matched_filtered;
 
 % plot correlogram
 correlogram = get_correlogram( ...
@@ -370,7 +343,9 @@ exportgraphics( ...
 	xcorr.time_lag, ...
 	xcorr.time_interval, ...
 	xcorr.filename_table, ...
-	'subtitle', data.time_and_date);
+	'subtitle', data.time_and_date, ...
+	'offset_step', 1, ...
+	'use_hilbert', true);
 
 % export plot as png
 exportgraphics( ...
@@ -378,7 +353,7 @@ exportgraphics( ...
 	fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.png']));
 
 % estimates the distance btw the source and the CPA (at 42800 m)
-estimate_R = true;
+estimate_R = false;
 if estimate_R
 	distance_from_CPA = (xcorr.cpa_m - xcorr.channel_position_m); % distance btw reference channel and CPA
 	xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
