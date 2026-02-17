@@ -87,22 +87,20 @@ end
 %% ELLY AND CABLE: CHANNEL POSITION
 if strcmp(dataset_name, 'Norway')
 	channel_no = 210;
-	channel_position_m = (channel_no)* data.channel_distance_m;
-	EllyCable.plot_channel_pos(channel_position_m);
+	EllyCable.plot_channel_pos(channel_no);
 
 	% clear variables
-	clear channel_no channel_position_m
+	clear channel_no
 end
 % -----------------------------------------------------------------------%
 
 %% ELLY AND CABLE: SOURCE AND CHANNEL POSITION
 if strcmp(dataset_name, 'Norway')
-	channel_no = 178;
-	channel_position_m = (channel_no)* data.channel_distance_m;
-	EllyCable.plot_source_channel(data.time_and_date, channel_position_m, data.channel_distance_m);
+	channel_no = 204;
+	EllyCable.plot_source_channel(data.time_and_date, channel_no);
 
 	% clear variables
-	clear channel_no channel_position_m
+	clear channel_no
 end
 % -----------------------------------------------------------------------%
 
@@ -233,6 +231,9 @@ clear tx speedline time_space_plot
 %% STRAIN WAVEFORM (SINGLE CHANNEL)
 % parameters
 wf = DAS.waveform();
+% to use strain with matched filtering (Trondheim dataset):
+% strain_filt_no_match = strain_filtered;
+% strain_filtered = strain_matched_filtered;
 
 % plot strain waveform channel of interest
 strain_waveform = get_strain_waveform( ...
@@ -258,6 +259,9 @@ clear wf strain_waveform
 %% SPECTROGRAM (SINGLE CHANNEL)
 % parameters
 sg = DAS.spectrogram();
+% to use strain with matched filtering (Trondheim dataset):
+% strain_filt_no_match = strain_filtered;
+% strain_filtered = strain_matched_filtered;
 
 % plot spectrogram
 spectrogram_plot = get_spectrogram( ...
@@ -314,7 +318,9 @@ clear fx space_frequency_plot
 %% CROSS-CORRELATION STATISTICS
 % parameters
 xcorr = DAS.correlation();
-strain_filtered = strain_matched_filtered;
+% to use strain with matched filtering (Trondheim dataset):
+% strain_filt_no_match = strain_filtered;
+% strain_filtered = strain_matched_filtered;
 
 % plot correlogram
 correlogram = get_correlogram( ...
@@ -325,7 +331,8 @@ correlogram = get_correlogram( ...
 	xcorr.offset_m, ...
 	xcorr.time_lag, ...
 	xcorr.time_interval, ...
-	'subtitle', data.time_and_date);
+	'subtitle', data.time_and_date, ...
+	'use_hilbert',true);
 
 % export plot as png
 exportgraphics( ...

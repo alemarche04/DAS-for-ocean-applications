@@ -352,7 +352,7 @@ function sourcePos = get_source_pos(time_and_date)
 		elly1 = run1();
 		sourcePos.xE = elly1.xE(source_pos_idx);
 		sourcePos.yN = elly1.yN(source_pos_idx);
-		sourcePos.zU = 0;
+		sourcePos.zU = elly1.zU(source_pos_idx);
 		
 	elseif source_time >= t_start_run2 && source_time <= t_end_run2 % RUN2
 		% find time index on time axis closest to source time
@@ -361,7 +361,7 @@ function sourcePos = get_source_pos(time_and_date)
 		elly2 = run2();
 		sourcePos.xE = elly2.xE(source_pos_idx);
 		sourcePos.yN = elly2.yN(source_pos_idx);
-		sourcePos.zU = 0;
+		sourcePos.zU = elly2.zU(source_pos_idx);
 		
 	elseif source_time >= t_start_run3 && source_time <= t_end_run3 % RUN3
 		% find time index on time axis closest to source time
@@ -370,8 +370,8 @@ function sourcePos = get_source_pos(time_and_date)
 		elly3 = run1();
 		sourcePos.xE = elly3.xE(source_pos_idx);
 		sourcePos.yN = elly3.yN(source_pos_idx);
-		sourcePos.zU = 0;
-		
+		sourcePos.zU = elly3.zU(source_pos_idx);
+
 	else
 		error('Time out of range');
 	end
@@ -393,7 +393,7 @@ function plot_source_pos(time_and_date)
 	plot3(cable.xE, cable.yN, cable.zU, 'b.-', 'LineWidth', 1.5); 
 	grid on; axis equal; view(3);
 	xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
-	title('Cable geometry and Elly position', 'FontSize', 12);
+	title('Cable geometry and Source position', 'FontSize', 12);
 	hold on;
 	
 	% plot source position
@@ -406,48 +406,36 @@ end
 %========================================================================%
 
 %% FIND CHANNEL POSITION ON FO CABLE
-function channelPos = get_channel_pos(channel_m)
+function channelPos = get_channel_pos(channel_idx)
 % GET_CHANNEL_POS Compute channel position on FO cable.
 
 	% get cable geometry
 	cable = cable_geometry();
 
-	% compute distance between each point
-	dx = diff(cable.xE(:));
-	dy = diff(cable.yN(:));
-	dz = diff(cable.zU(:));
-	segment_lengths = sqrt(dx.^2 + dy.^2 + dz.^2);
-	%
-
-	% compute cumulative length
-	cumulative_length = [0; cumsum(segment_lengths)]; % start from 0m
-	cable_length = cumulative_length(end);
-	%
-
 	% check FO cable length bounds
-	if channel_m < 0 || channel_m > cable_length
+	if channel_idx < 1 || channel_idx > length(cable.xE)
 		warning("Target channel out of range.")
 		return
 	end
 	%
 
 	% interpolate to find channel position on FO cable
-	channelPos.xE = interp1(cumulative_length, cable.xE, channel_m, 'nearest');
-	channelPos.yN = interp1(cumulative_length, cable.yN, channel_m, 'nearest');
-	channelPos.zU = interp1(cumulative_length, cable.zU, channel_m, 'nearest');
+	channelPos.xE = cable.xE(channel_idx);
+	channelPos.yN = cable.yN(channel_idx);
+	channelPos.zU = cable.zU(channel_idx);
 	%
 
 end
 
 %% PLOT CHANNEL POSITION ON FO CABLE
-function plot_channel_pos(channel_m)
+function plot_channel_pos(channel_idx)
 % PLOT_CHANNEL_POS Plot channel position on FO cable.
 
 	% get cable geometry
 	cable = cable_geometry();
 
 	% get channel position on FO cable
-	channel = get_channel_pos(channel_m);
+	channel = get_channel_pos(channel_idx);
 	
 	% plot cable geometry
 	figure(Name="Cable and Channel", NumberTitle="off");
@@ -459,7 +447,7 @@ function plot_channel_pos(channel_m)
 	
 	% plot source position
 	plot3(channel.xE, channel.yN, channel.zU, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
-	subtitle(sprintf('Channel: %.4f m', channel_m));
+	subtitle(sprintf('Channel: %d', channel_idx));
 	legend('Cable', 'Channel');
 	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
 	hold off
@@ -467,7 +455,7 @@ end
 %========================================================================%
 
 %% PLOT SOURCE POSITION AT GIVEN TIME AND CHANNEL ON FO CABLE
-function plot_source_channel(time_and_date, channel_m, channel_len)
+function plot_source_channel(time_and_date, channel_idx)
 % PLOT_SOURCE_CHANNEL Plot channel and Elly position at given time.
 
 	% get cable geometry
@@ -477,31 +465,37 @@ function plot_source_channel(time_and_date, channel_m, channel_len)
 	source = get_source_pos(time_and_date);
 
 	% get channel position on FO cable
-	channel = get_channel_pos(channel_m);
+	channel = get_channel_pos(channel_idx);
 	
 	% plot cable geometry
 	figure(Name="Cable, Source and Channel", NumberTitle="off");
 	plot3(cable.xE, cable.yN, cable.zU, 'b.-', 'LineWidth', 1.5); 
 	grid on; axis equal; view(3);
 	xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
-	title('Cable geometry with Elly and Channel position', 'FontSize', 12);
+	title('Cable geometry with Source and Channel position', 'FontSize', 12);
 	hold on;
 	
 	% plot source position
 	plot3(source.xE, source.yN, source.zU, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6);
 	plot3(channel.xE, channel.yN, channel.zU, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
-	subtitle([time_and_date, sprintf(' | Channel: %.4f m', channel_m)]);
+	subtitle([time_and_date, sprintf(' | Channel: %d', channel_idx)]);
 	lgd = legend('Cable', 'Source', 'Channel');
 	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
 	hold off
 
 	% compute distance between elly and channel
-	channel_idx = round(channel_m/channel_len);
 	distance = get_distance(channel_idx, time_and_date);
+
+	% % compute distance from 2d model to verify correctness
+	% estimated_distance.xE = source.xE - channel.xE;
+	% estimated_distance.yN = source.yN - channel.yN;
+	% estimated_distance.zU = source.zU - channel.zU;
+	% estimated_distance.dist = sqrt(estimated_distance.xE^2 + estimated_distance.yN^2 + estimated_distance.zU^2);
+	% fprintf('\nEstimated distance: %.2f\n', estimated_distance.dist);
 
 	% textbox with distance info
 	lgd_pos = lgd.Position;  % [x, y, width, height] in normalized units
-	info_text = sprintf('Distance Elly - channel: %.2f', distance);
+	info_text = sprintf('Distance\n(source-channel):\n%.2f', distance);
 	annotation('textbox', ...
 		[lgd_pos(1), lgd_pos(2) - 0.15, lgd_pos(3), 0.12], ... 
     	'String', info_text, ...

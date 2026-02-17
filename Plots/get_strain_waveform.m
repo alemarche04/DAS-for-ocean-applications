@@ -51,7 +51,7 @@ function fig = get_strain_waveform(data, distance, time, channel_position_m, ...
     %
 	% apply optional subtitle
 	if ~isempty(params.subtitle)
-		subtitle({sprintf("Channel at m %.2f", channel_position_m), params.subtitle}, "FontSize", 12);
+		subtitle({sprintf("Channel at m %.2f (n° %d)", channel_position_m, channel_idx), params.subtitle}, "FontSize", 12);
 	end
     %
     % plot limits configuration

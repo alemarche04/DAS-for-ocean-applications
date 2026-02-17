@@ -19,6 +19,7 @@ function fig = get_correlogram(data, sampling_frequency, distance, ...
 %
 %   Optional Parameters (Name-Value Pairs):
 %       'subtitle'          - Plot subtitle string (typically time and date)
+%		'use_hilbert'       - Logical (true/false) for Hilbert tranform (envelope)
 %
 %   Output Arguments:
 %       fig                 - Handle to the generated figure.
@@ -32,6 +33,7 @@ function fig = get_correlogram(data, sampling_frequency, distance, ...
     % validate input
     params = parse_inputs(data, sampling_frequency, distance, channel_reference_position_m, ...
         offset_m, max_lag, time_interval, varargin{:});
+	use_hilbert = params.use_hilbert;
 
     % signal selection
     % ensure index is at least 1
@@ -62,8 +64,12 @@ function fig = get_correlogram(data, sampling_frequency, distance, ...
     for i = 1:nb_channels
         current_channel_idx = nearby_idx(i);
         current_channel_data = data_corr(current_channel_idx, :);
-        % normalization is often useful here; currently using raw xcorr
-        [correlation_matrix(i, :), lags] = xcorr(channel_reference, current_channel_data, max_lag_samples);
+        [corr_result, lags] = xcorr(channel_reference, current_channel_data, max_lag_samples);
+		if use_hilbert
+            correlation_matrix(i, :) = abs(hilbert(corr_result));
+		else
+			correlation_matrix(i, :) = corr_result;
+		end
     end
     
     % axis Generation
@@ -108,6 +114,7 @@ function results = parse_inputs(data, sampling_frequency, distance, channel_refe
 
 	% optional parameters
 	addParameter(p, 'subtitle', [], @(x) isempty(x) || ischar(x) || isstring(x));
+	addParameter(p, 'use_hilbert', false, @islogical);
 
     parse(p, data, sampling_frequency, distance, channel_reference_position_m, ...
         offset_m, max_lag, time_interval, varargin{:});
