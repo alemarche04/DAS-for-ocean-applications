@@ -79,7 +79,7 @@ end
 
 %% CABLE GEOMETRY, CHANNEL POSITION AND SOURCE POSITION AT TIME OF RECORDING
 if strcmp(dataset_name, 'Norway')
-	channel_no = 178;
+	channel_no = 210;
 	channel_position_m = (channel_no)* data.channel_distance_m;
 	GEO.plot_source_channel_on_cable(data.time_and_date, channel_position_m);
 
@@ -114,7 +114,7 @@ end
 
 %% ELLY AND CABLE: CHANNEL POSITION
 if strcmp(dataset_name, 'Norway')
-	channel_no = 178;
+	channel_no = 210;
 	channel_position_m = (channel_no)* data.channel_distance_m;
 	EllyCable.plot_channel_pos(channel_position_m);
 

@@ -49,7 +49,7 @@ end
 function elly1 = run1()
 % RUN1 Loads Elly (source) position from ellyandcable_run1.mat.
 	% load data file first run (cable geometry is the same for all runs)
-	run1 = load("ellyandcable_run1.mat", "elly");
+	run1 = load("ellyandcable_run1.mat", "elly", "t");
 
 	% get cable geometry
 	cable = cable_geometry();
@@ -61,13 +61,21 @@ function elly1 = run1()
 	[elly1.lat, elly1.lon, elly1.alt] = ecef2geodetic(Earth, run1.elly(3, :), run1.elly(1, :), run1.elly(2, :));
 	% transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
 	[elly1.xE, elly1.yN, elly1.zU] = geodetic2enu(elly1.lat, elly1.lon, elly1.alt, cable.lat0, cable.lon0, cable.alt0, wgs84Ellipsoid);
+
+	% set up time axis and format
+	elly1.time = run1.t + 36;
+	time_s = seconds(elly1.time); % time starts form -36?
+	fmt = 'hh:mm:ss.SSS';
+
+	% RUN1: 128 transmissions, each of 22.5 s
+	elly1.t_start_run1 = duration('10:59:19.0', 'InputFormat', fmt,'Format', fmt);
+	elly1.time_run1 = elly1.t_start_run1 + time_s;
+	elly1.t_end_run1 = elly1.time_run1(end);
 end
 %========================================================================%
 
 function plot_run1()
 % PLOT_RUN1 Plot Elly (source) position for run1, relative to cable geometry.
-	% load data file first run (cable geometry is the same for all runs)
-	run1 = load("ellyandcable_run1.mat");
 
 	% get cable geometry
 	cable = cable_geometry();
@@ -80,23 +88,19 @@ function plot_run1()
 	title('Cable geometry and Elly position (first run)', 'FontSize', 12);
 	hold on;
 
-	% ECEF coordinates system uses a shperical model
-	Earth = referenceSphere('Earth'); 
-	
-	% get geodetic coordinates for Elly (source)
-	[elly1.lat, elly1.lon, elly1.alt] = ecef2geodetic(Earth, run1.elly(3, :), run1.elly(1, :), run1.elly(2, :));
-	% transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
-	[elly1.xE, elly1.yN, elly1.zU] = geodetic2enu(elly1.lat, elly1.lon, elly1.alt, cable.lat0, cable.lon0, cable.alt0, wgs84Ellipsoid);
+	% get Elly position for run1
+	elly1 = run1();
+
 	% plot 3D geometry of the source
 	plot3(elly1.xE, elly1.yN, elly1.zU, '-o', 'Color', 'r', 'MarkerSize', 3);
 	view(3);
 	
 	% add colormap for time progression
 	colormap("jet");
-	scatter3(elly1.xE, elly1.yN, elly1.zU, 50, run1.t, 'filled');
+	scatter3(elly1.xE, elly1.yN, elly1.zU, 50, elly1.time, 'filled');
 	cb = colorbar;
-	cb.Label.String = 'Time (s)';
-	clim([min(run1.t) max(run1.t)]);
+	cb.Label.String = 'Time';
+	clim([min(elly1.time) max(elly1.time)]);
 	xlim([-50 450]); ylim([-200 300]); zlim([-150 0]);
 	hold off;
 end
@@ -106,7 +110,7 @@ end
 function elly2 = run2()
 % RUN2 Loads Elly (source) position from ellyandcable_run2.mat.
 	% load data file second run
-	run2 = load("ellyandcable_run2.mat", "elly");
+	run2 = load("ellyandcable_run2.mat", "elly", "t");
 
 	% get cable geometry
 	cable = cable_geometry();
@@ -118,13 +122,21 @@ function elly2 = run2()
 	[elly2.lat, elly2.lon, elly2.alt] = ecef2geodetic(Earth, run2.elly(3, :), run2.elly(1, :), run2.elly(2, :));
 	% transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
 	[elly2.xE, elly2.yN, elly2.zU] = geodetic2enu(elly2.lat, elly2.lon, elly2.alt, cable.lat0, cable.lon0, cable.alt0, wgs84Ellipsoid);
+
+	% set up time axis and format
+	elly2.time = run2.t + 36;
+	time_s = seconds(elly2.time); % time starts form -36?
+	fmt = 'hh:mm:ss.SSS';
+
+	% RUN2: 128 transmissions, each of 22.5 s
+	elly2.t_start_run2 = duration('12:12:23.0', 'InputFormat', fmt,'Format', fmt);
+	elly2.time_run2 = elly2.t_start_run2 + time_s;
+	elly2.t_end_run2 = elly2.time_run2(end);
 end
 %========================================================================%
 
 function plot_run2()
 % PLOT_RUN2 Plot Elly (source) position for run2, relative to cable geometry.
-	% load data file second run
-	run2 = load("ellyandcable_run2.mat");
 
 	% get cable geometry
 	cable = cable_geometry();
@@ -137,23 +149,19 @@ function plot_run2()
 	title('Cable geometry and Elly position (second run)', 'FontSize', 12);
 	hold on;
 
-	% ECEF coordinates system uses a shperical model
-	Earth = referenceSphere('Earth'); 
-	
-	% get geodetic coordinates for Elly (source)
-	[elly2.lat, elly2.lon, elly2.alt] = ecef2geodetic(Earth, run2.elly(3, :), run2.elly(1, :), run2.elly(2, :));
-	% transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
-	[elly2.xE, elly2.yN, elly2.zU] = geodetic2enu(elly2.lat, elly2.lon, elly2.alt, cable.lat0, cable.lon0, cable.alt0, wgs84Ellipsoid);
+	% get Elly position for run2
+	elly2 = run2();
+
 	% plot 3D geometry of the source
 	plot3(elly2.xE, elly2.yN, elly2.zU, '-o', 'Color', 'r', 'MarkerSize', 3);
 	view(3);
 	
 	% add colormap for time progression
 	colormap("jet");
-	scatter3(elly2.xE, elly2.yN, elly2.zU, 50, run2.t, 'filled');
+	scatter3(elly2.xE, elly2.yN, elly2.zU, 50, elly2.time, 'filled');
 	cb = colorbar;
 	cb.Label.String = 'Time (s)';
-	clim([min(run2.t) max(run2.t)]);
+	clim([min(elly2.time) max(elly2.time)]);
 	xlim([-50 450]); ylim([-200 300]); zlim([-150 0]);
 	hold off;
 end
@@ -163,7 +171,7 @@ end
 function elly3 = run3()
 % RUN3 Loads Elly (source) position from ellyandcable_run3.mat.
 	% load data file third run
-	run3 = load("ellyandcable_run3.mat", "elly");
+	run3 = load("ellyandcable_run3.mat", "elly", "t");
 
 	% get cable geometry
 	cable = cable_geometry();
@@ -175,13 +183,21 @@ function elly3 = run3()
 	[elly3.lat, elly3.lon, elly3.alt] = ecef2geodetic(Earth, run3.elly(3, :), run3.elly(1, :), run3.elly(2, :));
 	% transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
 	[elly3.xE, elly3.yN, elly3.zU] = geodetic2enu(elly3.lat, elly3.lon, elly3.alt, cable.lat0, cable.lon0, cable.alt0, wgs84Ellipsoid);
+
+	% set up time axis and format
+	elly3.time = run3.t(1:99) + 36;
+	time_s = seconds(elly3.time); % time starts form -36?
+	fmt = 'hh:mm:ss.SSS';
+
+	% RUN1: 128 transmissions, each of 22.5 s
+	elly3.t_start_run1 = duration('10:59:19.0', 'InputFormat', fmt,'Format', fmt);
+	elly3.time_run1 = elly3.t_start_run1 + time_s;
+	elly3.t_end_run1 = elly3.time_run1(end);
 end
 %========================================================================%
 
 function plot_run3()
 % PLOT_RUN3 Plot Elly (source) position for run3, relative to cable geometry.
-	% load data file third run
-	run3 = load("ellyandcable_run3.mat");
 
 	% get cable geometry
 	cable = cable_geometry();
@@ -193,24 +209,20 @@ function plot_run3()
 	xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
 	title('Cable geometry and Elly position (third run)', 'FontSize', 12);
 	hold on;
-
-	% ECEF coordinates system uses a shperical model
-	Earth = referenceSphere('Earth'); 
 	
-	% get geodetic coordinates for Elly (source)
-	[elly3.lat, elly3.lon, elly3.alt] = ecef2geodetic(Earth, run3.elly(3, :), run3.elly(1, :), run3.elly(2, :));
-	% transforms geodetic coordinates (lat, lon, alt) of Elly to the local east-north-up (ENU) Cartesian coordinates
-	[elly3.xE, elly3.yN, elly3.zU] = geodetic2enu(elly3.lat, elly3.lon, elly3.alt, cable.lat0, cable.lon0, cable.alt0, wgs84Ellipsoid);
+	% get Elly position for run1
+	elly3 = run3();
+
 	% plot 3D geometry of the source
 	plot3(elly3.xE(:, 1:99), elly3.yN(:, 1:99), elly3.zU(:, 1:99), '-o', 'Color', 'r', 'MarkerSize', 3);
 	view(3);
 	
 	% add colormap for time progression
 	colormap("jet");
-	scatter3(elly3.xE(:, 1:99), elly3.yN(:, 1:99), elly3.zU(:, 1:99), 50, run3.t(1:99), 'filled');
+	scatter3(elly3.xE(:, 1:99), elly3.yN(:, 1:99), elly3.zU(:, 1:99), 50, elly3.time, 'filled');
 	cb = colorbar;
 	cb.Label.String = 'Time (s)';
-	clim([run3.t(1) run3.t(99)]);
+	clim([min(elly3.time) max(elly3.time)]);
 	xlim([-50 450]); ylim([-200 300]); zlim([-150 0]);
 	hold off;
 end
