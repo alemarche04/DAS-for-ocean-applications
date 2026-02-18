@@ -14,50 +14,9 @@ addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration'
 dataset_name	= 'Norway';
 DAS				= feval(str2func(dataset_name + "_cfg"));
 if strcmp(dataset_name, 'Norway')
-	GEO			= geo_norway();
 	EllyCable	= ellyandcable();
 end
-data			= DAS.load_data();
-% -----------------------------------------------------------------------%
-
-%% CABLE GEOMETRY AND SOURCE POSTION
-if strcmp(dataset_name, 'Norway')
-
-	% plot cable geometry 2D
-	GEO.plot_cable_geometry_2D();
-	exportgraphics( ...
-	gcf, ...
-	fullfile(dataset_name, ['cable_geometry_' dataset_name  '.png']));
-
-	% source position first run
-	t_start_run1 = duration(10, 59, 19);
-	t_end_run1 = duration(11, 47, 29);
-	source_run1 = GEO.sourcePos_interval(t_start_run1, t_end_run1);
-	
-	% source position second run
-	t_start_run2 = duration(12, 12, 23);
-	t_end_run2 = duration(13, 00, 33);
-	source_run2 = GEO.sourcePos_interval(t_start_run2, t_end_run2);
-
-	% source position third run
-	t_start_run3 = duration(13, 09, 50);
-	t_end_run3 = duration(13, 47, 10);
-	source_run3 = GEO.sourcePos_interval(t_start_run3, t_end_run3);
-
-	% plot cable geometry and rouce postion 2D
-	GEO.plot_source_pos_all_2D(source_run1, source_run2, source_run3);
-
-	exportgraphics( ...
-	gcf, ...
-	fullfile(dataset_name, ['cable_source_' dataset_name  '.png']));
-
-	% plot cable geometry and rouce postion 3D
-	GEO.plot_cable_source_3D(source_run1, source_run2, source_run3);
-
-	% clear variables
-	clear source_run1 source_run2 source_run3
-	clear t_start_run1 t_end_run1 t_start_run2 t_end_run2 t_start_run3 t_end_run3
-end
+data			= DAS.load_data("122403.hdf5");
 % -----------------------------------------------------------------------%
 
 %% ELLY AND CABLE: PLOT RUN 1
@@ -108,6 +67,9 @@ end
 if strcmp(dataset_name, 'Norway')
 	channel_no = 178;
 	EllyCable.get_distance(channel_no, data.time_and_date);
+
+	% clear variables
+	clear channel_no
 end
 % -----------------------------------------------------------------------%
 

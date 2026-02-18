@@ -23,27 +23,49 @@ end
 % -----------------------------------------------------------------------%
 
 %% DATA LOADING
-function data = load_data()
+function data = load_data(dataset_name)
 % LOAD_DATA Loads DAS strain data and metadata from HDF5 files.
 %
 %   Output:
 %       data - Struct containing transposed strain matrix, time vectors,
 %              distances, and sensor metadata (fs, dx, GL).
 
-	filename = '122403_norway.hdf5';
-	data.strain						= h5read(filename, '/trace');
-	data.time						= h5read(filename, '/tx');
-	data.distance_m					= h5read(filename, '/dist');
+
+	% Check if the dataset exists
+	if ~isfile(fullfile(fileparts(which(dataset_name)), dataset_name))
+        error('Dataset file does not exist: %s', dataset_name);
+	end
+
+	% Check if directory exists
+	if isfolder("Dataset") == false
+    	% Create directory
+    	mkdir("Dataset")
+	end
+
+	% Create filename for the loaded dataset
+	loaded_filename = fullfile("Dataset", strcat('Trondheim_processed_', dataset_name));
+	input_filename = fullfile(fileparts(which('122403.hdf5')), '122403.hdf5');
+
+	% Check if processed dataset already exists
+	if ~isfile(loaded_filename)
+        % Run python script to load data of interest from hdf5 file
+		pyrunfile("hdf5_handler.py", input_file=input_filename, output_file=loaded_filename);
+	end
+
+    % Extract data
+    data.strain						= h5read(loaded_filename, '/trace');
+	data.time						= h5read(loaded_filename, '/tx');
+	data.distance_m					= h5read(loaded_filename, '/dist');
 	data.distance_km				= double(data.distance_m .* 1e-3);
 	
-	temp_time						= h5read(filename, '/file_begin_time_utc');
+	temp_time						= h5read(loaded_filename, '/file_begin_time_utc');
 	data.time_and_date				= temp_time{1}; 
 	
-	data.sampling_frequency_Hz		= h5read(filename, '/metadata/fs');
-	data.channel_distance_m			= h5read(filename, '/metadata/dx');
-	data.gauge_length				= h5read(filename, '/metadata/GL');
-	data.nb_of_channels				= h5read(filename, '/metadata/nx');
-	data.nb_of_samples				= h5read(filename, '/metadata/ns');
+	data.sampling_frequency_Hz		= h5read(loaded_filename, '/metadata/fs');
+	data.channel_distance_m			= h5read(loaded_filename, '/metadata/dx');
+	data.gauge_length				= h5read(loaded_filename, '/metadata/GL');
+	data.nb_of_channels				= h5read(loaded_filename, '/metadata/nx');
+	data.nb_of_samples				= h5read(loaded_filename, '/metadata/ns');
 	data.sampling_interval_s		= 1/data.sampling_frequency_Hz;
 	data.dimensions					= [data.nb_of_channels data.nb_of_samples];
 	
