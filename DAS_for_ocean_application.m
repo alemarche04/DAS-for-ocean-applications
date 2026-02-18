@@ -8,8 +8,10 @@ close all
 addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration');
 
 % Dataset available:	
-%		DAS4Whale_Bou22
+%		DAS4Whale
+%		DAS4Tracking
 %		Norway
+%		OOI_Wilcock
 
 dataset_name	= 'Norway';
 DAS				= feval(str2func(dataset_name + "_cfg"));

@@ -17,17 +17,17 @@ function data = DAS4Whale(dataset_name)
 	dataset = load(dataset_name);
     
     % Extract data
-    data.strain =					dataset.data .* 1e-9;
-    data.time =						dataset.x2_time_s; % s
-    data.sampling_interval_s =		dataset.info_sample_interval_s; % s
-    data.distance_m =				dataset.x1_distance_from_shore_m; % m
-    data.distance_km =				data.distance_m .* 1e-3; % km
+    data.strain =					dataset.data .* 1e-9; %[strain unit]
+    data.time =						dataset.x2_time_s; %[s]
+    data.sampling_interval_s =		dataset.info_sample_interval_s; %[s]
+    data.distance_m =				dataset.x1_distance_from_shore_m; %[m]
+    data.distance_km =				data.distance_m .* 1e-3; %[km]
     data.nb_of_channels =			dataset.info_ntraces;
     data.nb_of_samples =			dataset.info_nsamples;
     data.dimensions =				[data.nb_of_channels data.nb_of_samples];
-    data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz; % Hz
-    data.gauge_length_m =			dataset.info_GL_m; % m
-    data.channel_distance_m =		data.distance_m(2) - data.distance_m(1); % m
+    data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz; %[Hz]
+    data.gauge_length_m =			dataset.info_GL_m; %[m]
+    data.channel_distance_m =		data.distance_m(2) - data.distance_m(1); %[m]
 end
 
 %% DAS4Tracking
@@ -42,17 +42,17 @@ function data = DAS4Tracking(dataset_name)
 	dataset = load(dataset_name);
     
     % Extract data
-    data.strain =					dataset.data;
-    data.time =						dataset.x1_time;
-    data.sampling_interval_s =		dataset.info_sapmling_interval_s;            
-    data.distance_m =				dataset.x1_absolute_channel;
-    data.distance_km =				data.distance_m .* 1e-3;            
+    data.strain =					dataset.data; %[strain unit]
+    data.time =						dataset.x1_time; %[s]
+    data.sampling_interval_s =		dataset.info_sapmling_interval_s; %[s]           
+    data.distance_m =				dataset.x1_absolute_channel; %[m]
+    data.distance_km =				data.distance_m .* 1e-3; %[m]         
     data.nb_of_channels =			dataset.info_ntraces;
     data.nb_of_samples =			dataset.info_nsamples; 
 	data.dimensions =				[data.nb_of_channels data.nb_of_samples];
-    data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz;
-    data.gauge_length =				dataset.info_gauge_length;
-    data.channel_distance_m =		data.distance_m(2) - data.distance_m(1);
+    data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz; %[Hz]
+    data.gauge_length =				dataset.info_gauge_length; %[m]
+    data.channel_distance_m =		data.distance_m(2) - data.distance_m(1); %[m]
 end
 
 %% OOI_Wilcock
@@ -65,18 +65,18 @@ function data = OOI_Wilcock(dataset_name)
 	end
 
 	% Extract data
-    data.strain =					double(h5read(dataset_name,"/Acquisition/Raw[0]/RawData"))';
-    data.time =						double(h5read(dataset_name,"/Acquisition/Raw[0]/RawDataTime"))';
-	data.time =						(data.time - data.time(1)) .* 1e-6;
-    data.sampling_interval_s =		data.time(2) - data.time(1);            
-    data.channel_distance_m =		double(h5readatt(dataset_name,'/Acquisition','SpatialSamplingInterval'));
+    data.strain =					double(h5read(dataset_name,"/Acquisition/Raw[0]/RawData"))'; %[strain unit]
+    data.time =						double(h5read(dataset_name,"/Acquisition/Raw[0]/RawDataTime"))'; %[us]
+	data.time =						(data.time - data.time(1)) .* 1e-6; %[s]
+    data.sampling_interval_s =		data.time(2) - data.time(1); %[s]
+    data.channel_distance_m =		double(h5readatt(dataset_name,'/Acquisition','SpatialSamplingInterval')); %[m]
 	data.nb_of_channels =			h5readatt(dataset_name,'/Acquisition','NumberOfLoci');
     data.nb_of_samples =			length(data.time);
-	data.distance_m =				double(0:1:(data.nb_of_channels - 1)) .* data.channel_distance_m;
-    data.distance_km =				data.distance_m .* 1e-3; 
+	data.distance_m =				double(0:1:(data.nb_of_channels - 1)) .* data.channel_distance_m; %[m]
+    data.distance_km =				data.distance_m .* 1e-3; %[km]
 	data.dimensions =				[data.nb_of_channels data.nb_of_samples];
-    data.sampling_frequency_Hz =	h5readatt(dataset_name,'/Acquisition/Raw[0]','OutputDataRate');
-    data.gauge_length =				h5readatt(dataset_name,'/Acquisition','GaugeLength');
+    data.sampling_frequency_Hz =	h5readatt(dataset_name,'/Acquisition/Raw[0]','OutputDataRate'); %[Hz]
+    data.gauge_length =				h5readatt(dataset_name,'/Acquisition','GaugeLength'); %[m]
 end
 
 %% Trondheim
@@ -104,20 +104,20 @@ function data = Trondheim(dataset_name)
 	end
 
     % Extract data
-    data.strain						= h5read(loaded_filename, '/trace');
-	data.time						= h5read(loaded_filename, '/tx');
-	data.distance_m					= h5read(loaded_filename, '/dist');
-	data.distance_km				= double(data.distance_m .* 1e-3);
+    data.strain						= h5read(loaded_filename, '/trace'); %[strain unit]
+	data.time						= h5read(loaded_filename, '/tx'); %[s]
+	data.distance_m					= h5read(loaded_filename, '/dist'); %[m]
+	data.distance_km				= double(data.distance_m .* 1e-3); %[km]
 	
 	temp_time						= h5read(loaded_filename, '/file_begin_time_utc');
 	data.time_and_date				= temp_time{1}; 
 	
-	data.sampling_frequency_Hz		= h5read(loaded_filename, '/metadata/fs');
-	data.channel_distance_m			= h5read(loaded_filename, '/metadata/dx');
-	data.gauge_length				= h5read(loaded_filename, '/metadata/GL');
+	data.sampling_frequency_Hz		= h5read(loaded_filename, '/metadata/fs'); %[Hz]
+	data.channel_distance_m			= h5read(loaded_filename, '/metadata/dx'); %[m]
+	data.gauge_length				= h5read(loaded_filename, '/metadata/GL'); %[m]
 	data.nb_of_channels				= h5read(loaded_filename, '/metadata/nx');
 	data.nb_of_samples				= h5read(loaded_filename, '/metadata/ns');
-	data.sampling_interval_s		= 1/data.sampling_frequency_Hz;
+	data.sampling_interval_s		= 1/data.sampling_frequency_Hz; %[s]
 	data.dimensions					= [data.nb_of_channels data.nb_of_samples];
 	
 	% Transpose from Row-Major (Python) to Column-Major (MATLAB)

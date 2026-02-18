@@ -53,17 +53,17 @@ function data = load_data(dataset_name)
 	end
 
     % Extract data
-    data.strain						= h5read(loaded_filename, '/trace');
-	data.time						= h5read(loaded_filename, '/tx');
-	data.distance_m					= h5read(loaded_filename, '/dist');
-	data.distance_km				= double(data.distance_m .* 1e-3);
+    data.strain						= h5read(loaded_filename, '/trace'); %[strain unit]
+	data.time						= h5read(loaded_filename, '/tx'); %[s]
+	data.distance_m					= h5read(loaded_filename, '/dist'); %[m]
+	data.distance_km				= double(data.distance_m .* 1e-3); %[km]
 	
 	temp_time						= h5read(loaded_filename, '/file_begin_time_utc');
 	data.time_and_date				= temp_time{1}; 
 	
-	data.sampling_frequency_Hz		= h5read(loaded_filename, '/metadata/fs');
-	data.channel_distance_m			= h5read(loaded_filename, '/metadata/dx');
-	data.gauge_length				= h5read(loaded_filename, '/metadata/GL');
+	data.sampling_frequency_Hz		= h5read(loaded_filename, '/metadata/fs'); %[Hz]
+	data.channel_distance_m			= h5read(loaded_filename, '/metadata/dx'); %[m]
+	data.gauge_length				= h5read(loaded_filename, '/metadata/GL'); %[m]
 	data.nb_of_channels				= h5read(loaded_filename, '/metadata/nx');
 	data.nb_of_samples				= h5read(loaded_filename, '/metadata/ns');
 	data.sampling_interval_s		= 1/data.sampling_frequency_Hz;
@@ -103,7 +103,7 @@ function fkFilt = fkFilt()
 %   Output:
 %       fkFilt - Struct containing velocity range limits for f-k filtering.
 
-    fkFilt.velocity_range = [1400 1435 1575 1600];
+    fkFilt.velocity_range = [1400 1435 1575 1600]; %[m/s]
 end
 % -----------------------------------------------------------------------%
 
@@ -114,13 +114,13 @@ function tx = tx_plot()
 %   Output:
 %       tx - Parameters for axis limits and propagation speed references.
 
-    tx.time_lim					= [];
-    tx.distance_lim				= [];
-    tx.strain_lim				= [-40 -10];	% [dB]
-    tx.p1						= [1 1]; % [time space]
-	tx.p2						= [2 2]; % [time space]
-    tx.channel_position_m		= 0;
-    tx.cpa_m					= 0;
+    tx.time_lim					= []; %[s]
+    tx.distance_lim				= []; %[m]
+    tx.strain_lim				= [-40 -10]; % [dB]
+    tx.p1						= [1 1]; %[time space]
+	tx.p2						= [2 2]; %[time space]
+    tx.channel_position_m		= 0; %[m]
+    tx.cpa_m					= 0; %[m]
 end
 % -----------------------------------------------------------------------%
 
@@ -131,10 +131,10 @@ function wf = waveform()
 %   Output:
 %       wf - Parameters for time-series plotting and audio export.
 
-    wf.channel_position_m	= (286 -1) * 1.02;
-    wf.cpa_m				= 0;
-    wf.time_lim				= [];
-    wf.strain_lim			= [];
+    wf.channel_position_m	= (286 -1) * 1.02; %[m]
+    wf.cpa_m				= 0; %[m]
+    wf.time_lim				= []; %[s]
+    wf.strain_lim			= []; %[strain unit]
     wf.filename_audio		= fullfile('Norway/', 'strain_waveform_Norway.wav');
 end
 % -----------------------------------------------------------------------%
@@ -146,14 +146,14 @@ function sg = spectrogram()
 %   Output:
 %       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
-    sg.channel_position_m	= (286 -1) * 1.02;
+    sg.channel_position_m	= (286 -1) * 1.02; %[m]
     sg.nfft					= 4096;
     sg.window_len			= 512;
     sg.window				= hann(sg.window_len, 'periodic');
     sg.overlap_pct			= 0.89;
-    sg.time_lim				= [];
-    sg.frequency_lim		= [800 4000]; % [Hz]
-    sg.strain_lim			= [-155 -125];
+    sg.time_lim				= []; %[s]
+    sg.frequency_lim		= [800 4000]; %[Hz]
+    sg.strain_lim			= [-155 -125]; %[dB]
 end
 % -----------------------------------------------------------------------%
 
@@ -165,10 +165,10 @@ function fx = fx_plot()
 %       fx - Parameters for spatial-frequency analysis.
 
     fx.nfft					= 4096;
-    fx.time_interval		= [0 23];
-    fx.time_window			= 1.5;
-    fx.frequency_lim		= [];
-    fx.strain_lim			= [];
+    fx.time_interval		= [0 23]; %[s]
+    fx.time_window			= 1.5; %[s]
+    fx.frequency_lim		= []; %[Hz]
+    fx.strain_lim			= []; %[dB]
     fx.filename_animation	= fullfile('Norway/', 'fx_animation_Norway.avi');
 end
 % -----------------------------------------------------------------------%
@@ -180,11 +180,11 @@ function xcorr = correlation()
 %   Output:
 %       xcorr - Channel offsets, time lags, and statistics export settings.
 
-    xcorr.channel_position_m	= (178 -1) * 1.02;
-    xcorr.offset_m				= 9;
-    xcorr.time_lag				= 0.007;
-    xcorr.time_interval			= [3.8 4];
-    xcorr.cpa_m					= 207;
+    xcorr.channel_position_m	= (178 -1) * 1.02; %[m]
+    xcorr.offset_m				= 9; %[m]
+    xcorr.time_lag				= 0.007; %[s]
+    xcorr.time_interval			= [3.8 4]; %[s]
+    xcorr.cpa_m					= 207; %[m]
     xcorr.filename_table		= fullfile('Norway/', 'cross_corr_stats_Norway.csv');
 end
 % -----------------------------------------------------------------------%

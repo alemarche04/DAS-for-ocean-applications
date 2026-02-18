@@ -1,7 +1,7 @@
-function cfg = DAS4Whale_Bou22_cfg()
-% DAS4WHALE_BOU22_CFG Configuration file for the DAS4Whale dataset.
+function cfg = DAS4Tracking_cfg()
+% DAS4TRACKING_CFG Configuration file for the DAS4Tracking dataset.
 %
-%   CFG = DAS4WHALE_BOU22_CFG() returns a structure containing function
+%   CFG = DAS4TRACKING_CFG() returns a structure containing function
 %   handles and predefined parameters for loading, processing, and 
 %   visualizing Distributed Acoustic Sensing (DAS) data.
 %
@@ -9,8 +9,8 @@ function cfg = DAS4Whale_Bou22_cfg()
 %       cfg - Struct containing processing parameters and handles to 
 %             sub-configuration functions.
 %
-%   Reference: Bou22 Dataset
-%   See also: LOAD, SPECTROGRAM, DESIGNFILT
+%   Reference: https://dataverse.no/dataset.xhtml?persistentId=doi:10.18710/Q8OSON
+%   See also: LOAD, FULLFILE
 
     % Function handles for configuration sub-modules
     cfg.load_data   = @load_data;
@@ -27,29 +27,32 @@ end
 % -----------------------------------------------------------------------%
 
 %% DATA LOADING
-function data = load_data()
+function data = load_data(dataset_name)
 % LOAD_DATA Loads raw DAS data from the specified .mat file.
 %
 %   Output:
 %       data - Struct containing transposed strain matrix, time vectors,
 %              distances, and sensor metadata (fs, dx, GL).
 
-    filename = "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat";
-    dataset = load(filename);
+    % Check if the dataset exists
+	if ~isfile(fullfile(fileparts(which(dataset_name)), dataset_name))
+        error('Dataset file does not exist: %s', dataset_name);
+	end
+
+	dataset = load(dataset_name);
     
-    % Data extraction and conversion
-    data.strain						= dataset.data .* 1e-9;
-    data.time						= dataset.x2_time_s; % [s]
-    data.sampling_interval_s		= dataset.info_sample_interval_s; % [s]
-    data.distance_m					= dataset.x1_distance_from_shore_m; % [m]
-    data.distance_km				= data.distance_m .* 1e-3; % [km]
-    data.nb_of_channels				= dataset.info_ntraces;
-    data.nb_of_samples				= dataset.info_nsamples;
-    data.dimensions					= [data.nb_of_channels data.nb_of_samples];
-    data.sampling_frequency_Hz		= dataset.info_sampling_frequency_Hz; % [Hz]
-    data.gauge_length_m				= dataset.info_GL_m; % [m]
-    data.channel_distance_m			= data.distance_m(2) - data.distance_m(1); % [m]
-    data.time_and_date				= "2020-06-27, 05:24:41";
+    % Extract data
+    data.strain =					dataset.data; %[strain unit]
+    data.time =						dataset.x1_time; %[s]
+    data.sampling_interval_s =		dataset.info_sapmling_interval_s; %[s]           
+    data.distance_m =				dataset.x1_absolute_channel; %[m]
+    data.distance_km =				data.distance_m .* 1e-3; %[km]    
+    data.nb_of_channels =			dataset.info_ntraces;
+    data.nb_of_samples =			dataset.info_nsamples; 
+	data.dimensions =				[data.nb_of_channels data.nb_of_samples];
+    data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz; %[Hz]
+    data.gauge_length =				dataset.info_gauge_length; %[m]
+    data.channel_distance_m =		data.distance_m(2) - data.distance_m(1); %[m]
 end
 % -----------------------------------------------------------------------%
 
@@ -83,7 +86,7 @@ function fkFilt = fkFilt()
 %   Output:
 %       fkFilt - Struct containing velocity range limits for f-k filtering.
 
-    fkFilt.velocity_range = [];
+    fkFilt.velocity_range = []; %[m/s]
 end
 
 % -----------------------------------------------------------------------%
@@ -95,13 +98,13 @@ function tx = tx()
 %   Output:
 %       tx - Parameters for axis limits and propagation speed references.
 
-    tx.time_lim                 = [];
-    tx.distance_lim             = [];
+    tx.time_lim                 = []; % [s]
+    tx.distance_lim             = []; % [m]
     tx.strain_lim               = [-30 -5]; % [dB]
-	tx.p1						= [49.65 45925.8]; % [time space]
-	tx.p2						= [48.15 43752.5]; % [time space]
-    tx.channel_position_m       = 42000;
-    tx.cpa_m                    = 42800;
+	tx.p1						= [1 1]; % [time space]
+	tx.p2						= [1 1]; % [time space]
+    tx.channel_position_m       = 1; % [m]
+    tx.cpa_m                    = 1; % [m]
 end
 
 % -----------------------------------------------------------------------%
@@ -113,11 +116,11 @@ function wf = waveform()
 %   Output:
 %       wf - Parameters for time-series plotting and audio export.
 
-    wf.channel_position_m    = 42000;
-    wf.cpa_m                 = 42800;
-    wf.time_lim              = [];
-    wf.strain_lim            = [-1.3e-9 1.3e-9];
-    wf.filename_audio        = fullfile('DAS4Whale_Bou22/', 'strain_waveform_DAS4Whale_Bou22.wav');
+    wf.channel_position_m    = 1; % [m]
+    wf.cpa_m                 = 1; % [m]
+    wf.time_lim              = []; % [s]
+    wf.strain_lim            = [-1.3e-9 1.3e-9]; %[strain unit]
+    wf.filename_audio        = fullfile('DAS4Tracking/', 'strain_waveform_DAS4Tracking.wav');
 end
 % -----------------------------------------------------------------------%
 
@@ -128,14 +131,14 @@ function sg = spectrogram()
 %   Output:
 %       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
-    sg.channel_position_m    = 42000;
+    sg.channel_position_m    = 1; % [m]
     sg.nfft                  = 4096;
     sg.window_len            = 512;
     sg.window                = hann(sg.window_len, 'periodic');
     sg.overlap_pct           = 0.89;
-    sg.time_lim              = [];
+    sg.time_lim              = []; % [s]
     sg.frequency_lim         = [10 80]; % [Hz]
-    sg.strain_lim            = [-25 0];
+    sg.strain_lim            = [-25 0]; % [dB]
 end
 % -----------------------------------------------------------------------%
 
@@ -147,11 +150,11 @@ function fx = fx()
 %       fx - Parameters for spatial-frequency analysis.
 
     fx.nfft					= 4096;
-    fx.time_interval		= [44 67];
-    fx.time_window			= 1.5;
-    fx.frequency_lim		= [5 75];
-    fx.strain_lim			= [-25 -5];
-    fx.filename_animation   = fullfile('DAS4Whale_Bou22/', 'fx_animation_DAS4Whale_Bou22.avi');
+    fx.time_interval		= [1 23]; % [s]
+    fx.time_window			= 1.5; % [s]
+    fx.frequency_lim		= [5 75]; % [Hz]
+    fx.strain_lim			= [-25 -5]; % [dB]
+    fx.filename_animation   = fullfile('DAS4Tracking/', 'fx_animation_DAS4Tracking.avi');
 end
 % -----------------------------------------------------------------------%
 
@@ -162,10 +165,10 @@ function xcorr = correlation()
 %   Output:
 %       xcorr - Channel offsets, time lags, and statistics export settings.
 
-    xcorr.channel_position_m	= 42000;
-    xcorr.offset_m				= 300;
-    xcorr.time_lag				= 0.2;
-    xcorr.time_interval			= [47 50];
-    xcorr.cpa_m					= 42800;
-    xcorr.filename_table		= fullfile('DAS4Whale_Bou22/', 'cross_corr_stats_DAS4Whale_Bou22.csv');
+    xcorr.channel_position_m	= 1; % [m]
+    xcorr.offset_m				= 10; % [m]
+    xcorr.time_lag				= 0.01; % [s]
+    xcorr.time_interval			= [1 3]; % [s]
+    xcorr.cpa_m					= 1; % [m]
+    xcorr.filename_table		= fullfile('DAS4Tracking/', 'cross_corr_stats_DAS4Tracking.csv');
 end
