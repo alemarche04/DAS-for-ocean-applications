@@ -44,7 +44,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 	offset_step = params.offset_step;
 	use_hilbert = params.use_hilbert;
     
-    % signal in time interval
+    % select signals in time interval
     t_start_idx = max(1, round(time_interval(1) * sampling_frequency));
     t_end_idx = min(size(data, 2), round(time_interval(2) * sampling_frequency));
     data_corr = data(:, t_start_idx:t_end_idx);
@@ -57,7 +57,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     actual_channel_distance = distance(channel_reference_idx); % distance of the closest channel to channel_reference_position_km
     channel_reference = data_corr(channel_reference_idx, :);
         
-    % sets up subplots
+    % subplots steup
     nb_subplots = 2 * round(offset_m/(offset_step * channel_distance_m)) + 1;
     nb_columns = floor(sqrt(nb_subplots));
     nb_rows = ceil(nb_subplots / nb_columns);
@@ -66,6 +66,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     fig = figure('units','normalized','outerposition',[0 0 1 1], Name="Corss-Correlation", NumberTitle="off");
     t = tiledlayout(nb_rows,nb_columns,'TileSpacing','Compact', 'Padding', 'compact');
     
+	% ------------------------- AUTOCORRELATION ------------------------- %
     % (auto)correlation of refernce channel signal
     [acorr_result, lags_auto] = xcorr(channel_reference, max_lag_samples);
     auto_time_lags = lags_auto/sampling_frequency;
@@ -82,11 +83,14 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     min_correlation = min_correlation + min_correlation/4;
     max_correlation = max(auto_correlation);
     max_correlation = max_correlation + max_correlation/4;
+
+	% ------------------------------------------------------------------- %
     
-	% correlation statistics matrix
+	% correlation statistics matrix pre-allocation
     correlation_statistics = zeros(nb_subplots, 3); % [offset, max_value, time]
 	csv_position = 1;
 
+	% -------------------- NEGATIVE CROSSCORRELATION -------------------- %
 	for i = (ceil(nb_subplots/2) -1):-1:1
     
         % check on array limits
@@ -130,14 +134,15 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 		csv_position = csv_position + 1;
         
 	end
+	% ------------------------------------------------------------------- %
 
-	% plot auto-correlation
+	% ------------------------- AUTOCORRELATION ------------------------- %
     nexttile
 
     plot(auto_time_lags, auto_correlation);
     ylim([min_correlation max_correlation]); xlim([-max_lag max_lag]);
     xlabel('Time lag (s)');
-    title('Auto-correlation');
+    title('Auto-correlation', 'Color', 'r');
     
     % writes (auto)correlation result on csv file
 	[~, max_auto_correlation_idx] = max(auto_correlation);	
@@ -145,7 +150,9 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 	correlation_statistics(csv_position, 2) = auto_correlation(max_auto_correlation_idx);
 	correlation_statistics(csv_position, 3) = auto_time_lags(max_auto_correlation_idx);
 	csv_position = csv_position + 1;
+	% ------------------------------------------------------------------- %
 
+	% -------------------- POSITIVE CROSSCORRELATION -------------------- %
 	for i = 1:(ceil(nb_subplots/2) -1)
     
         % check on array limits
@@ -185,9 +192,11 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         correlation_statistics(csv_position, 1) = offset_from_reference;
         correlation_statistics(csv_position, 2) = max_peak;
         correlation_statistics(csv_position, 3) = time_lags_xcorr_positive_offset(max_peak_idx);
+
 		csv_position = csv_position + 1;
         
 	end
+	% ------------------------------------------------------------------- %
 
 	correlation_table = array2table(correlation_statistics, ...
     	'VariableNames', {'Offset', 'Peak_value', 'Time'});

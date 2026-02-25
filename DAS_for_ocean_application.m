@@ -12,13 +12,26 @@ addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration'
 %		DAS4Tracking
 %		Norway
 %		OOI_Wilcock
+% Dataset filenames:
+%		DAS4Whale
+%			- "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat"
+%		DAS4Tracking
+%			- "20220822_114507_to_114837_ch9803_to_ch24509_sample_Freq_78_Hz.mat"
+%			- "20220822_122707_to_123037_ch9803_to_ch24509_sample_Freq_78_Hz.mat"
+%			- "20220906_165106_to_165436_ch2450_to_ch9191_sample_Freq_125_Hz.mat"
+%			- "20220906_175106_to_175436_ch2450_to_ch9191_sample_Freq_125_Hz_outer.mat"
+%			- "20220906_175107_to_175437_ch2450_to_ch9191_sample_Freq_125_Hz_inner.mat"
+%		Norway
+%			- "122403.hdf5"
+%		OOI_Wilcock
+%			- "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5"
 
-dataset_name	= 'Norway';
+dataset_name	= 'DAS4Whale';
 DAS				= feval(str2func(dataset_name + "_cfg"));
 if strcmp(dataset_name, 'Norway')
 	EllyCable	= ellyandcable();
 end
-data			= DAS.load_data("122403.hdf5");
+data			= DAS.load_data("20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat");
 % -----------------------------------------------------------------------%
 
 %% ELLY AND CABLE: PLOT RUN 1
@@ -171,16 +184,17 @@ time_space_plot = get_time_space_plot( ...
 	'strain_lim', tx.strain_lim);
 
 % draw propagation speed lines on time-space plot
-speedline = false;
+speedline = true;
 if speedline
 	hold on;
-	draw_prop_speed_lines( ...
+	c = draw_prop_speed_lines( ...
 		data.time, ...
 		tx.p1, ...
 		tx.p2, ...
 		tx.cpa_m, ...
 		tx.channel_position_m);
 	hold off;
+	disp(c);
 end
 
 % export plot as png
@@ -268,7 +282,7 @@ space_frequency_plot = get_space_frequency_plot( ...
 	'subtitle', data.time_and_date, ...
 	'frequency_lim', fx.frequency_lim, ...
 	'strain_lim', fx.strain_lim, ...
-	'get_animation', true);
+	'get_animation', false);
 
 % export plot as png
 exportgraphics( ...
@@ -296,7 +310,7 @@ correlogram = get_correlogram( ...
 	xcorr.time_lag, ...
 	xcorr.time_interval, ...
 	'subtitle', data.time_and_date, ...
-	'use_hilbert',true);
+	'use_hilbert',false);
 
 % export plot as png
 exportgraphics( ...
@@ -315,8 +329,8 @@ exportgraphics( ...
 	xcorr.time_interval, ...
 	xcorr.filename_table, ...
 	'subtitle', data.time_and_date, ...
-	'offset_step', 1, ...
-	'use_hilbert', true);
+	'offset_step', 2, ...
+	'use_hilbert', false);
 
 % export plot as png
 exportgraphics( ...
@@ -324,12 +338,15 @@ exportgraphics( ...
 	fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.png']));
 
 % estimates the distance btw the source and the CPA (at 42800 m)
-estimate_R = false;
+estimate_R = true;
 if estimate_R
 	distance_from_CPA = (xcorr.cpa_m - xcorr.channel_position_m); % distance btw reference channel and CPA
 	xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
 	time_peak = correlation_statistics(:, 3); % peak time of cross correlations
-	c = 1470;
+
+	% get propagation speed from two points on tx plane
+	tx = DAS.tx_plot();
+	c = get_prop_speed(tx.p1, tx.p2);
 	
 	R = sqrt(((distance_from_CPA^2 + (time_peak.^2).*c^2 - (distance_from_CPA - xcorr_offset_m).^2) ...
 		./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
@@ -339,7 +356,6 @@ if estimate_R
 	scatter(xcorr_offset_m, R)
 	
 	figure(correlogram);
-	c = 1470;
 	dt= -0.2:0.002:0.2;
 	distance_from_CPA = 800;
 	
@@ -352,7 +368,7 @@ if estimate_R
 	ylabel('Distance from reference, dx [m]')
 	hold off
 
-	fprintf('Estimate value of R: %d\n [m]', R_med);
+	fprintf('Estimate value of R: %d [m]\n', R_med);
 end
 
 % clear variables

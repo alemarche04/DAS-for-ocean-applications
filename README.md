@@ -23,12 +23,12 @@ This toolset provides a complete suite of functions for processing and analyzing
 
 ### Configuration Functions
 
-#### `DAS4Whale_Bou22_cfg`
+#### `DAS4Whale_cfg`
 
 Configuration file for the DAS4Whale dataset. Returns a structure containing function handles and predefined parameters for loading, processing, and  visualizing Distributed Acoustic Sensing (DAS) data.
 
 ```matlab
-cfg = DAS4Whale_Bou22_cfg()
+cfg = DAS4Whale_cfg()
 ```
 **Output Arguments:**
 - `cfg` - Struct containing processing parameters and handles to sub-configuration and plotting functions
@@ -44,18 +44,6 @@ cfg = Norway_cfg()
 ```
 **Output Arguments:**
 - `cfg` - Struct containing processing parameters and handles to sub-configuration and plotting functions
-
----
-
-#### `geo_norway`
-
-Functions for position file source-position.ods from Trondheim dataset. Geographical mapping of the cable and vessel (source) positions.
-
-```matlab
-geo = geo_norway()
-```
-**Output Arguments:**
-- `geo` - Struct containing sub-configuration and plotting functions.
 
 ---
 
