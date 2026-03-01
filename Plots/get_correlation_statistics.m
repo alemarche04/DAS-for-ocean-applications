@@ -48,14 +48,24 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
     t_start_idx = max(1, round(time_interval(1) * sampling_frequency));
     t_end_idx = min(size(data, 2), round(time_interval(2) * sampling_frequency));
     data_corr = data(:, t_start_idx:t_end_idx);
+
+	% new sampling frequency (if there is a resample factor)
+	if ~isempty(params.resample_factor)
+		sampling_frequency = round(params.resample_factor*sampling_frequency);
+	end
     
     % number of samples
     max_lag_samples = round(max_lag * sampling_frequency);
     
     % closest channel to reference channel
-    [~, channel_reference_idx] = min(abs(distance - channel_reference_position_m)); % index of the closest channel to channel_reference_position_km
-    actual_channel_distance = distance(channel_reference_idx); % distance of the closest channel to channel_reference_position_km
+    [~, channel_reference_idx] = min(abs(distance - channel_reference_position_m)); % index of the closest channel to channel_reference_position_m
+    actual_channel_distance = distance(channel_reference_idx); % distance of the closest channel to channel_reference_position_m
     channel_reference = data_corr(channel_reference_idx, :);
+
+	% resample channel signal
+	if ~isempty(params.resample_factor)
+		channel_reference = resample(channel_reference, params.resample_factor, 1);
+	end
         
     % subplots steup
     nb_subplots = 2 * round(offset_m/(offset_step * channel_distance_m)) + 1;
@@ -99,10 +109,18 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         
         if idx_plus > size(data_corr, 1) || idx_minus < 1
             break;
-        end
+		end
+
+		% get channel signal
+		channel_i = data_corr((channel_reference_idx - i * offset_step), :);
+
+		% resample channel signal
+		if ~isempty(params.resample_factor)
+			channel_i = resample(channel_i, params.resample_factor, 1);
+		end
         
         % (cross)correlation with negative offset
-        [xcorr_result, lags_xcorr_negative_offset] = xcorr(channel_reference, data_corr((channel_reference_idx - i * offset_step), :), max_lag_samples);
+        [xcorr_result, lags_xcorr_negative_offset] = xcorr(channel_reference, channel_i, max_lag_samples);
         time_lags_xcorr_negative_offset = lags_xcorr_negative_offset / sampling_frequency;
 		offset_from_reference = distance(channel_reference_idx - i * offset_step) - actual_channel_distance;
 
@@ -118,7 +136,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         plot(time_lags_xcorr_negative_offset, xcorr_negative_offset);
         ylim([min_correlation max_correlation]); xlim([-max_lag max_lag]);
         xlabel('Time lag (s)');
-        title(sprintf('dx= %0.2f m', offset_from_reference));
+        title(sprintf('dx = %0.2f m', offset_from_reference));
 
 		% find peak
         [max_peak, max_peak_idx] = max(xcorr_negative_offset);
@@ -161,10 +179,18 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         
         if idx_plus > size(data_corr, 1) || idx_minus < 1
             break;
-        end
+		end
+
+		% get channel signal
+		channel_i = data_corr((channel_reference_idx + i * offset_step), :);
+
+		% resample channel signal
+		if ~isempty(params.resample_factor)
+			channel_i = resample(channel_i, params.resample_factor, 1);
+		end
             
         % (cross)correlation with positive offset
-        [xcorr_result, lags_xcorr_positive_offset] = xcorr(channel_reference, data_corr((channel_reference_idx + i * offset_step), :), max_lag_samples);
+        [xcorr_result, lags_xcorr_positive_offset] = xcorr(channel_reference, channel_i, max_lag_samples);
         time_lags_xcorr_positive_offset = lags_xcorr_positive_offset / sampling_frequency;
 		offset_from_reference = distance(channel_reference_idx + i * offset_step) - actual_channel_distance;
 
@@ -180,7 +206,7 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
         plot(time_lags_xcorr_positive_offset, xcorr_positive_offset);
         ylim([min_correlation max_correlation]); xlim([-max_lag max_lag]);
         xlabel('Time lag (s)');
-        title(sprintf('dx= %0.2f m', offset_from_reference));
+        title(sprintf('dx = %0.2f m', offset_from_reference));
    
 		% find peak
 		[max_peak, max_peak_idx] = max(xcorr_positive_offset);
@@ -232,8 +258,9 @@ function results = parse_inputs(data, sampling_frequency, distance, channel_dist
 
 	% optional parameters
 	addParameter(p, 'subtitle', [], @(x) isempty(x) || ischar(x) || isstring(x));
-	addParameter(p, 'offset_step', 2, @(x) isempty(x) || isnumeric(x) && isscalar(x))
+	addParameter(p, 'offset_step', 2, @(x) isempty(x) || isnumeric(x) && isscalar(x));
 	addParameter(p, 'use_hilbert', false, @islogical);
+	addParameter(p, 'resample_factor', [], @(x) isempty(x) || isnumeric(x) || isinteger(x));
 	
 	parse(p, data, sampling_frequency, distance, channel_distance_m, ...
 	channel_reference_position_m, offset_m, max_lag, time_interval, ...

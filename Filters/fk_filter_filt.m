@@ -39,7 +39,6 @@ function trace_out = fk_filter_filt(trace_in, fk_filter_matrix)
     
     % --- Step 2: Apply Mask ---
     % Point-by-point multiplication in the f-k domain
-    
     printStep('Applying fk filter');
     fk_filtered_trace = fk_trace .* fk_filter_matrix;
     printTime();

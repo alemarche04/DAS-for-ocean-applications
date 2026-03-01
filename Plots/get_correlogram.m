@@ -40,6 +40,11 @@ function fig = get_correlogram(data, sampling_frequency, distance, ...
     t_start_idx = max(1, round(time_interval(1) * sampling_frequency));
     t_end_idx = min(size(data, 2), round(time_interval(2) * sampling_frequency));
     data_corr = data(:, t_start_idx:t_end_idx);
+
+	% new sampling frequency (if there is a resample factor)
+	if ~isempty(params.resample_factor)
+		sampling_frequency = round(params.resample_factor*sampling_frequency);
+	end
     
     % calculate lag samples
     max_lag_samples = round(max_lag * sampling_frequency);
@@ -49,6 +54,11 @@ function fig = get_correlogram(data, sampling_frequency, distance, ...
     [~, channel_reference_idx] = min(abs(distance - channel_position_m)); 
     actual_channel_distance = distance(channel_reference_idx); 
     channel_reference = data_corr(channel_reference_idx, :);
+
+	% resample channel signal
+	if ~isempty(params.resample_factor)
+		channel_reference = resample(channel_reference, params.resample_factor, 1);
+	end
         
     % spatial subset selection
     distance_from_reference_channel = abs(distance - actual_channel_distance);
@@ -64,6 +74,12 @@ function fig = get_correlogram(data, sampling_frequency, distance, ...
     for i = 1:nb_channels
         current_channel_idx = nearby_idx(i);
         current_channel_data = data_corr(current_channel_idx, :);
+
+		% resample channel signal
+		if ~isempty(params.resample_factor) && i ~= channel_reference_idx
+			current_channel_data = resample(current_channel_data, params.resample_factor, 1);
+		end
+
         [corr_result, lags] = xcorr(channel_reference, current_channel_data, max_lag_samples);
 		if use_hilbert
             correlation_matrix(i, :) = abs(hilbert(corr_result));
@@ -115,6 +131,7 @@ function results = parse_inputs(data, sampling_frequency, distance, channel_refe
 	% optional parameters
 	addParameter(p, 'subtitle', [], @(x) isempty(x) || ischar(x) || isstring(x));
 	addParameter(p, 'use_hilbert', false, @islogical);
+	addParameter(p, 'resample_factor', [], @(x) isempty(x) || isnumeric(x) || isinteger(x));
 
     parse(p, data, sampling_frequency, distance, channel_reference_position_m, ...
         offset_m, max_lag, time_interval, varargin{:});

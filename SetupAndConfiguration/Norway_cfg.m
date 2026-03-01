@@ -37,6 +37,12 @@ function data = load_data(dataset_name)
 	end
 
 	% Check if directory exists
+	if isfolder("Norway") == false
+    	% Create directory
+    	mkdir("Norway")
+	end
+
+	% Check if directory exists
 	if isfolder("Dataset") == false
     	% Create directory
     	mkdir("Dataset")

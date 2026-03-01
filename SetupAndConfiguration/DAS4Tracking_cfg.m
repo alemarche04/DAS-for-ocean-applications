@@ -12,6 +12,17 @@ function cfg = DAS4Tracking_cfg()
 %   Reference: https://dataverse.no/dataset.xhtml?persistentId=doi:10.18710/Q8OSON
 %   See also: LOAD, FULLFILE
 
+	% Check if the dataset exists
+	if ~isfile(fullfile(fileparts(which(dataset_name)), dataset_name))
+        error('Dataset file does not exist: %s', dataset_name);
+	end
+
+	% Check if directory exists
+	if isfolder("DAS4Tracking") == false
+    	% Create directory
+    	mkdir("DAS4Tracking")
+	end
+
     % Function handles for configuration sub-modules
     cfg.load_data   = @load_data;
     cfg.bandpass    = @bandpass;

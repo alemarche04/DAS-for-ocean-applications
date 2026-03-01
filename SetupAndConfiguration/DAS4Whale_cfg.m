@@ -39,6 +39,12 @@ function data = load_data(dataset_name)
         error('Dataset file does not exist: %s', dataset_name);
 	end
 
+	% Check if directory exists
+	if isfolder("DAS4Whale") == false
+    	% Create directory
+    	mkdir("DAS4Whale")
+	end
+
 	dataset = load(dataset_name);
     
     % Extract data
@@ -53,6 +59,7 @@ function data = load_data(dataset_name)
     data.sampling_frequency_Hz		= dataset.info_sampling_frequency_Hz; %[Hz]
     data.gauge_length_m				= dataset.info_GL_m; %[m]
     data.channel_distance_m			= data.distance_m(2) - data.distance_m(1); %[m]
+	data.propagation_speed			= 1480; % [m/s]
 
 	filename						= char(dataset_name);
 	day								= string(filename(7:8));
@@ -63,7 +70,7 @@ function data = load_data(dataset_name)
 	minutes							= string(filename(12:13));
 	seconds							= string(filename(14:15));
 	time							= strcat(hour, ':', minutes, ':', seconds);
-	data.time_and_date				= strcat(date, ', ', time);
+	data.time_and_date				= strcat(date, ',', {' '}, time);
 end
 % -----------------------------------------------------------------------%
 
@@ -112,8 +119,7 @@ function tx = tx()
     tx.time_lim                 = []; %[s]
     tx.distance_lim             = []; %[m]
     tx.strain_lim               = [-30 -5]; % [dB]
-	tx.p1						= [48.15 43618.4]; % [time space]
-	tx.p2						= [50.7 47373.4]; % [time space]
+	tx.p1						= [48 44000]; % [time space]
     tx.channel_position_m       = 42000; %[m]
     tx.cpa_m                    = 42800; %[m]
 end

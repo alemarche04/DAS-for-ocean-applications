@@ -12,6 +12,17 @@ function cfg = OOI_Wilcock()
 %   Reference: https://oceanobservatories.org/pi-instrument/rapid-a-community-test-of-distributed-acoustic-sensing-on-the-ocean-observatories-initiative-regional-cabled-array/
 %   See also: H5READ, FULLFILE
 
+	% Check if the dataset exists
+	if ~isfile(fullfile(fileparts(which(dataset_name)), dataset_name))
+        error('Dataset file does not exist: %s', dataset_name);
+	end
+
+	% Check if directory exists
+	if isfolder("OOI_Wilcock") == false
+    	% Create directory
+    	mkdir("OOI_Wilcock")
+	end
+
     % Function handles for configuration sub-modules
     cfg.load_data   = @load_data;
     cfg.bandpass    = @bandpass;
