@@ -1,5 +1,30 @@
 function [peak_lag, fig] = corss_correlation(data, sampling_frequency, distance_m, channel_distance_m, ...
     channel1_position_m, channel2_position_m, max_lag, time_interval, varargin)
+% CROSS_CORRELATION compute and plot cross-correlation between two channels.
+%
+%   [PEAK_LAG, FIG] = CROSS_CORRELATION(DATA, SAMPLING_FREQUENCY, ...) 
+%   calculates the cross correlation of two channels at specific positions 
+%	along the FO cable and computes the TDOA of the acoustic signal.
+%
+%   Input Arguments: 
+%       data                 - 2D matrix of DAS data [channels x samples].
+%       sampling_frequency   - System sampling rate [Hz].
+%       distance_m           - Vector of spatial coordinates for channels [m].
+%       channel_distance_m   - Nominal spacing between channels [m].
+%       channlel1_position_m - Position of the first channel [m].
+%       channlelw_position_m - Position of the second channel [m].
+%       max_lag              - Maximum time lag for correlation [s].
+%       time_interval        - 2-element vector [start end] for data segment [s].
+%
+%   Optional Parameters (Name-Value Pairs):
+%       'subtitle'           - Plot subtitle string (typically time and date).
+%       'resample_factor'    - Upsampling factor.
+%
+%   Output Arguments:
+%       peak_lag             - TDOA of the acoustic signal.
+%       fig                  - Handle to the tiled layout figure.
+%
+%   See also: XCORR, RESAMPLE, GET_CORRELOGRAM, GET_CORRELATION_STATISTICS
 
 	% parse input parameters
     params = parse_inputs(data, sampling_frequency, distance_m, channel_distance_m, ...

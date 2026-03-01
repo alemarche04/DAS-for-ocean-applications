@@ -17,11 +17,6 @@ function cfg = OOI_Wilcock()
         error('Dataset file does not exist: %s', dataset_name);
 	end
 
-	% Check if directory exists
-	if isfolder("OOI_Wilcock") == false
-    	% Create directory
-    	mkdir("OOI_Wilcock")
-	end
 
     % Function handles for configuration sub-modules
     cfg.load_data   = @load_data;
@@ -50,19 +45,26 @@ function data = load_data(dataset_name)
         error('Dataset file does not exist: %s', dataset_name);
 	end
 
+	% Check if directory exists
+	if isfolder("OOI_Wilcock") == false
+    	% Create directory
+    	mkdir("OOI_Wilcock")
+	end
+
 	% Extract data
-    data.strain =					double(h5read(dataset_name,"/Acquisition/Raw[0]/RawData"))'; %[strain unit]
-    data.time =						double(h5read(dataset_name,"/Acquisition/Raw[0]/RawDataTime"))'; %[us]
-	data.time =						(data.time - data.time(1)) .* 1e-6; %[s]
-    data.sampling_interval_s =		data.time(2) - data.time(1); %[s]
-    data.channel_distance_m =		double(h5readatt(dataset_name,'/Acquisition','SpatialSamplingInterval')); %[m]
-	data.nb_of_channels =			h5readatt(dataset_name,'/Acquisition','NumberOfLoci');
-    data.nb_of_samples =			length(data.time);
-	data.distance_m =				double(0:1:(data.nb_of_channels - 1)) .* data.channel_distance_m; %[m]
-    data.distance_km =				data.distance_m .* 1e-3; %[km]
-	data.dimensions =				[data.nb_of_channels data.nb_of_samples];
-    data.sampling_frequency_Hz =	h5readatt(dataset_name,'/Acquisition/Raw[0]','OutputDataRate'); %[Hz]
-    data.gauge_length =				h5readatt(dataset_name,'/Acquisition','GaugeLength'); %[m]
+    data.strain						= double(h5read(dataset_name,"/Acquisition/Raw[0]/RawData"))'; %[strain unit]
+    data.time						= double(h5read(dataset_name,"/Acquisition/Raw[0]/RawDataTime"))'; %[us]
+	data.time						= (data.time - data.time(1)) .* 1e-6; %[s]
+    data.sampling_interval_s		= data.time(2) - data.time(1); %[s]
+    data.channel_distance_m			= double(h5readatt(dataset_name,'/Acquisition','SpatialSamplingInterval')); %[m]
+	data.nb_of_channels				= h5readatt(dataset_name,'/Acquisition','NumberOfLoci');
+    data.nb_of_samples				= length(data.time);
+	data.distance_m					= double(0:1:(data.nb_of_channels - 1)) .* data.channel_distance_m; %[m]
+    data.distance_km				= data.distance_m .* 1e-3; %[km]
+	data.dimensions					= [data.nb_of_channels data.nb_of_samples];
+    data.sampling_frequency_Hz		= h5readatt(dataset_name,'/Acquisition/Raw[0]','OutputDataRate'); %[Hz]
+    data.gauge_length				= h5readatt(dataset_name,'/Acquisition','GaugeLength'); %[m]
+	data.propagation_speed			= 1500; % [m/s]
 end
 % -----------------------------------------------------------------------%
 

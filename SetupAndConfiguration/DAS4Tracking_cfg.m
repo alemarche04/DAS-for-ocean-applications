@@ -12,17 +12,6 @@ function cfg = DAS4Tracking_cfg()
 %   Reference: https://dataverse.no/dataset.xhtml?persistentId=doi:10.18710/Q8OSON
 %   See also: LOAD, FULLFILE
 
-	% Check if the dataset exists
-	if ~isfile(fullfile(fileparts(which(dataset_name)), dataset_name))
-        error('Dataset file does not exist: %s', dataset_name);
-	end
-
-	% Check if directory exists
-	if isfolder("DAS4Tracking") == false
-    	% Create directory
-    	mkdir("DAS4Tracking")
-	end
-
     % Function handles for configuration sub-modules
     cfg.load_data   = @load_data;
     cfg.bandpass    = @bandpass;
@@ -50,20 +39,27 @@ function data = load_data(dataset_name)
         error('Dataset file does not exist: %s', dataset_name);
 	end
 
+	% Check if directory exists
+	if isfolder("DAS4Tracking") == false
+    	% Create directory
+    	mkdir("DAS4Tracking")
+	end
+
 	dataset = load(dataset_name);
     
     % Extract data
-    data.strain =					dataset.data; %[strain unit]
-    data.time =						dataset.x1_time; %[s]
-    data.sampling_interval_s =		dataset.info_sapmling_interval_s; %[s]           
-    data.distance_m =				dataset.x1_absolute_channel; %[m]
-    data.distance_km =				data.distance_m .* 1e-3; %[km]    
-    data.nb_of_channels =			dataset.info_ntraces;
-    data.nb_of_samples =			dataset.info_nsamples; 
-	data.dimensions =				[data.nb_of_channels data.nb_of_samples];
-    data.sampling_frequency_Hz =	dataset.info_sampling_frequency_Hz; %[Hz]
-    data.gauge_length =				dataset.info_gauge_length; %[m]
-    data.channel_distance_m =		data.distance_m(2) - data.distance_m(1); %[m]
+    data.strain						= dataset.data; %[strain unit]
+    data.time						= dataset.x1_time; %[s]
+    data.sampling_interval_s		= dataset.info_sapmling_interval_s; %[s]           
+    data.distance_m					= dataset.x1_absolute_channel; %[m]
+    data.distance_km				= data.distance_m .* 1e-3; %[km]    
+    data.nb_of_channels				= dataset.info_ntraces;
+    data.nb_of_samples				= dataset.info_nsamples; 
+	data.dimensions					= [data.nb_of_channels data.nb_of_samples];
+    data.sampling_frequency_Hz		= dataset.info_sampling_frequency_Hz; %[Hz]
+    data.gauge_length				= dataset.info_gauge_length; %[m]
+    data.channel_distance_m			= data.distance_m(2) - data.distance_m(1); %[m]
+	data.propagation_speed			= 1500; % [m/s]
 end
 % -----------------------------------------------------------------------%
 

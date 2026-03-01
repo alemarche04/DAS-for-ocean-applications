@@ -1,5 +1,8 @@
 function fk_spectrum(trace, channel_spacing, sampling_interval, varargin)
-% FK_SPECTRUM compute and plot FK spectrum of strain matrix
+% FK_SPECTRUM compute and plot FK spectrum of strain matrix.
+%
+%   FK_SPECTRUM(TRACE, CHANNEL_SPACING_SAMPLING_INTERVAL) computes FK 
+%	spectrum with 2D fft tranform then plots it.
 % 
 %   Input Arguments:
 %       trace               - 2D matrix of DAS data [channels x samples].
@@ -11,6 +14,8 @@ function fk_spectrum(trace, channel_spacing, sampling_interval, varargin)
 %       'frequency_lim'     - 2-element vector [min max] for X-axis limits.
 %       'wavenumber_lim'    - 2-element vector [min max] for Y-axis limits.
 %       'dB_lim'            - 2-element vector [min max] for colorbar limits (clim).
+%
+%   See also: FFT2, FFTSHIFT
 
 	params = parse_inputs(trace, channel_spacing, sampling_interval, varargin{:});
 
