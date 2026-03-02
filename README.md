@@ -35,12 +35,36 @@ cfg = DAS4Whale_cfg()
 
 ---
 
+#### `DAS4Tracking_cfg`
+
+Configuration file for the DAS4Tracking dataset. Returns a structure containing function handles and predefined parameters for loading, processing, and  visualizing Distributed Acoustic Sensing (DAS) data.
+
+```matlab
+cfg = DAS4Tracking_cfg()
+```
+**Output Arguments:**
+- `cfg` - Struct containing processing parameters and handles to sub-configuration and plotting functions
+
+---
+
 #### `Norway_cfg`
 
 Configuration file for the Trondheimsfjord dataset. Returns a structure containing function handles and parameters for processing DAS data from the Norway experiment.
 
 ```matlab
 cfg = Norway_cfg()
+```
+**Output Arguments:**
+- `cfg` - Struct containing processing parameters and handles to sub-configuration and plotting functions
+
+---
+
+#### `OOI_Wilcock_cfg`
+
+Configuration file for the OOI dataset. Returns a structure containing function handles and parameters for processing DAS data from the Norway experiment.
+
+```matlab
+cfg = OOI_Wilcock_cfg()
 ```
 **Output Arguments:**
 - `cfg` - Struct containing processing parameters and handles to sub-configuration and plotting functions
@@ -387,6 +411,35 @@ Quantifies cross-correlation peaks across the array.
 
 ---
 
+#### `cross_correlogram`
+
+Computes and plot cross-correlation between two channels.
+
+```matlab
+	[peak_lag, fig] = corss_correlation(data, sampling_frequency, distance_m, channel_distance_m, ...
+    channel1_position_m, channel2_position_m, max_lag, time_interval)
+```
+
+**Input Arguments:**
+- `data` - 2D matrix of DAS data [channels x samples].
+- `sampling_frequency` - System sampling rate [Hz].
+- `distance_m` - Vector of spatial coordinates for channels [m].
+- `channel_distance_m` - Nominal spacing between channels [m].
+- `channlel1_position_m` - Position of the first channel [m].
+- `channlelw_position_m` - Position of the second channel [m].
+- `max_lag` - Maximum time lag for correlation [s].
+- `time_interval` - 2-element vector [start end] for data segment [s].
+
+**Optional Parameters (Name-Value Pairs):**
+- `'subtitle'` - Plot subtitle string (typically time and date)
+- `'resample_factor'` - Upsampling factor.
+
+**Output Arguments:**
+- `peak_lag` - TDOA of the acoustic signal.
+- `fig` - Handle to the generated figure
+
+---
+
 ## Data Format Requirements
 
 All functions expect DAS data in the following format:
@@ -417,6 +470,7 @@ All functions expect DAS data in the following format:
 - MATLAB R2019b or later (recommended)
 - Signal Processing Toolbox
 - Image Processing Toolbox
+- Mapping Toolbox
 
 ---
 

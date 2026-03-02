@@ -1,6 +1,6 @@
 function [peak_lag, fig] = corss_correlation(data, sampling_frequency, distance_m, channel_distance_m, ...
     channel1_position_m, channel2_position_m, max_lag, time_interval, varargin)
-% CROSS_CORRELATION compute and plot cross-correlation between two channels.
+% CROSS_CORRELATION Computes and plot cross-correlation between two channels.
 %
 %   [PEAK_LAG, FIG] = CROSS_CORRELATION(DATA, SAMPLING_FREQUENCY, ...) 
 %   calculates the cross correlation of two channels at specific positions 
