@@ -28,64 +28,7 @@ addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration'
 
 dataset_name	= 'DAS4Whale';
 DAS				= feval(str2func(dataset_name + "_cfg"));
-if strcmp(dataset_name, 'Norway')
-	EllyCable	= ellyandcable();
-end
 data			= DAS.load_data("20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat");
-% -----------------------------------------------------------------------%
-
-%% ELLY AND CABLE: PLOT RUN 1
-if strcmp(dataset_name, 'Norway')
-	EllyCable.plot_run1();
-end
-% -----------------------------------------------------------------------%
-
-%% ELLY AND CABLE: PLOT RUN 2
-if strcmp(dataset_name, 'Norway')
-	EllyCable.plot_run2();
-end
-% -----------------------------------------------------------------------%
-
-%% ELLY AND CABLE: PLOT RUN 3
-if strcmp(dataset_name, 'Norway')
-	EllyCable.plot_run3();
-end
-% -----------------------------------------------------------------------%
-
-%% ELLY AND CABLE: SOURCE POSITION
-if strcmp(dataset_name, 'Norway')
-	EllyCable.plot_source_pos(data.time_and_date);
-end
-% -----------------------------------------------------------------------%
-
-%% ELLY AND CABLE: CHANNEL POSITION
-if strcmp(dataset_name, 'Norway')
-	channel_no = 210;
-	EllyCable.plot_channel_pos(channel_no);
-
-	% clear variables
-	clear channel_no
-end
-% -----------------------------------------------------------------------%
-
-%% ELLY AND CABLE: SOURCE AND CHANNEL POSITION
-if strcmp(dataset_name, 'Norway')
-	channel_no = 204;
-	EllyCable.plot_source_channel(data.time_and_date, channel_no);
-
-	% clear variables
-	clear channel_no
-end
-% -----------------------------------------------------------------------%
-
-%% ELLY AND CABLE: CHANNEL-SOURCE DISTANCE
-if strcmp(dataset_name, 'Norway')
-	channel_no = 178;
-	EllyCable.get_distance(channel_no, data.time_and_date);
-
-	% clear variables
-	clear channel_no
-end
 % -----------------------------------------------------------------------%
 
 %% BUTTERWORTH BANDPASS FILTER
@@ -135,40 +78,6 @@ strain_filtered = fk_filter_filt( ...
 clear fkFilt fk_filter
 % -----------------------------------------------------------------------%
 
-%% MATCHED FILTER AND TIME-SPACE PLOT
-if strcmp(dataset_name, 'Norway')
-	preamble_filename = 'preamble-B_4-25000.wav';
-	strain_matched_filtered = matched_filter(strain_filtered, preamble_filename);
-
-	% parameters
-	tx = DAS.tx_plot();
-
-	% time-space plot
-	time_space_plot = get_time_space_plot( ...
-	strain_matched_filtered(50:end, :), ...
-	data.time, ...
-	data.distance_m(50:end), ...
-	'subtitle', data.time_and_date, ...
-    'time_lim', tx.time_lim, ...
-	'distance_lim', tx.distance_lim, ...
-	'strain_lim', tx.strain_lim);
-
-	% export plot as png
-	exportgraphics( ...
-	time_space_plot, ...
-	fullfile(dataset_name, ['tx_matched_filt_plot_' dataset_name  '.png']));
-
-	% draw channel position
-	channel_no = 178;
-	channel_position_m = channel_no * data.channel_distance_m;
-	hold on;
-	yline(channel_position_m*1e-3, '--', 'channel','LineWidth', 1, 'Color', '#FFD1DF');
-	hold off;
-
-	% clear variables
-	clear preamble_filename tx time_space_plot  channel_no channel_position_m
-end
-% -----------------------------------------------------------------------%
 %% TIME-SPACE PLOT
 % parameters
 tx = DAS.tx_plot();
@@ -336,48 +245,6 @@ exportgraphics( ...
 	xcorr_plot, ...
 	fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.png']));
 
-% estimates the distance btw the source and the CPA (at 42800 m)
-estimate_R = true;
-if estimate_R
-	distance_from_CPA = (xcorr.cpa_m - xcorr.channel_position_m); % distance btw reference channel and CPA
-	xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
-	time_peak = correlation_statistics(:, 3); % peak time of cross correlations
-	
-	R = sqrt(((distance_from_CPA^2 + (time_peak.^2).*c^2 - (distance_from_CPA - xcorr_offset_m).^2) ...
-		./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
-	R = abs(R);
-	
-	figure;
-	scatter(xcorr_offset_m, R)
-	
-	figure(correlogram);
-	dt= -0.2:0.002:0.2;
-	distance_from_CPA = 800;
-	
-	R_med = median(R, 'omitnan');
-
-	d1 = sqrt( ( sqrt(R_med^2+distance_from_CPA^2) - dt*c ).^2 - R_med^2 );
-	dsh = distance_from_CPA-d1;
-	hold on
-	plot(dt,dsh,'k--','LineWidth', 1)
-	ylabel('Distance from reference, dx [m]')
-	hold off
-
-	fprintf('Estimate value of R: %d [m]\n', R_med);
-end
-
 % clear variables
-clear xcorr correlogram correlation_statistics xcorr_plot estimate_R
+clear xcorr correlogram correlation_statistics xcorr_plot
 % -----------------------------------------------------------------------%
-
-%% EVENT DETECTION
-% %% event detection
-% cfg =				cfg.reload_params();		% loads any changes in the configuration file
-% eventDetection =	cfg.params.eventDetection;	% event detection parameters
-% 
-% [events_detected, events_plot] = event_detection(strain_filtered, ...
-% 	data.time, ...
-% 	data.distance_km);
-% 
-% % export plot as png
-% exportgraphics(events_plot, eventDetection.filename_plot);
