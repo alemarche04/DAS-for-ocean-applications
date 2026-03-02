@@ -15,6 +15,7 @@ function fig = get_time_space_plot(data, time, distance, varargin)
 %       'time_lim'     - 2-element vector [min max] for X-axis limits.
 %       'distance_lim' - 2-element vector [min max] for Y-axis limits.
 %       'strain_lim'   - 2-element vector [min max] for colorbar limits (clim).
+%		'norm'         - Logical (true/false) to enable normalization (deafult: false)
 %
 %   Output Arguments:
 %       fig          - Handle to the generated figure.
@@ -26,10 +27,17 @@ function fig = get_time_space_plot(data, time, distance, varargin)
     time_lim = params.time_lim;
     distance_lim = params.distance_lim;
     strain_lim = params.strain_lim;
+	norm = params.norm;
     %
 
 	% data is plotted in dB scale
-	data_dB = 20*log10(abs(data) ./ max(abs(data), [], "all"));
+	if norm
+    	% normalized dB scale
+    	data_dB = 20*log10(abs(data) ./ max(abs(data), [], "all"));
+	else
+    	% dB scale (no normalization)
+    	data_dB = 20*log10(abs(data));
+	end
 	%
 
     % plot figure
@@ -41,13 +49,19 @@ function fig = get_time_space_plot(data, time, distance, varargin)
     title('Time-Space plot', 'FontSize', 14, 'FontWeight', 'bold');
     xlabel('Time (s)', 'FontSize', 12);
     ylabel('Distance (m)', 'FontSize', 12);
-    c.Label.String = 'Strain (dB)';
+	if norm
+    	c.Label.String = 'Strain (dB) (normalized)';
+	else
+    	c.Label.String = 'Strain (dB)';
+	end
 	%
+
 	% apply optional subtitle
 	if ~isempty(params.subtitle)
 		subtitle(params.subtitle, "FontSize", 12);
 	end
     %
+	
     % plot limits configuration
     if ~isempty(time_lim)
     xlim(time_lim);
@@ -76,6 +90,7 @@ function results = parse_inputs(data, time, distance, varargin)
 	addParameter(p, 'time_lim', [], @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x>=0)));
 	addParameter(p, 'distance_lim', [], @(x) isempty(x) || (isnumeric(x) && isvector(x) && all(x>=0)));
 	addParameter(p, 'strain_lim', [], @(x) isempty(x) || (isnumeric(x) && isvector(x)));
+	addParameter(p, 'norm', false, @islogical);
 	
 	parse(p, data, time, distance, varargin{:});
 	results = p.Results;

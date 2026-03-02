@@ -22,8 +22,7 @@ function fig = get_spectrogram(data, distance, sampling_frequency, ...
 %       'time_lim'          - 2-element vector [min max] for X-axis limits (s).
 %       'frequency_lim'     - 2-element vector [min max] for Y-axis limits (Hz).
 %       'strain_lim'        - 2-element vector [min max] for colorbar limits (dB).
-%		'norm'              - Logical (true/false) to enable normalization
-%		(deafult: false)
+%		'norm'              - Logical (true/false) to enable normalization (deafult: false)
 %
 %   Output Arguments:
 %       fig                 - Handle to the generated figure.
@@ -52,11 +51,9 @@ function fig = get_spectrogram(data, distance, sampling_frequency, ...
 	if norm
     	% normalized dB scale
     	spectrogram_dB = 20*log10(abs(spectrogram) ./ max(abs(spectrogram), [], "all"));
-    	c.Label.String = 'Strain (dB) (normalized)';
 	else
     	% dB scale (no normalization)
     	spectrogram_dB = 20*log10(abs(spectrogram));
-    	c.Label.String = 'Strain (dB)';
 	end
 
     % plot spectrogram
@@ -64,10 +61,16 @@ function fig = get_spectrogram(data, distance, sampling_frequency, ...
 	imagesc(time_axis, freq_axis, spectrogram_dB);
 	axis xy;
 	c = colorbar;
+	if norm
+    	c.Label.String = 'Strain (dB) (normalized)';
+	else
+    	c.Label.String = 'Strain (dB)';
+	end
 	xlabel('Time (s)', 'FontSize', 12);
 	ylabel('Frequency (Hz)', 'FontSize', 12);
     title('Spectrogram', 'FontSize', 14, 'FontWeight', 'bold');
 	%
+	
 	% apply optional subtitle
 	if ~isempty(params.subtitle)
 		subtitle({sprintf("Channel at m %.2f (n° %d)", channel_position_m, channel_idx), params.subtitle}, "FontSize", 12);
