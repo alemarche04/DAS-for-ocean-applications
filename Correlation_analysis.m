@@ -114,6 +114,8 @@ correlogram = get_correlogram( ...
 	'use_hilbert', false, ...
 	'resample_factor', 10);
 
+
+% estimate distance between CPA and source
 distance_from_CPA = (xcorr.cpa_m - xcorr.channel_position_m); % distance btw reference channel and CPA
 xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
 time_peak = correlation_statistics(:, 3); % peak time of cross correlations
