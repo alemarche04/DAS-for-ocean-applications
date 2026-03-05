@@ -134,24 +134,21 @@ theta_deg = rad2deg(theta_rad);
 figure('Name', "Angle of Arrival", 'NumberTitle','off');
 plot(channel_dist_12, theta_deg, '-*');
 
-% Weighted least squares (weighted linear regression)
+% Linear regression
 valid_idx = isfinite(theta_deg) & (channel_dist_12 ~= 0); % remove problematic points
-valid_channel_dist_12 = channel_dist_12(valid_idx);
-theta_deg_valid = theta_deg(valid_idx);
+valid_channel_dist_12 = channel_dist_12(valid_idx); % get valid elements
+theta_deg_valid = theta_deg(valid_idx); % get valid elements
 
-weights = abs(valid_channel_dist_12); 
-weights = weights / max(weights); % normalization
-
-% weighted linear regression parameters
-X = [ones(length(valid_channel_dist_12), 1), valid_channel_dist_12(:)];
-W = diag(weights);
+% robustfit(x,y) returns a vector b of coefficient estimates for a robust 
+% multiple linear regression of the responses in vector y on the predictors
+% in matrix x; uses bisquare robust fitting weight function
 beta = robustfit(valid_channel_dist_12, theta_deg_valid); 
-theta_WLR = beta(1) + beta(2) * valid_channel_dist_12;
+theta_LR = beta(1) + beta(2) * valid_channel_dist_12;
 
 % plot weighted linear regression result
 hold on;
-plot(valid_channel_dist_12, theta_WLR);
-legend("Angle of Arrival", "Weighted Least Squares");
+plot(valid_channel_dist_12, theta_LR);
+legend("Angle of Arrival", "Linear regression");
 title("Angle of Arrival (estimate)");
 xlabel("Distance between channels");
 ylabel("Angle (degrees)");
@@ -186,35 +183,28 @@ title("Source distance (estimate)");
 xlabel("Distance between channels");
 ylabel("Distance (m)");
 
-% weighted least squares
+% linear regression
 valid_idx = ~isnan(R) & (d12 ~= 0); % remove problematic points
-valid_channel_dist_12 = d12(valid_idx);
-R_valid = R(valid_idx);
+valid_channel_dist_12 = d12(valid_idx); % get valid elements
+R_valid = R(valid_idx); % get valid elements
 
-weights = abs(valid_channel_dist_12); 
-weights = weights / max(weights); % normalization
-
-% weighted linear regression parameters
-X = [ones(length(valid_channel_dist_12), 1), valid_channel_dist_12(:)];
-W = diag(weights);
 beta = robustfit(valid_channel_dist_12, R_valid); 
-R_WLR = beta(1) + beta(2) * valid_channel_dist_12;
+R_LR = beta(1) + beta(2) * valid_channel_dist_12;
 
 hold on 
-plot(d12, R_WLR, "Color", "r");
-legend("R estimate", "Wheighted linear regression");
+plot(valid_channel_dist_12, R_LR, 'Color', "r");
+legend("R estimate", "Linear regression");
 hold off
 
 figure(correlogram);
-dt= -0.2:0.002:0.2;
-distance_from_CPA = 800;
+dt= -0.2:data.sampling_interval_s:0.2;
 
 R_med = median(R, 'omitnan');
 
-d1 = sqrt( ( sqrt(R_med^2+distance_from_CPA^2) - dt*c ).^2 - R_med^2 );
-dsh = distance_from_CPA-d1;
+d1 = sqrt( ( sqrt(R_med^2 + distance_from_CPA^2) - dt*c ).^2 - R_med^2 );
+dx = distance_from_CPA - d1;
 hold on
-plot(dt,dsh,'k--','LineWidth', 1)
+plot(dt, dx, 'k--', 'LineWidth', 1)
 hold off
 
 fprintf('Median value of R: %d [m]\n', R_med);
