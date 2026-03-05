@@ -34,22 +34,27 @@ function [peak_lag, fig] = corss_correlation(data, sampling_frequency, distance_
     t_start_idx = max(1, round(time_interval(1) * sampling_frequency));
     t_end_idx = min(size(data, 2), round(time_interval(2) * sampling_frequency));
     data_corr = data(:, t_start_idx:t_end_idx);
+	%
     
     % get channel1
     [~, channel1_idx] = min(abs(distance_m - channel1_position_m)); % index of the closest channel to channel1_position_m
     actual_channel1_distance = distance_m(channel1_idx); % distance of the closest channel to channel1_position_m
     channel1_trace = data_corr(channel1_idx, :);
+	%
 
 	% get channel2
     [~, channel2_idx] = min(abs(distance_m - channel2_position_m)); % index of the closest channel to channel2_position_m
     actual_channel2_distance = distance_m(channel2_idx); % distance of the closest channel to channel2_position_m
     channel2_trace = data_corr(channel2_idx, :);
+	%
 
+	% upsampling of channel1 and channel2 signals
 	if ~isempty(params.resample_factor)
 		sampling_frequency = round(params.resample_factor*sampling_frequency);
 		channel1_trace = resample(channel1_trace, params.resample_factor, 1);
 		channel2_trace = resample(channel2_trace, params.resample_factor, 1);
 	end
+	%
 
 	% number of samples
 	max_lag_samples = round(max_lag * sampling_frequency);
@@ -58,12 +63,14 @@ function [peak_lag, fig] = corss_correlation(data, sampling_frequency, distance_
 	[corss_correlation, lags_xcorr] = xcorr(channel1_trace, channel2_trace, max_lag_samples);
         time_lags_xcorr = lags_xcorr / sampling_frequency;
 		distance_channels_12 = abs(actual_channel1_distance - actual_channel2_distance);
+	%
 
 	% plot cross correlation
 	fig = figure(Name="Corss-Correlation", NumberTitle="off");
 	plot(time_lags_xcorr, corss_correlation);
 	title("Cross-correlation between two channels", "FontSize", 16);
 	xlabel("Time lag (s)");
+	%
 
 	% plot correlation peak line
 	[max_peak , max_peak_idx] = max(corss_correlation);
@@ -73,6 +80,7 @@ function [peak_lag, fig] = corss_correlation(data, sampling_frequency, distance_
 	peak_lag_txt = sprintf(" peak time lag = %.5f s", peak_lag);
 	text(peak_lag, max_peak, peak_lag_txt, 'Color', 'r', 'FontSize', 12, 'HorizontalAlignment','left');
 	hold off
+	%
 
 	% apply optional subtitle
 	if ~isempty(params.subtitle)

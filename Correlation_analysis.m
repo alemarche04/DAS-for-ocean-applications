@@ -95,7 +95,6 @@ correlogram = get_correlogram( ...
 	xcorr.time_lag, ...
 	xcorr.time_interval, ...
 	'subtitle', data.time_and_date, ...
-	'use_hilbert',false, ...
 	'resample_factor', 10);
 
 % plot correlation statistics and export data to csv file
@@ -108,28 +107,105 @@ correlogram = get_correlogram( ...
 	xcorr.offset_m, ...
 	xcorr.time_lag, ...
 	xcorr.time_interval, ...
-	"cross_corr_stats_medFilt.csv", ...
+	"cross_corr_stats.csv", ...
 	'subtitle', data.time_and_date, ...
 	'offset_step', 2, ...
-	'use_hilbert', false, ...
 	'resample_factor', 10);
 
-
-% estimate distance between CPA and source
-distance_from_CPA = (xcorr.cpa_m - xcorr.channel_position_m); % distance btw reference channel and CPA
-xcorr_offset_m = correlation_statistics(:, 1); % cross-correlation offset [m]
+%% estimate angle of arrival (AoA)
+channel_dist_12 = correlation_statistics(:, 1); % cross-correlation offset [m]
 time_peak = correlation_statistics(:, 3); % peak time of cross correlations
-
 c = data.propagation_speed;
 
-R = sqrt(((distance_from_CPA^2 + (time_peak.^2).*c^2 - (distance_from_CPA - xcorr_offset_m).^2) ...
-	./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
-R = abs(R);
+% ratio between the distance traveled by the acoustic wave and the distance between the two channels
+arg = (time_peak .* c) ./ channel_dist_12;
 
-figure;
-plot(xcorr_offset_m, R, '-*');
+% clipping to avoid numeric instability (asin/acos take as argument [-1, 1])
+arg(arg > 1) = 1;
+arg(arg < -1) = -1;
 
-% figure(correlogram);
+% angle (radiants)
+theta_rad = acos(arg);
+
+% angle (degrees)
+theta_deg = rad2deg(theta_rad);
+
+% plot angle of arrival as a function of the distance between the two channels
+figure('Name', "Angle of Arrival", 'NumberTitle','off');
+plot(channel_dist_12, theta_deg, '-*');
+
+% Weighted least squares (weighted linear regression)
+valid_idx = isfinite(theta_deg) & (channel_dist_12 ~= 0); % remove problematic points
+valid_channel_dist_12 = channel_dist_12(valid_idx);
+theta_deg_valid = theta_deg(valid_idx);
+
+weights = abs(valid_channel_dist_12); 
+weights = weights / max(weights); % normalization
+
+% weighted linear regression parameters
+X = [ones(length(valid_channel_dist_12), 1), valid_channel_dist_12(:)];
+W = diag(weights);
+beta = robustfit(valid_channel_dist_12, theta_deg_valid); 
+theta_WLR = beta(1) + beta(2) * valid_channel_dist_12;
+
+% plot weighted linear regression result
+hold on;
+plot(valid_channel_dist_12, theta_WLR);
+legend("Angle of Arrival", "Weighted Least Squares");
+title("Angle of Arrival (estimate)");
+xlabel("Distance between channels");
+ylabel("Angle (degrees)");
+hold off
+
+%% estimate distance between CPA and source
+
+distance_from_CPA = (xcorr.cpa_m - xcorr.channel_position_m); % distance btw reference channel and CPA
+channel_dist_12 = correlation_statistics(:, 1); % cross-correlation offset [m]
+time_peak = correlation_statistics(:, 3); % peak time of cross correlations
+c = data.propagation_speed;
+
+% R = sqrt(((distance_from_CPA^2 + (time_peak.^2).*c^2 - (distance_from_CPA - xcorr_offset_m).^2) ...
+% 	./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
+% R = abs(R);
+
+d12 = channel_dist_12;
+pc = time_peak.*c;
+d1 = distance_from_CPA;
+
+figure('Name', "TDOA * c", 'NumberTitle','off');
+plot(d12, pc, '-*');
+legend("TDOA * c");
+
+A = (pc.^2 + 2*d1.*d12 - d12.^2) ./ (2 .* pc);
+R = sqrt((A - d1) .* (A + d1));
+R(imag(R) ~= 0) = NaN;
+
+figure('Name', "Source distance", 'NumberTitle','off');
+plot(d12, R, '-*');
+title("Source distance (estimate)");
+xlabel("Distance between channels");
+ylabel("Distance (m)");
+
+% weighted least squares
+valid_idx = ~isnan(R) & (d12 ~= 0); % remove problematic points
+valid_channel_dist_12 = d12(valid_idx);
+R_valid = R(valid_idx);
+
+weights = abs(valid_channel_dist_12); 
+weights = weights / max(weights); % normalization
+
+% weighted linear regression parameters
+X = [ones(length(valid_channel_dist_12), 1), valid_channel_dist_12(:)];
+W = diag(weights);
+beta = robustfit(valid_channel_dist_12, R_valid); 
+R_WLR = beta(1) + beta(2) * valid_channel_dist_12;
+
+hold on 
+plot(d12, R_WLR, "Color", "r");
+legend("R estimate", "Wheighted linear regression");
+hold off
+
+figure(correlogram);
 dt= -0.2:0.002:0.2;
 distance_from_CPA = 800;
 
@@ -137,13 +213,13 @@ R_med = median(R, 'omitnan');
 
 d1 = sqrt( ( sqrt(R_med^2+distance_from_CPA^2) - dt*c ).^2 - R_med^2 );
 dsh = distance_from_CPA-d1;
-% hold on
-% plot(dt,dsh,'k--','LineWidth', 1)
-% ylabel('Distance from reference, dx [m]')
-% hold off
+hold on
+plot(dt,dsh,'k--','LineWidth', 1)
+hold off
 
-fprintf('Estimate value of R: %d [m]\n', R_med);
+fprintf('Median value of R: %d [m]\n', R_med);
 
+%%
 % clear variables
 clear xcorr correlogram correlation_statistics xcorr_plot
 % -----------------------------------------------------------------------%
@@ -158,12 +234,21 @@ channel2_position = 42000 + channel_dist_12;
 
 channel_dist_1CPA = abs(CPA-channel1_position);
 
-c = 1475; % [m/s]
+c = data.propagation_speed; % [m/s]
 max_lag = 300 / c;
 time_interval = [47 50];
 
-[peak_lag, cross_corr] = corss_correlation(strain_filtered, data.sampling_frequency_Hz, data.distance_m, data.channel_distance_m, ...
-    channel1_position, channel2_position, max_lag, time_interval, 'subtitle', data.time_and_date);
+[peak_lag, cross_corr] = corss_correlation( ...
+	strain_filtered, ...
+	data.sampling_frequency_Hz, ...
+	data.distance_m, ...
+	data.channel_distance_m, ...
+    channel1_position, ...
+	channel2_position, ...
+	max_lag, ...
+	time_interval, ...
+	'subtitle', data.time_and_date, ...
+	'resample_factor', 1000);
 
 R = sqrt(((channel_dist_1CPA^2 + (peak_lag.^2).*c^2 - (channel_dist_1CPA - channel_dist_12).^2) ...
 		./ (2.*peak_lag.*c)).^2 - channel_dist_1CPA^2);

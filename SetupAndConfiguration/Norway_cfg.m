@@ -74,6 +74,8 @@ function data = load_data(dataset_name)
 	data.nb_of_samples				= h5read(loaded_filename, '/metadata/ns');
 	data.sampling_interval_s		= 1/data.sampling_frequency_Hz;
 	data.dimensions					= [data.nb_of_channels data.nb_of_samples];
+
+	data.propagation_speed			= 1475; % [m/s]
 	
 	% Transpose from Row-Major (Python) to Column-Major (MATLAB)
 	data.strain	= data.strain'; 
@@ -137,7 +139,7 @@ function wf = waveform()
 %   Output:
 %       wf - Parameters for time-series plotting and audio export.
 
-    wf.channel_position_m	= (286 -1) * 1.02; %[m]
+    wf.channel_position_m	= (178 -1) * 1.02; %[m]
     wf.cpa_m				= 0; %[m]
     wf.time_lim				= []; %[s]
     wf.strain_lim			= []; %[strain unit]
@@ -152,7 +154,7 @@ function sg = spectrogram()
 %   Output:
 %       sg - STFT parameters (Window type, NFFT, Overlap) and plot parameters.
 
-    sg.channel_position_m	= (286 -1) * 1.02; %[m]
+    sg.channel_position_m	= (178 -1) * 1.02; %[m]
     sg.nfft					= 4096;
     sg.window_len			= 512;
     sg.window				= hann(sg.window_len, 'periodic');

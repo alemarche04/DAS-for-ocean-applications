@@ -20,6 +20,7 @@ function fig = get_correlogram(data, sampling_frequency, distance, ...
 %   Optional Parameters (Name-Value Pairs):
 %       'subtitle'          - Plot subtitle string (typically time and date)
 %		'use_hilbert'       - Logical (true/false) for Hilbert tranform (envelope)
+%       'resample_factor'   - Upsampling factor.
 %
 %   Output Arguments:
 %       fig                 - Handle to the generated figure.

@@ -22,9 +22,10 @@ function [correlation_statistics, fig] = get_correlation_statistics( ...
 %       filename_xcorr_table - Filename (string) for the output CSV table.
 %
 %   Optional Parameters (Name-Value Pairs):
-%       'subtitle'     - Plot subtitle string (typically time and date)
-%       'offset_step'  - Spatial sample rate
-%		'use_hilbert'  - Logical (true/false) for Hilbert tranform (envelope)
+%       'subtitle'           - Plot subtitle string (typically time and date).
+%       'offset_step'        - Spatial sample rate.
+%		'use_hilbert'        - Logical (true/false) for Hilbert tranform (envelope).
+%		'resample_factor'    - Upsampling factor.
 %
 %   Output Arguments:
 %       correlation_statistics - Matrix [Offset, Peak Value, Time Lag].
