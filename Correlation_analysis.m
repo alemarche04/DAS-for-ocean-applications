@@ -167,14 +167,14 @@ c = data.propagation_speed;
 
 d12 = channel_dist_12;
 pc = time_peak.*c;
-d1 = distance_from_CPA;
+d0 = distance_from_CPA;
 
 figure('Name', "TDOA * c", 'NumberTitle','off');
 plot(d12, pc, '-*');
 legend("TDOA * c");
 
-A = (pc.^2 + 2*d1.*d12 - d12.^2) ./ (2 .* pc);
-R = sqrt((A - d1) .* (A + d1));
+A = (pc.^2 + 2.*d0.*d12 - d12.^2) ./ (2 .* pc);
+R = sqrt(A.^2 - d0^2);
 R(imag(R) ~= 0) = NaN;
 
 figure('Name', "Source distance", 'NumberTitle','off');
@@ -197,7 +197,7 @@ legend("R estimate", "Linear regression");
 hold off
 
 figure(correlogram);
-dt= -0.2:data.sampling_interval_s:0.2;
+dt = -0.2:data.sampling_interval_s:0.2;
 
 R_med = median(R, 'omitnan');
 
