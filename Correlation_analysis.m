@@ -161,10 +161,6 @@ channel_dist_12 = correlation_statistics(:, 1); % cross-correlation offset [m]
 time_peak = correlation_statistics(:, 3); % peak time of cross correlations
 c = data.propagation_speed;
 
-% R = sqrt(((distance_from_CPA^2 + (time_peak.^2).*c^2 - (distance_from_CPA - xcorr_offset_m).^2) ...
-% 	./ (2.*time_peak.*c)).^2 - distance_from_CPA^2);
-% R = abs(R);
-
 d12 = channel_dist_12;
 pc = time_peak.*c;
 d0 = distance_from_CPA;
@@ -173,8 +169,11 @@ figure('Name', "TDOA * c", 'NumberTitle','off');
 plot(d12, pc, '-*');
 legend("TDOA * c");
 
-A = (pc.^2 + 2.*d0.*d12 - d12.^2) ./ (2 .* pc);
-R = sqrt(A.^2 - d0^2);
+% A = (pc.^2 + 2.*d0.*d12 - d12.^2) ./ (2 .* pc);
+% R = sqrt(A.^2 - d0^2);
+
+R = sqrt(((d0^2 + (time_peak.^2).*c^2 - (d0 - d12).^2) ...
+	./ (2.*time_peak.*c)).^2 - d0^2);
 R(imag(R) ~= 0) = NaN;
 
 figure('Name', "Source distance", 'NumberTitle','off');
@@ -202,7 +201,11 @@ dt = -0.2:data.sampling_interval_s:0.2;
 R_med = median(R, 'omitnan');
 
 d1 = sqrt( ( sqrt(R_med^2 + distance_from_CPA^2) - dt*c ).^2 - R_med^2 );
-dx = distance_from_CPA - d1;
+if distance_from_CPA < 0
+	dx = distance_from_CPA + d1;
+else
+	dx = distance_from_CPA - d1;
+end
 hold on
 plot(dt, dx, 'k--', 'LineWidth', 1)
 hold off

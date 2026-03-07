@@ -93,18 +93,31 @@ time_space_plot = get_time_space_plot( ...
 	'strain_lim', tx.strain_lim, ...
 	'norm', true);
 
+hold on;
+
+% position of interest markers
+yline(tx.cpa_m, '--', 'CPA','LineWidth', 1, 'Color', '#FFD1DF');
+yline(tx.channel_position_m, '--', 'far from CPA', 'LineWidth', 1, 'Color', '#D1FFBD');
+
 % draw propagation speed lines on time-space plot
-speedline = false;
+speedline = true;
 if speedline
-	hold on;
 	draw_prop_speed_lines( ...
 		data.time, ...
 		data.propagation_speed, ...
-		tx.p1, ...
-		tx.cpa_m, ...
-		tx.channel_position_m);
-	hold off;
+		tx.p1);
 end
+
+draw_lines = true;
+if draw_lines
+	p1 = [122.45 43184.7];
+	p2 = [129.24 49504.5];
+	p3 = [122.5 42208.3];
+	p4 = [128.62 36178.5];
+	draw_lines_tx_plot(p1, p2, p3, p4);
+end
+
+hold off
 
 % export plot as png
 exportgraphics( ...
@@ -112,7 +125,7 @@ exportgraphics( ...
 	fullfile(dataset_name, ['time_space_plot_' dataset_name  '.png']));
 
 % clear variables
-clear tx speedline time_space_plot
+clear tx speedline time_space_plot draw_lines p1 p2 p3 p4
 % -----------------------------------------------------------------------%
 
 %% STRAIN WAVEFORM (SINGLE CHANNEL)

@@ -120,8 +120,8 @@ function tx = tx()
     tx.distance_lim             = []; %[m]
     tx.strain_lim               = [-30 -5]; % [dB]
 	tx.p1						= [48 44000]; % [time space]
-    tx.channel_position_m       = 42000; %[m]
-    tx.cpa_m                    = 42800; %[m]
+    tx.channel_position_m       = 43500; %[m]
+    tx.cpa_m                    = 42730; %[m]
 end
 
 % -----------------------------------------------------------------------%
@@ -185,7 +185,7 @@ function xcorr = correlation()
     xcorr.channel_position_m	= 42000; %[m]
     xcorr.offset_m				= 300; %[m]
     xcorr.time_lag				= 0.2; %[s]
-    xcorr.time_interval			= [55 58]; %[s]
-    xcorr.cpa_m					= 42800; %[m]
+    xcorr.time_interval			= [123 126]; %[s]
+    xcorr.cpa_m					= 42730; %[m]
     xcorr.filename_table		= fullfile('DAS4Whale/', 'cross_corr_stats_DAS4Whale.csv');
 end
