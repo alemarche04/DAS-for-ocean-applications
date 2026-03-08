@@ -142,11 +142,12 @@ c = data.propagation_speed;
 %
 
 % prepare parameters for iterative search of CPA
-LR_dist = zeros(1, size(CPA_interval, 2));
-negative_idx = channel_dist_12 < 0;
-negative_offset = channel_dist_12(negative_idx);
-positive_idx = channel_dist_12 > 0;
-positive_offset = channel_dist_12(positive_idx);
+% LR_dist = zeros(1, size(CPA_interval, 2));
+LR_misalignment = zeros(1, size(CPA_interval, 2));
+% negative_idx = channel_dist_12 < 0;
+% negative_offset = channel_dist_12(negative_idx);
+% positive_idx = channel_dist_12 > 0;
+% positive_offset = channel_dist_12(positive_idx);
 %
 
 for i = 1:size(CPA_interval, 2)
@@ -161,28 +162,39 @@ for i = 1:size(CPA_interval, 2)
 	R(imag(R) ~= 0) = NaN; % remove imaginary parts
 	%
 
-	% compute linear regression for negative offset
-	R_neg_offset = R(negative_idx);
-	beta = robustfit(negative_offset, R_neg_offset); 
-	R_LR_neg = beta(1) + beta(2) * negative_offset;
-	R_LR_neg_med = median(R_LR_neg, 'omitnan');
+	% linear regression
+	valid_idx = ~isnan(R) & (d12 ~= 0); % remove problematic points
+	valid_channel_dist_12 = d12(valid_idx); % get valid elements
+	R_valid = R(valid_idx); % get valid elements
+	
+	beta = robustfit(valid_channel_dist_12, R_valid); 
+	R_LR = beta(1) + beta(2) * valid_channel_dist_12;
 	%
 
-	% compute linear regression for positive offset
-	R_pos_offset = R(positive_idx);
-	beta = robustfit(positive_offset, R_pos_offset); 
-	R_LR_pos = beta(1) + beta(2) * positive_offset;
-	R_LR_pos_med = median(R_LR_pos, 'omitnan');
-	%
+	% % compute linear regression for negative offset
+	% R_neg_offset = R(negative_idx);
+	% beta = robustfit(negative_offset, R_neg_offset); 
+	% R_LR_neg = beta(1) + beta(2) * negative_offset;
+	% R_LR_neg_med = median(R_LR_neg, 'omitnan');
+	% %
+	% 
+	% % compute linear regression for positive offset
+	% R_pos_offset = R(positive_idx);
+	% beta = robustfit(positive_offset, R_pos_offset); 
+	% R_LR_pos = beta(1) + beta(2) * positive_offset;
+	% R_LR_pos_med = median(R_LR_pos, 'omitnan');
+	% %
 
-	% calculate how misaligned the two LR (negative and positive) are
-	LR_dist(i) = abs(R_LR_neg(1) - R_LR_pos(1)) +  abs(R_LR_neg(end) - R_LR_pos(end)) + abs(R_LR_neg_med - R_LR_pos_med);
+	% % calculate how misaligned the two LR (negative and positive) are
+	% LR_dist(i) = abs(R_LR_neg(1) - R_LR_pos(1)) +  abs(R_LR_neg(end) - R_LR_pos(end)) + abs(R_LR_neg_med - R_LR_pos_med);
+
+	LR_misalignment(i) = abs(R_LR(1) - R_LR(end));
 
 end
 
 % find the CPA that minimizes the misalignment
-[min_LR_dist, min_LR_dist_idx] = min(LR_dist);
-best_CPA = CPA_interval(min_LR_dist_idx);
+[min_LR_mis, min_LR_mis_idx] = min(LR_misalignment);
+best_CPA = CPA_interval(min_LR_mis_idx);
 
 fprintf('Best candidate for CPA: %.2f [m]\n', best_CPA);
 %
@@ -253,7 +265,7 @@ end
 
 hold on
 plot(dt, dx, 'k--', 'LineWidth', 1)
-plot(dt, dx_LR, 'g--', 'LineWidth', 1)
+% plot(dt, dx_LR, 'g--', 'LineWidth', 1)
 hold off
 
 fprintf('Median value of R: %.2f [m]\n', R_med);
