@@ -212,11 +212,6 @@ hold off
 
 fprintf('Median value of R: %d [m]\n', R_med);
 
-%%
-% clear variables
-clear xcorr correlogram correlation_statistics xcorr_plot
-% -----------------------------------------------------------------------%
-
 %% Cross-correlation between two channels
 % Define the channels for cross-correlation
 CPA = 42800;
