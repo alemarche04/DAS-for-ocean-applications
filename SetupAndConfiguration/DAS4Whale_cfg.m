@@ -182,10 +182,10 @@ function xcorr = correlation()
 %   Output:
 %       xcorr - Channel offsets, time lags, and statistics export settings.
 
-    xcorr.channel_position_m	= 43500; %[m]
+    xcorr.channel_position_m	= 42000; %[m]
     xcorr.offset_m				= 300; %[m]
     xcorr.time_lag				= 0.2; %[s]
-    xcorr.time_interval			= [123 126]; %[s]
-    xcorr.cpa_m					= 42625; %[m]
+    xcorr.time_interval			= [62 65]; %[s]
+    xcorr.cpa_m					= 42800; %[m]
     xcorr.filename_table		= fullfile('DAS4Whale/', 'cross_corr_stats_DAS4Whale.csv');
 end
