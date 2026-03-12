@@ -102,7 +102,7 @@ yline(tx.cpa_m, '--', 'CPA','LineWidth', 1, 'Color', '#FFD1DF');
 yline(tx.channel_position_m, '--', 'far from CPA', 'LineWidth', 1, 'Color', '#D1FFBD');
 
 % draw propagation speed lines on time-space plot
-speedline = true;
+speedline = false;
 if speedline
 	draw_prop_speed_lines( ...
 		data.time, ...
@@ -110,7 +110,7 @@ if speedline
 		tx.p1);
 end
 
-draw_lines = true;
+draw_lines = false;
 if draw_lines
 	p1 = [122.45 43184.7];
 	p2 = [129.24 49504.5];

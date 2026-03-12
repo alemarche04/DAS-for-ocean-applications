@@ -15,6 +15,7 @@ addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration'
 % Dataset filenames:
 %		DAS4Whale
 %			- "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat"
+%			- "20200716_154302_ch21001_to_ch22000_whale_raw_L720s.mat"
 %		DAS4Tracking
 %			- "20220822_114507_to_114837_ch9803_to_ch24509_sample_Freq_78_Hz.mat"
 %			- "20220822_122707_to_123037_ch9803_to_ch24509_sample_Freq_78_Hz.mat"
