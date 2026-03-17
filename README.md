@@ -471,6 +471,7 @@ All functions expect DAS data in the following format:
 - Signal Processing Toolbox
 - Image Processing Toolbox
 - Mapping Toolbox
+- Statistics and Machine Learning Toolbox
 
 ---
 

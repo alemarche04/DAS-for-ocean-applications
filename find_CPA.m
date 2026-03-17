@@ -190,7 +190,7 @@ R(imag(R) ~= 0) = NaN; % remove imaginary parts
 %
 
 % plot R
-figure('Name', "Source distance", 'NumberTitle','off');
+figure('Name', "SourceDistance", 'NumberTitle','off');
 plot(d12, R, '-*');
 title("Source distance (estimate)");
 xlabel("Distance between channels");

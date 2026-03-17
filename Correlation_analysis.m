@@ -15,7 +15,6 @@ addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration'
 % Dataset filenames:
 %		DAS4Whale
 %			- "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat"
-%			- "20200716_154302_ch21001_to_ch22000_whale_raw_L720s.mat"
 %		DAS4Tracking
 %			- "20220822_114507_to_114837_ch9803_to_ch24509_sample_Freq_78_Hz.mat"
 %			- "20220822_122707_to_123037_ch9803_to_ch24509_sample_Freq_78_Hz.mat"
@@ -177,7 +176,7 @@ R = sqrt(((d0^2 + (time_peak.^2).*c^2 - (d0 - d12).^2) ...
 	./ (2.*time_peak.*c)).^2 - d0^2);
 R(imag(R) ~= 0) = NaN;
 
-figure('Name', "Source distance", 'NumberTitle','off');
+figure('Name', "SourceDistance", 'NumberTitle','off');
 plot(d12, R, '-*');
 title("Source distance (estimate)");
 xlabel("Distance between channels");
