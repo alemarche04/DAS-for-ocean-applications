@@ -76,8 +76,27 @@ strain_filtered = fk_filter_filt( ...
 	strain_filtered, ...
 	fk_filter);
 
+plot_fk_spectrum = true;
+if plot_fk_spectrum
+    fk_spectrum( ...
+        data.strain, ...
+        data.channel_distance_m, ...
+        data.sampling_interval_s, ...
+        'subtitle', [data.time_and_date, "no filters"], ...
+        'dB_lim', [-120 0])
+end
+
+if plot_fk_spectrum
+    fk_spectrum( ...
+        strain_filtered, ...
+        data.channel_distance_m, ...
+        data.sampling_interval_s, ...
+        'subtitle', [data.time_and_date, "bandpass + fk filter"], ...
+        'dB_lim', [-120 0])
+end
+
 % clear variables
-clear fkFilt fk_filter
+clear fkFilt fk_filter plot_fk_spectrum
 % -----------------------------------------------------------------------%
 
 %% TIME-SPACE PLOT
@@ -102,21 +121,12 @@ yline(tx.cpa_m, '--', 'CPA','LineWidth', 1, 'Color', '#FFD1DF');
 yline(tx.channel_position_m, '--', 'far from CPA', 'LineWidth', 1, 'Color', '#D1FFBD');
 
 % draw propagation speed lines on time-space plot
-speedline = false;
+speedline = true;
 if speedline
 	draw_prop_speed_lines( ...
 		data.time, ...
 		data.propagation_speed, ...
 		tx.p1);
-end
-
-draw_lines = false;
-if draw_lines
-	p1 = [122.45 43184.7];
-	p2 = [129.24 49504.5];
-	p3 = [122.5 42208.3];
-	p4 = [128.62 36178.5];
-	draw_lines_tx_plot(p1, p2, p3, p4);
 end
 
 hold off

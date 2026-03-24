@@ -22,21 +22,27 @@ function fk_spectrum(trace, channel_spacing, sampling_interval, varargin)
 	[Nx, Nt] = size(trace);
 
 	% Frequency axis
+    printStep('Calculating frequency axis');
 	if mod(Nt, 2) == 0
         f = (-Nt/2 : Nt/2-1) * (1 / (Nt*sampling_interval)); %[Hz]
     else
         f = (-(Nt-1)/2 : (Nt-1)/2) * (1 / (Nt*sampling_interval)); %[Hz]
-	end
+    end
+    printTime();
 
 	% Wavenumber axis
+    printStep('Calculating wavenumber axis');
 	if mod(Nx, 2) == 0
         k = (-Nx/2 : Nx/2-1) * (1 / (Nx*channel_spacing)); % [1/m]
     else
         k = (-(Nx-1)/2 : (Nx-1)/2) * (1 / (Nx*channel_spacing)); % [1/m]
-	end
+    end
+    printTime();
 	
 	% 2D fft
+    printStep('Calculating 2D FFT');
 	FK = fftshift(fft2(trace));
+    printTime();
 
 	% Plot
 	figure;
@@ -85,4 +91,25 @@ function results = parse_inputs(trace, channel_spacing, sampling_interval, varar
     
     parse(p, trace, channel_spacing, sampling_interval, varargin{:});
     results = p.Results;
+end
+
+%% UTILITY FUNCTIONS
+function printStep(msg)
+% PRINTSTEP Formats and displays the current processing step in the command window.
+%
+%   Displays the message followed by a progress line of dots and starts 
+%   a tic timer for benchmarking.
+
+    numDots = 60 - length(msg);
+    fprintf('%s%s', msg, repmat('.', 1, max(numDots, 3)));
+    tic;
+end
+
+function printTime()
+% PRINTTIME Displays the time elapsed since the last printStep call.
+%
+%   Stops the toc timer and prints the duration in seconds with 3-decimal 
+%   point precision.
+
+    fprintf(' Time elapsed: %.3f s\n', toc);
 end

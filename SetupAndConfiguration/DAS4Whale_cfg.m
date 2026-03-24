@@ -120,8 +120,8 @@ function tx = tx()
     tx.distance_lim             = []; %[m]
     tx.strain_lim               = [-30 -5]; % [dB]
 	tx.p1						= [48 44000]; % [time space]
-    tx.channel_position_m       = 43500; %[m]
-    tx.cpa_m                    = 42730; %[m]
+    tx.channel_position_m       = 42000; %[m]
+    tx.cpa_m                    = 42800; %[m]
 end
 
 % -----------------------------------------------------------------------%
