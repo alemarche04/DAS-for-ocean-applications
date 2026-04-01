@@ -76,7 +76,7 @@ strain_filtered = fk_filter_filt( ...
 	strain_filtered, ...
 	fk_filter);
 
-plot_fk_spectrum = true;
+plot_fk_spectrum = false;
 if plot_fk_spectrum
     fk_spectrum( ...
         data.strain, ...
@@ -117,11 +117,11 @@ time_space_plot = get_time_space_plot( ...
 hold on;
 
 % position of interest markers
-yline(tx.cpa_m, '--', 'CPA','LineWidth', 1, 'Color', '#FFD1DF');
-yline(tx.channel_position_m, '--', 'far from CPA', 'LineWidth', 1, 'Color', '#D1FFBD');
+%yline(tx.cpa_m, '--', 'CPA','LineWidth', 1, 'Color', '#FFD1DF');
+%yline(tx.channel_position_m, '--', 'far from CPA', 'LineWidth', 1, 'Color', '#D1FFBD');
 
 % draw propagation speed lines on time-space plot
-speedline = true;
+speedline = false;
 if speedline
 	draw_prop_speed_lines( ...
 		data.time, ...
