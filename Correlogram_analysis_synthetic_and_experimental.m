@@ -2,6 +2,7 @@
 clc
 clear all
 close all
+clearAllMemoizedCaches
 
 %% LOAD DATA FROM DATASET
 % add directories to Matlab search path
@@ -169,7 +170,7 @@ time_axis           = [-1*flip(time_axis(2:end)) time_axis]; % asse temporale si
 % Parametri chirp
 B                   = 30; % larghezza di banda [Hz]
 f0                  = 44; % frequenza centrale [Hz]
-T                   = 1.5; % durata impulso [s]
+T                   = 1.3; % durata impulso [s]
 chirp_t_axis        = 0:sampling_period:T; % asse temporale dell'impulso
 chirp_rate          = B/T; % rate di variazione della frequenza (chirp rate) [Hz/s]
 
@@ -177,6 +178,8 @@ chirp_signal        = sin(2*pi*(f0 - chirp_rate * (chirp_t_axis - T) / 2) .* chi
 % chirp lineare discendente
 % frequenza che parte da f0+B/2 (t=0) e scende fino a f0-B/2 (t=T)
 % viene applicata una finestra triangolare
+
+% chirp_signal_w_noise = awgn(chirp_signal, 3);
 
 chirp_signal_norm   = chirp_signal / sqrt(sum(chirp_signal .^ 2) * sampling_period); % normalizzazione energetica
 % ----------------------------------------------------------------------- %
@@ -189,17 +192,17 @@ auto_corr_samples   = length(auto_correlation);
 
 
 % Parametri ambientali
-bottom_depth            = 295; % profondità fondale [m]
-target_depth            = 25; % profondità target [m]
+bottom_depth            = 260; % profondità fondale [m]
+target_depth            = 20; % profondità target [m]
 target_height           = bottom_depth - target_depth; % altezza del target rispetto al fondale [m]
 
-sediment_first_layer    = 15; % profonditò primo layer di sedimenti [m]
+sediment_first_layer    = 55; % profonditò primo layer di sedimenti [m]
 K_reflection_bottom     = 0.85; % coefficiente di riflessione sullo strato di roccia
 
 c                       = 1480; % velocità di propagazione del suono in acqua [m/s]
 
 % R                       = 405; % distanza del target dal fondale [m]
-R                       = R_med;
+R                       = 420;
 CPA_pos                 = 42800;
 ref_pos                 = 42000;
 distance_ref_CPA        = CPA_pos - ref_pos; % distanza tra canale di riferimento e CPA [m]
@@ -297,6 +300,10 @@ exportgraphics(gcf, ...
 channel_dist_12_syn = offset_ref; % distance btw reference channel and another within the max offset [m]
 time_peak_syn = tk'; % peak time of cross correlations
 
+CPA_pos                 = 42800;
+ref_pos                 = 42000;
+distance_ref_CPA        = CPA_pos - ref_pos;
+
 d12_syn = channel_dist_12_syn';
 pc_syn = time_peak_syn.*c;
 d0_syn = distance_ref_CPA;
@@ -339,12 +346,12 @@ exportgraphics(gcf, ...
 figure(correlogram_synthetic);
 dt_syn = -0.2:sampling_period:0.2;
 
-d1_syn = sqrt( ( sqrt(R_med_syn^2 + distance_from_CPA^2) - dt_syn*c ).^2 - R_med_syn^2 );
+d1_syn = sqrt( ( sqrt(R_med_syn^2 + distance_ref_CPA^2) - dt_syn*c ).^2 - R_med_syn^2 );
 
-if distance_from_CPA < 0
-	dx_syn = distance_from_CPA + d1_syn;
+if distance_ref_CPA < 0
+	dx_syn = distance_ref_CPA + d1_syn;
 else
-	dx_syn = distance_from_CPA - d1_syn;
+	dx_syn = distance_ref_CPA - d1_syn;
 end
 
 hold on
