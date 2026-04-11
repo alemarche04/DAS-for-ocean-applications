@@ -2,6 +2,7 @@
 clc
 clear all
 close all
+clearAllMemoizedCaches
 
 %% LOAD DATA FROM DATASET
 % add directories to Matlab search path
@@ -69,7 +70,8 @@ fkFilt = DAS.fkFilt();
 fk_filter =	fk_filter_design( ...
 	data.dimensions, ...
 	data.channel_distance_m, ...
-	data.sampling_interval_s);
+	data.sampling_interval_s, ...
+    'c_range', fkFilt.c_range);
 
 % apply fk filter
 strain_filtered = fk_filter_filt( ...
@@ -128,6 +130,16 @@ if speedline
 		data.time, ...
 		data.propagation_speed, ...
 		tx.p1);
+end
+
+% draw lines following triangle shape to find CPA
+CPA_lines = true;
+if CPA_lines
+    p1 = [49.23 45353.9];
+    p2 = [47.81 43393];
+    p3 = [47.78 42245.1];
+    p4 = [49.56 39793.9];
+	draw_lines_tx_plot(p1, p2, p3, p4)
 end
 
 hold off
