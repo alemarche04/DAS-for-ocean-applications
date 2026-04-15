@@ -31,7 +31,9 @@ y1_end   = m1*x_range(2) + q1;
 y2_start = m2*x_range(1) + q2;
 y2_end   = m2*x_range(2) + q2;
 
-plot(x_range, [y1_start, y1_end], 'w--', 'LineWidth', 1)
-plot(x_range, [y2_start, y2_end], 'w--', 'LineWidth', 1)
-
+plot(x_range, [y1_start, y1_end], 'w-', 'LineWidth', 0.7)
+plot(x_range, [y2_start, y2_end], 'w-', 'LineWidth', 0.7)
+plot(x_int, y_int, 'r.', 'MarkerSize', 20);
+int_text = ["    point of interception:"; "    x = " + num2str(x_int); "    y = " + num2str(y_int)];
+text(x_int, y_int, int_text, 'Color', 'white', 'FontSize', 14, 'FontWeight', 'bold', 'HorizontalAlignment','left');
 end
