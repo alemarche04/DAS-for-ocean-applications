@@ -44,7 +44,7 @@ function fig = get_time_space_plot(data, time, distance, varargin)
     fig = figure(Name="Time-Space plot", NumberTitle="off");
     imagesc(time, distance, data_dB);
     axis xy;
-    colormap(jet);
+    colormap(parula);
     c = colorbar;
     title('Time-Space plot', 'FontSize', 14, 'FontWeight', 'bold');
     xlabel('Time (s)', 'FontSize', 12);

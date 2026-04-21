@@ -20,7 +20,7 @@ bp = DAS.bandpass();
 % apply filter
 strain_filtered = butterworth_bp_filter( ...
 	data.strain, ...
-	bp.cutoff_freq, ...
+	[30 65], ...
 	bp.order, ...
 	data.sampling_frequency_Hz);
 
@@ -31,12 +31,14 @@ clear bp
 %% FK FILTERING
 % parameters
 fkFilt = DAS.fkFilt();
+c_range = [1400 1450 2000 2050];
 
 % design fk filter
 fk_filter =	fk_filter_design( ...
 	data.dimensions, ...
 	data.channel_distance_m, ...
-	data.sampling_interval_s);
+	data.sampling_interval_s, ...
+    'c_range', c_range);
 
 % apply fk filter
 strain_filtered = fk_filter_filt( ...
@@ -90,7 +92,7 @@ end
 	offset, ...
 	max_time_lag, ...
 	time_interval, ...
-	"Correlogram_Analysis/exp_correlation_statistics.csv", ...
+	"exp_correlation_statistics.csv", ...
 	'subtitle', data.time_and_date, ...
 	'offset_step', 2, ...
 	'resample_factor', 10);
@@ -134,12 +136,12 @@ plot(valid_channel_dist_12, R_LR, 'Color', "r");
 legend("R estimate", "Linear regression");
 hold off
 
-exportgraphics(gcf, ...
-    ['Correlogram_Analysis/exp_estimateR_' ...
-    num2str(time_interval(1)) '_' ...
-    num2str(time_interval(2)) '_' ...
-    'ref_' num2str(channel_position) ...
-    '.png']);
+% exportgraphics(gcf, ...
+%     ['Correlogram_Analysis/exp_estimateR_' ...
+%     num2str(time_interval(1)) '_' ...
+%     num2str(time_interval(2)) '_' ...
+%     'ref_' num2str(channel_position) ...
+%     '.png']);
 
 figure(correlogram);
 dt = -0.2:data.sampling_interval_s:0.2;
@@ -193,10 +195,10 @@ auto_corr_samples   = length(auto_correlation);
 
 % Parametri ambientali
 bottom_depth            = 260; % profondità fondale [m]
-target_depth            = 20; % profondità target [m]
+target_depth            = 21; % profondità target [m]
 target_height           = bottom_depth - target_depth; % altezza del target rispetto al fondale [m]
 
-sediment_first_layer    = 55; % profonditò primo layer di sedimenti [m]
+sediment_first_layer    = 65; % profonditò primo layer di sedimenti [m]
 K_reflection_bottom     = 0.85; % coefficiente di riflessione sullo strato di roccia
 
 c                       = 1480; % velocità di propagazione del suono in acqua [m/s]
@@ -400,3 +402,27 @@ function cmap = redblue(m)
     
     cmap = cmap(1:m, :);
 end
+
+%%
+cb = colorbar; % Create the colorbar and get its handle
+cb.Label.String = 'Correlation intensity'; % Label the colorbar
+cb.Label.FontSize = 30; % Adjust font size
+
+h = ylabel('Offset from reference channel [m]');
+h.FontSize = 30;
+
+g = xlabel('Time lag [s]');
+g.FontSize = 30;
+
+ax = gca;
+ax.FontSize = 26;
+
+%%
+h = xlabel('Offset from reference channel [m]');
+h.FontSize = 40;
+
+g = ylabel('R [m]');
+g.FontSize = 40;
+
+ax = gca;
+ax.FontSize = 32;

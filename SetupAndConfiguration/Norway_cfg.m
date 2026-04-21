@@ -188,11 +188,11 @@ function xcorr = correlation()
 %   Output:
 %       xcorr - Channel offsets, time lags, and statistics export settings.
 
-    xcorr.channel_position_m	= (178 -1) * 1.02; %[m]
-    xcorr.offset_m				= 9; %[m]
-    xcorr.time_lag				= 0.007; %[s]
-    xcorr.time_interval			= [3.8 4]; %[s]
-    xcorr.cpa_m					= 207; %[m]
+    xcorr.channel_position_m	= (180 -1) * 1.02; %[m]
+    xcorr.offset_m				= 3; %[m]
+    xcorr.time_lag				= 0.005; %[s]
+    xcorr.time_interval			= [3.6 4.2]; %[s]
+    xcorr.cpa_m					= (207 -1) * 1.02; %[m]
     xcorr.filename_table		= fullfile('Norway/', 'cross_corr_stats_Norway.csv');
 end
 % -----------------------------------------------------------------------%

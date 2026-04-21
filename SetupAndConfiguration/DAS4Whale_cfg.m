@@ -60,6 +60,7 @@ function data = load_data(dataset_name)
     data.gauge_length_m				= dataset.info_GL_m; %[m]
     data.channel_distance_m			= data.distance_m(2) - data.distance_m(1); %[m]
 	data.propagation_speed			= 1480; % [m/s]
+    data.cable_depth                = dataset.x1_recwdepthz_m;
 
 	filename						= char(dataset_name);
 	day								= string(filename(7:8));
@@ -81,7 +82,7 @@ function bp = bandpass()
 %   Output:
 %       bp - Struct containing cutoff frequencies and filter order.
 
-    bp.cutoff_freq   = [30 65]; % [Hz]
+    bp.cutoff_freq   = [5 75]; % [Hz]
     bp.order         = 5;
 end
 % -----------------------------------------------------------------------%

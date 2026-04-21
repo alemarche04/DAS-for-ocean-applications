@@ -16,6 +16,8 @@ addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration'
 % Dataset filenames:
 %		DAS4Whale
 %			- "20200627_052441_ch10001_to_ch15000_whale_raw_L160s.mat"
+%			- "20200716_154302_ch21001_to_ch22000_whale_raw_L720s.mat"
+%			- "20200716_154302_ch22001_to_ch23000_whale_raw_L720s.mat"
 %		DAS4Tracking
 %			- "20220822_114507_to_114837_ch9803_to_ch24509_sample_Freq_78_Hz.mat"
 %			- "20220822_122707_to_123037_ch9803_to_ch24509_sample_Freq_78_Hz.mat"
@@ -26,6 +28,7 @@ addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration'
 %			- "122403.hdf5"
 %		OOI_Wilcock
 %			- "North-C2-HF-P1kHz-GL30m-Sp2m-FS500Hz_2021-11-03T015731Z.h5"
+%			- "North-C1-LR-P1kHz-GL50m-Sp2m-FS200Hz_2021-11-04T020002Z.h5"
 
 dataset_name	= 'DAS4Whale';
 DAS				= feval(str2func(dataset_name + "_cfg"));
@@ -65,6 +68,8 @@ clear medFilt
 %% FK FILTERING
 % parameters
 fkFilt = DAS.fkFilt();
+
+% fkFilt_c_range = [1400 1450 2000 2050];
 
 % design fk filter
 fk_filter =	fk_filter_design( ...
@@ -106,16 +111,31 @@ clear fkFilt fk_filter plot_fk_spectrum
 % parameters
 tx = DAS.tx_plot();
 
+% tx_time_lim = [];
+% tx_distance_lim = [15700 58900];
+% tx_strain_lim = [-130 -100];
+
 % time-space plot
 time_space_plot = get_time_space_plot( ...
 	strain_filtered, ...
 	data.time, ...
 	data.distance_m, ...
-	'subtitle', data.time_and_date, ...
+    'subtitle', data.time_and_date, ...
     'time_lim', tx.time_lim, ...
-	'distance_lim', tx.distance_lim, ...
-	'strain_lim', tx.strain_lim, ...
+    'distance_lim', tx.distance_lim, ...
+    'strain_lim', tx.strain_lim, ...
 	'norm', true);
+
+% % time-space plot
+% time_space_plot = get_time_space_plot( ...
+% 	strain_filtered, ...
+% 	data.time, ...
+% 	data.distance_m, ...
+% 	'subtitle', data.time_and_date, ...
+%   'time_lim', tx_time_lim, ...
+% 	'distance_lim', tx_distance_lim, ...
+% 	'strain_lim', tx_strain_lim, ...
+% 	'norm', true);
 
 hold on;
 
@@ -135,10 +155,10 @@ end
 % draw lines following triangle shape to find CPA
 CPA_lines = true;
 if CPA_lines
-    p1 = [49.23 45353.9];
-    p2 = [47.81 43393];
-    p3 = [47.78 42245.1];
-    p4 = [49.56 39793.9];
+    p1 = [122 43331.7];
+    p2 = [128.08 49463.6];
+    p3 = [122.114 41918.2];
+    p4 = [127.373 36599.3];
 	draw_lines_tx_plot(p1, p2, p3, p4)
 end
 
@@ -160,6 +180,9 @@ wf = DAS.waveform();
 % to use strain with matched filtering (Trondheim dataset):
 % strain_filt_no_match = strain_filtered;
 % strain_filtered = strain_matched_filtered;
+
+% wf_filename_audio = 'audio_waveform.wav';
+% wf_channel_position_m = 87450;
 
 % plot strain waveform channel of interest
 strain_waveform = get_strain_waveform( ...
@@ -298,3 +321,29 @@ end
 % clear variables
 clear xcorr correlogram correlation_statistics xcorr_plot
 % -----------------------------------------------------------------------%
+
+
+%% PLOT CABLE DEPTH
+cable_depth = -data.cable_depth;
+channel_ref = 44000;
+[~, idx_ref] = min(abs(data.distance_m - channel_ref));
+
+offset = 300;
+[~, idx_offset_pos] = min(abs(data.distance_m - (channel_ref + offset)));
+[~, idx_offset_neg] = min(abs(data.distance_m - (channel_ref - offset)));
+
+CPA = 42680;
+[~, idx_CPA] = min(abs(data.distance_m - CPA));
+
+x_axis = 1:5000;
+%x_axis = x_axis * data.channel_distance_m;
+
+figure;
+plot(x_axis, cable_depth);
+hold on
+plot(x_axis(idx_ref), cable_depth(idx_ref), 'r.', 'MarkerSize', 20);
+plot(x_axis(idx_offset_pos), cable_depth(idx_offset_pos), 'g.', 'MarkerSize', 20);
+plot(x_axis(idx_offset_neg), cable_depth(idx_offset_neg), 'b.', 'MarkerSize', 20);
+plot(x_axis(idx_CPA), cable_depth(idx_CPA), 'y.', 'MarkerSize', 20);
+
+legend('cable', 'reference channel', 'positive offset', 'negative offset', 'CPA');

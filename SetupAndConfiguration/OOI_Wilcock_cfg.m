@@ -1,4 +1,4 @@
-function cfg = OOI_Wilcock()
+function cfg = OOI_Wilcock_cfg()
 % DOOI_WILCOCK Configuration file for the OOI Wilcock dataset.
 %
 %   CFG = DOOI_WILCOCK() returns a structure containing function
@@ -11,11 +11,6 @@ function cfg = OOI_Wilcock()
 %
 %   Reference: https://oceanobservatories.org/pi-instrument/rapid-a-community-test-of-distributed-acoustic-sensing-on-the-ocean-observatories-initiative-regional-cabled-array/
 %   See also: H5READ, FULLFILE
-
-	% Check if the dataset exists
-	if ~isfile(fullfile(fileparts(which(dataset_name)), dataset_name))
-        error('Dataset file does not exist: %s', dataset_name);
-	end
 
 
     % Function handles for configuration sub-modules

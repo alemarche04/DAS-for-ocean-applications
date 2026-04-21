@@ -52,7 +52,7 @@ clear channel_no
 % -----------------------------------------------------------------------%
 
 %% ELLY AND CABLE: CHANNEL-SOURCE DISTANCE
-channel_no = 178;
+channel_no = 207;
 EllyCable.get_distance(channel_no, data.time_and_date);
 
 % clear variables
@@ -106,10 +106,13 @@ strain_filtered = fk_filter_filt( ...
 clear fkFilt fk_filter
 % -----------------------------------------------------------------------%
 
-%% MATCHED FILTER AND TIME-SPACE PLOT
+%% MATCHED FILTER
 preamble_filename = 'preamble-B_4-25000.wav';
 strain_matched_filtered = matched_filter(strain_filtered, preamble_filename);
 
+% strain_filt_no_match = strain_filtered;
+% strain_filtered = strain_matched_filtered;
+%% TIME-SPACE PLOT WITH MATCHED FILTER
 % parameters
 tx = DAS.tx_plot();
 
@@ -129,12 +132,12 @@ exportgraphics( ...
 time_space_plot, ...
 fullfile(dataset_name, ['tx_matched_filt_plot_' dataset_name  '.png']));
 
-% draw channel position
-channel_no = 178;
-channel_position_m = channel_no * data.channel_distance_m;
-hold on;
-yline(channel_position_m*1e-3, '--', 'channel','LineWidth', 1, 'Color', '#FFD1DF');
-hold off;
+% % draw channel position
+% channel_no = 178;
+% channel_position_m = channel_no * data.channel_distance_m;
+% hold on;
+% yline(channel_position_m*1e-3, '--', 'channel','LineWidth', 1, 'Color', '#FFD1DF');
+% hold off;
 
 % clear variables
 clear preamble_filename tx time_space_plot  channel_no channel_position_m
@@ -179,9 +182,6 @@ clear tx speedline time_space_plot
 %% STRAIN WAVEFORM (SINGLE CHANNEL)
 % parameters
 wf = DAS.waveform();
-% to use strain with matched filtering (Trondheim dataset):
-% strain_filt_no_match = strain_filtered;
-% strain_filtered = strain_matched_filtered;
 
 % plot strain waveform channel of interest
 strain_waveform = get_strain_waveform( ...
@@ -207,9 +207,6 @@ clear wf strain_waveform
 %% SPECTROGRAM (SINGLE CHANNEL)
 % parameters
 sg = DAS.spectrogram();
-% to use strain with matched filtering (Trondheim dataset):
-% strain_filt_no_match = strain_filtered;
-% strain_filtered = strain_matched_filtered;
 
 % plot spectrogram
 spectrogram_plot = get_spectrogram( ...
@@ -271,7 +268,7 @@ xcorr = DAS.correlation();
 
 % plot correlogram
 correlogram = get_correlogram( ...
-	strain_filtered, ...
+	strain_matched_filtered, ...
 	data.sampling_frequency_Hz, ...
 	data.distance_m, ...
     xcorr.channel_position_m, ...
@@ -288,7 +285,7 @@ exportgraphics( ...
 
 % plot correlation statistics and export data to csv file
 [correlation_statistics, xcorr_plot] = get_correlation_statistics( ...
-	strain_filtered, ...
+	strain_matched_filtered, ...
 	data.sampling_frequency_Hz, ...
 	data.distance_m, ...
 	data.channel_distance_m, ...
@@ -298,14 +295,81 @@ exportgraphics( ...
 	xcorr.time_interval, ...
 	xcorr.filename_table, ...
 	'subtitle', data.time_and_date, ...
-	'offset_step', 2, ...
+	'offset_step', 1, ...
 	'use_hilbert', false);
 
 % export plot as png
 exportgraphics( ...
 	xcorr_plot, ...
 	fullfile(dataset_name, ['cross_corr_stats_' dataset_name  '.png']));
-
-% clear variables
-clear xcorr correlogram correlation_statistics xcorr_plot
 % -----------------------------------------------------------------------%
+
+%% R estimate
+CPA_position = xcorr.cpa_m;
+reference_channel_position = xcorr.channel_position_m;
+
+distance_ref_CPA = (CPA_position - reference_channel_position); % distance btw reference channel and CPA
+distance_ref_k = correlation_statistics(:, 1); % distance btw reference channel and another within the max offset [m]
+time_peaks = correlation_statistics(:, 3); % peak time of cross correlations
+c = data.propagation_speed;
+
+d12 = distance_ref_k;
+pc = time_peaks.*c;
+d0 = distance_ref_CPA;
+
+figure('Name', "TDOA * c", 'NumberTitle','off');
+plot(d12, pc, '-*');
+legend("TDOA * c");
+
+R = sqrt(((d0^2 + (time_peaks.^2).*c^2 - (d0 - d12).^2) ...
+	./ (2.*time_peaks.*c)).^2 - d0^2);
+R(imag(R) ~= 0) = NaN;
+
+R_med = median(R, 'omitnan');
+
+figure('Name', "SourceDistance", 'NumberTitle','off');
+plot(d12, R, '-*');
+title("Source distance (estimate)");
+subtitle(['Median value of R: ' num2str(R_med)]);
+xlabel("Distance between channels");
+ylabel("Distance (m)");
+
+% linear regression
+valid_idx = ~isnan(R) & (d12 ~= 0); % remove problematic points
+valid_channel_dist_12 = d12(valid_idx); % get valid elements
+R_valid = R(valid_idx); % get valid elements
+
+beta = robustfit(valid_channel_dist_12, R_valid); 
+R_LR = beta(1) + beta(2) * valid_channel_dist_12;
+
+hold on 
+plot(valid_channel_dist_12, R_LR, 'Color', "r");
+legend("R estimate", "Linear regression");
+hold off
+
+figure(correlogram);
+dt = -0.2:data.sampling_interval_s:0.2;
+
+
+d1 = sqrt( ( sqrt(R_med^2 + distance_ref_CPA^2) - dt*c ).^2 - R_med^2 );
+if distance_ref_CPA < 0
+	dx = distance_ref_CPA + d1;
+else
+	dx = distance_ref_CPA - d1;
+end
+hold on
+plot(dt, dx, 'k--', 'LineWidth', 1)
+hold off
+
+% % export plot as png
+% exportgraphics(correlogram, ...
+% ['Correlogram_tests/correlogram_' ...
+% num2str(time_interval(1)) '_' ...
+% num2str(time_interval(2)) '_' ...
+% 'ref_' num2str(reference_channel_position) ...
+% '_band_' ...
+% num2str(bp_cutoff_frequency(1)) '_' ...
+% num2str(bp_cutoff_frequency(2)) '_' ...
+% 'with_R_line.png']);
+
+fprintf('Median value of R: %d [m]\n', R_med);
