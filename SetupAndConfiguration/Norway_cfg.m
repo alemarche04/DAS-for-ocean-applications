@@ -88,7 +88,8 @@ function bp = bandpass()
 %
 %   Output:
 %       bp - Struct containing cutoff frequencies and filter order.
-    bp.cutoff_freq		= [800 4000]; % [Hz]
+    %bp.cutoff_freq		= [800 4000]; % [Hz]
+    bp.cutoff_freq		= [1240 1760]; % [Hz]
     bp.order			= 6;
 end
 % -----------------------------------------------------------------------%
@@ -188,11 +189,12 @@ function xcorr = correlation()
 %   Output:
 %       xcorr - Channel offsets, time lags, and statistics export settings.
 
-    xcorr.channel_position_m	= (180 -1) * 1.02; %[m]
-    xcorr.offset_m				= 3; %[m]
+    xcorr.channel_position_m	= (235 - 1) * 1.02; %[m]
+    xcorr.offset_m				= 6.5; %[m]
     xcorr.time_lag				= 0.005; %[s]
     xcorr.time_interval			= [3.6 4.2]; %[s]
-    xcorr.cpa_m					= (207 -1) * 1.02; %[m]
+    xcorr.cpa_m					= (207 - 1) * 1.02; %[m]
     xcorr.filename_table		= fullfile('Norway/', 'cross_corr_stats_Norway.csv');
 end
 % -----------------------------------------------------------------------%
+% 228, 232, 235

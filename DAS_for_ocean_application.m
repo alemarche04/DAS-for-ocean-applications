@@ -69,8 +69,6 @@ clear medFilt
 % parameters
 fkFilt = DAS.fkFilt();
 
-% fkFilt_c_range = [1400 1450 2000 2050];
-
 % design fk filter
 fk_filter =	fk_filter_design( ...
 	data.dimensions, ...
@@ -347,3 +345,55 @@ plot(x_axis(idx_offset_neg), cable_depth(idx_offset_neg), 'b.', 'MarkerSize', 20
 plot(x_axis(idx_CPA), cable_depth(idx_CPA), 'y.', 'MarkerSize', 20);
 
 legend('cable', 'reference channel', 'positive offset', 'negative offset', 'CPA');
+
+%% Extract signal
+x1 = 3.6072e+04;
+x2 = 50000;
+
+[~, xidx1] = min(abs(data.distance_m - x1));
+[~, xidx2] = min(abs(data.distance_m - x2));
+
+v1t1 = 45;
+v1t2 = 54;
+
+v2t1 = 54;
+v2t2 = 61;
+
+v3t1 = 61;
+v3t2 = 70;
+
+v4t1 = 120;
+v4t2 = 131;
+
+[~, v1tidx1] = min(abs(data.time - v1t1));
+[~, v1tidx2] = min(abs(data.time - v1t2));
+
+[~, v2tidx1] = min(abs(data.time - v2t1));
+[~, v2tidx2] = min(abs(data.time - v2t2));
+
+[~, v3tidx1] = min(abs(data.time - v3t1));
+[~, v3tidx2] = min(abs(data.time - v3t2));
+
+[~, v4tidx1] = min(abs(data.time - v4t1));
+[~, v4tidx2] = min(abs(data.time - v4t2));
+
+V1_30_65_fk_1400_3500 = strain_filtered(xidx1:xidx2, v1tidx1:v1tidx2);
+V2_30_65_fk_1400_3500 = strain_filtered(xidx1:xidx2, v2tidx1:v2tidx2);
+V3_30_65_fk_1400_3500 = strain_filtered(xidx1:xidx2, v3tidx1:v3tidx2);
+V4_30_65_fk_1400_3500 = strain_filtered(xidx1:xidx2, v4tidx1:v4tidx2);
+
+figure;
+imagesc(data.time(v1tidx1:v1tidx2), data.distance_m(xidx1:xidx2), 20*log10(abs(V1_30_65_fk_1400_3500)));
+clim([-200 -170])
+
+figure;
+imagesc(data.time(v2tidx1:v2tidx2), data.distance_m(xidx1:xidx2), 20*log10(abs(V2_30_65_fk_1400_3500)));
+clim([-200 -170])
+
+figure;
+imagesc(data.time(v3tidx1:v3tidx2), data.distance_m(xidx1:xidx2), 20*log10(abs(V3_30_65_fk_1400_3500)));
+clim([-200 -170])
+
+figure;
+imagesc(data.time(v4tidx1:v4tidx2), data.distance_m(xidx1:xidx2), 20*log10(abs(V4_30_65_fk_1400_3500)));
+clim([-200 -170])

@@ -22,6 +22,7 @@ function EllyCable = ellyandcable()
 	EllyCable.get_channel_pos		= @get_channel_pos;
 	EllyCable.plot_channel_pos		= @plot_channel_pos;
 	EllyCable.plot_source_channel	= @plot_source_channel;
+    EllyCable.plot_source_2channels = @plot_source_2channels;
 end
 
 %% CABLE GEOMETRY
@@ -475,7 +476,7 @@ function plot_source_channel(time_and_date, channel_idx)
 	title('Cable geometry with Source and Channel position', 'FontSize', 12);
 	hold on;
 	
-	% plot source position
+	% plot source and channel position
 	plot3(source.xE, source.yN, source.zU, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6);
 	plot3(channel.xE, channel.yN, channel.zU, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
 	subtitle([time_and_date, sprintf(' | Channel: %d', channel_idx)]);
@@ -496,6 +497,56 @@ function plot_source_channel(time_and_date, channel_idx)
 	% textbox with distance info
 	lgd_pos = lgd.Position;  % [x, y, width, height] in normalized units
 	info_text = sprintf('Distance\n(source-channel):\n%.2f', distance);
+	annotation('textbox', ...
+		[lgd_pos(1), lgd_pos(2) - 0.15, lgd_pos(3), 0.12], ... 
+    	'String', info_text, ...
+    	'FitBoxToText', 'on', ...
+    	'BackgroundColor', 'white', ...
+    	'EdgeColor', 'black', ...
+    	'LineWidth', 0.5, ...
+    	'FontSize', 10);
+end
+%========================================================================%
+
+%% PLOT SOURCE POSITION AT GIVEN TIME AND CHANNEL ON FO CABLE
+function plot_source_2channels(time_and_date, channel_idx1, channel_idx2)
+% PLOT_SOURCE_CHANNEL Plot channel and Elly position at given time.
+
+	% get cable geometry
+	cable = cable_geometry();
+
+	% get source position from timestamp
+	source = get_source_pos(time_and_date);
+
+	% get channel 1 position on FO cable
+	channel1 = get_channel_pos(channel_idx1);
+
+    % get channel 2 position on FO cable
+	channel2 = get_channel_pos(channel_idx2);
+	
+	% plot cable geometry
+	figure(Name="Cable_Source_Channels", NumberTitle="off");
+	plot3(cable.xE, cable.yN, cable.zU, 'b.-', 'LineWidth', 1.5); 
+	grid on; axis equal; view(3);
+	xlabel('East (m)'); ylabel('North (m)'); zlabel('Altitude (m)');
+	title('Cable geometry with Source and Channels positions', 'FontSize', 12);
+	hold on;
+	
+	% plot source and channels position
+	plot3(source.xE, source.yN, source.zU, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 6);
+	plot3(channel1.xE, channel1.yN, channel1.zU, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
+    plot3(channel2.xE, channel2.yN, channel2.zU, 'mo', 'MarkerFaceColor', 'm', 'MarkerSize', 6);
+	subtitle([time_and_date, sprintf(' | Channel: %d', channel_idx1)]);
+	lgd = legend('Cable', 'Source', 'CPA', 'Reference channel');
+	xlim([-50 450]); ylim([-200 100]); zlim([-150 0]);
+	hold off
+
+	% compute distance between elly and channel 1
+	distance = get_distance(channel_idx1, time_and_date);
+
+	% textbox with distance info
+	lgd_pos = lgd.Position;  % [x, y, width, height] in normalized units
+	info_text = sprintf('Distance\n(source-CPA):\n%.2f', distance);
 	annotation('textbox', ...
 		[lgd_pos(1), lgd_pos(2) - 0.15, lgd_pos(3), 0.12], ... 
     	'String', info_text, ...

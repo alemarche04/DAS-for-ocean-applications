@@ -15,7 +15,7 @@ addpath('Dataset', 'Dataset_Norway', 'Filters', 'Plots', 'SetupAndConfiguration'
 
 dataset_name	= 'Norway';
 DAS				= feval(str2func(dataset_name + "_cfg"));
-	EllyCable	= ellyandcable();
+EllyCable	    = ellyandcable();
 data			= DAS.load_data("122403.hdf5");
 % -----------------------------------------------------------------------%
 
@@ -44,7 +44,7 @@ clear channel_no
 % -----------------------------------------------------------------------%
 
 %% ELLY AND CABLE: SOURCE AND CHANNEL POSITION
-channel_no = 210;
+channel_no = 228;
 EllyCable.plot_source_channel(data.time_and_date, channel_no);
 
 % clear variables
@@ -262,9 +262,6 @@ clear fx space_frequency_plot
 %% CROSS-CORRELATION STATISTICS
 % parameters
 xcorr = DAS.correlation();
-% to use strain with matched filtering (Trondheim dataset):
-% strain_filt_no_match = strain_filtered;
-% strain_filtered = strain_matched_filtered;
 
 % plot correlogram
 correlogram = get_correlogram( ...
@@ -276,7 +273,8 @@ correlogram = get_correlogram( ...
 	xcorr.time_lag, ...
 	xcorr.time_interval, ...
 	'subtitle', data.time_and_date, ...
-	'use_hilbert',false);
+	'use_hilbert',false, ...
+    'resample_factor', 10);
 
 % export plot as png
 exportgraphics( ...
@@ -296,7 +294,8 @@ exportgraphics( ...
 	xcorr.filename_table, ...
 	'subtitle', data.time_and_date, ...
 	'offset_step', 1, ...
-	'use_hilbert', false);
+	'use_hilbert', false, ...
+    'resample_factor', 10);
 
 % export plot as png
 exportgraphics( ...

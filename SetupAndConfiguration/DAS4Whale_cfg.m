@@ -82,7 +82,7 @@ function bp = bandpass()
 %   Output:
 %       bp - Struct containing cutoff frequencies and filter order.
 
-    bp.cutoff_freq   = [5 75]; % [Hz]
+    bp.cutoff_freq   = [30 65]; % [Hz]
     bp.order         = 5;
 end
 % -----------------------------------------------------------------------%
@@ -105,7 +105,7 @@ function fkFilt = fkFilt()
 %   Output:
 %       fkFilt - Struct containing velocity range limits for f-k filtering.
 
-    fkFilt.c_range = [1400 1450 2000 2050]; %[m/s]
+    fkFilt.c_range = [1400 1450 3500 3550]; %[m/s]
 end
 
 % -----------------------------------------------------------------------%
